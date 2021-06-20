@@ -1310,7 +1310,7 @@ class SimilaritySurface(SageObject):
         r"""
         Return the minimal translation or half-translation cover of the surface.
 
-        Cover type may be either "translation", "half-translation" or "planar".
+        Cover type may be "translation", "half-translation", "planar" or "dilation".
 
         The minimal planar cover of a surface S is the smallest cover C so that
         the developing map from the universal cover U to the plane induces a
@@ -1361,6 +1361,10 @@ class SimilaritySurface(SageObject):
             from flatsurf.geometry.translation_surface import TranslationSurface
             from flatsurf.geometry.minimal_cover import MinimalPlanarCover
             return TranslationSurface(MinimalPlanarCover(self))
+        if cover_type == 'dilation':
+            from flatsurf.geometry.dilation_surface import DilationSurface
+            from flatsurf.geometry.minimal_cover import MinimalDilationCover
+            return DilationSurface(MinimalDilationCover(self))
         raise ValueError("Provided cover_type is not supported.")
 
     def minimal_translation_cover(self):

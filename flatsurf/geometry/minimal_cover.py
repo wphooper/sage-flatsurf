@@ -221,3 +221,93 @@ class MinimalPlanarCover(Surface):
         me = self._ss.edge_transformation(pp,e)
         mm = m*~me
         return ((p2,mm),e2)
+
+class MinimalDilationCover(Surface):
+    r"""
+    We label the cover by a triple `(label_from_base, a, b)` where
+    `a` and `b` are in the base field and $\max(|a|, |b|)=1$.
+    Here `a` and `b` determine a matrix representing a similarity
+    $$M = \begin{pmatrix} a & -b \\
+                          b & a \end{pmatrix}$$
+    and the polygon returned by the label is $M$ times the polygon of
+    the base with label `label_from_base`.
+
+    EXAMPLES::
+
+        sage: from flatsurf import *
+        sage: from flatsurf.geometry.similarity_surface_generators import SimilaritySurfaceGenerators
+        sage: ss = SimilaritySurfaceGenerators.example()
+        sage: from flatsurf.geometry.minimal_cover import MinimalDilationCover
+        sage: ds = DilationSurface(MinimalDilationCover(ss))
+        sage: TestSuite(ds).run(skip='_test_pickling')
+        sage: ds.is_finite()
+        False
+
+        sage: F.<sqrt3> = NumberField(x**2 - 3, embedding=AA(sqrt(3)))
+        sage: from flatsurf import *
+        sage: s = Surface_list(F)
+        sage: CP = ConvexPolygons(F)
+        sage: s.add_polygon(CP(vertices=[(0,0),(2,0),(1,1)]))
+        0
+        sage: s.add_polygon(CP(vertices=[(0,0),(1,0),(1,sqrt3)]))
+        1
+        sage: for i in range(3):
+        ....:     s.change_edge_gluing(0,i,1,i)
+        sage: s.change_base_label(0)
+        sage: s.set_immutable()
+        sage: TestSuite(s).run()
+        sage: ss = SimilaritySurface(s)
+        sage: TestSuite(ss).run()
+        sage: from flatsurf.geometry.minimal_cover import MinimalDilationCover
+        sage: ds = DilationSurface(MinimalDilationCover(ss))
+        sage: TestSuite(ds).run()
+        sage: ds.num_polygons()
+        48
+    """
+    def __init__(self, similarity_surface):
+        if similarity_surface.underlying_surface().is_mutable():
+            if similarity_surface.is_finite():
+                self._ss=similarity_surface.copy()
+            else:
+                raise ValueError("Can not construct MinimalTranslationCover of a surface that is mutable and infinite.")
+        else:
+            self._ss = similarity_surface
+
+        # We are finite if and only if self._ss is a finite RationalSimilaritySurface.
+        if not self._ss.is_finite():
+            finite = False
+        else:
+            try:
+                from flatsurf.geometry.rational_similarity_surface import RationalSimilaritySurface
+                ss_copy = self._ss.reposition_polygons(relabel=True)
+                rcs = RationalSimilaritySurface(ss_copy)
+                rcs._test_edge_matrix()
+                finite=True
+            except AssertionError:
+                # print("Warning: Could be indicating infinite surface falsely.")
+                finite=False
+
+        self._F = self._ss.base_ring()
+        base_label=(self._ss.base_label(), self._F.one(), self._F.zero())
+
+        Surface.__init__(self, self._ss.base_ring(), base_label, finite=finite, mutable=False)
+
+    def polygon(self, lab):
+        if not isinstance(lab, tuple) or len(lab) != 3:
+            raise ValueError("invalid label {!r}".format(lab))
+        l,a,b = lab
+        return matrix([[a, -b],
+                       [b,  a]]) * self._ss.polygon(l)
+
+    def opposite_edge(self, p, e):
+        if not isinstance(p, tuple) or len(p) != 3:
+            raise ValueError("invalid label {!r}".format(p))
+        pp,a,b = p  # this is the polygon m * ss.polygon(p)
+        p2,e2 = self._ss.opposite_edge(pp,e)
+        m = self._ss.edge_matrix(p2,e2)
+        aa = a*m[0][0] - b*m[1][0]
+        bb = b*m[0][0] + a*m[1][0]
+        q = max(abs(aa), abs(bb))
+        aa /= q
+        bb /= q
+        return ((p2,aa,bb),e2)

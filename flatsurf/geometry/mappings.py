@@ -13,11 +13,11 @@ from sage.structure.sage_object import SageObject
 
 class SurfaceMapping:
     r"""Abstract class for any mapping between surfaces."""
-    
+
     def __init__(self, domain, codomain):
         self._domain=domain
         self._codomain=codomain
-    
+
     def domain(self):
         r"""
         Return the domain of the mapping.
@@ -30,6 +30,21 @@ class SurfaceMapping:
         """
         return self._codomain
 
+    def is_invertible(self):
+        r"""Return true if this mapping is invertible."""
+        return False
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+
+        Raises a NotImplementedError if the map is not invertible.
+        """
+        if self.is_invertible():
+            return InverseMapping(self)
+        else:
+            raise NotImplementedError('This SurfaceMapping is not invertible')
+
     def push_vector_forward(self,tangent_vector):
         r"""Applies the mapping to the provided vector."""
         raise NotImplementedError
@@ -37,21 +52,72 @@ class SurfaceMapping:
     def pull_vector_back(self,tangent_vector):
         r"""Applies the inverse of the mapping to the provided vector."""
         raise NotImplementedError
-        
+
     def __mul__(self,other):
         # Compose SurfaceMappings
         return SurfaceMappingComposition(other,self)
-    
+
     def __rmul__(self,other):
         return SurfaceMappingComposition(self,other)
+
+class InverseMapping(SurfaceMapping):
+    r"""
+    Construct the inverse of an invertible mapping.
+
+    EXAMPLES::
+        sage: from flatsurf import *
+        sage: s = translation_surfaces.regular_octagon()
+        sage: m = s.triangulation_mapping()
+        sage: type(m)
+        <class 'flatsurf.geometry.mappings.SurfaceMappingComposition'>
+        sage: len(m.factors())
+        5
+        sage: t = m*~m
+        sage: v = t.domain().tangent_vector(
+        ....:    t.domain().base_label(),
+        ....:    (0,0),
+        ....:    t.domain().polygon(t.domain().base_label()).edge(0)
+        ....: )
+        sage: t.push_vector_forward(v) == v
+        True
+    """
+    def __init__(self, mapping):
+        if not mapping.is_invertible():
+            raise ValueError('Can only construct an InverseMapping from a invertible SurfaceMapping.')
+        self._m = mapping
+        SurfaceMapping.__init__(self, self._m._codomain, self._m._domain)
+
+    def push_vector_forward(self, tangent_vector):
+        r"""Applies the mapping to the provided vector."""
+        return self._m.pull_vector_back(tangent_vector)
+
+    def pull_vector_back(self,tangent_vector):
+        r"""Applies the pullback mapping to the provided vector."""
+        return self._m.push_vector_forward(tangent_vector)
+
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+        """
+        return self._m
+
+    def __str__(self):
+        return f'Inverse of {str(self._m)}'
+
+    def __repr__(self):
+        return f'Inverse of {repr(self._m)}'
 
 
 #class FinitelyPerturbedSurface(Surface):
 #    def __init__(self, surface, polygon_dictionary=None, glue_dictionary=None, base_label=None, ring=None):
 #        r"""
-#        
+#
 #        Warning: No checks are made to make sure the surface is reasonable.
-#        
+#
 #        PARAMETERS::
 #            surface: The surface this is based on.
 #            polygon_dictionary: A dictionary mapping labels to polygons which will override whatever was on the original surface.
@@ -103,33 +169,71 @@ class SurfaceMapping:
 
 class SurfaceMappingComposition(SurfaceMapping):
     r"""
-    Composition of two mappings between surfaces.
+    Composition of mappings.
     """
-    
-    def __init__(self, mapping1, mapping2):
-        r"""
-        Represent the mapping of mapping1 followed by mapping2.
-        """
-        if mapping1.codomain() != mapping2.domain():
-            raise ValueError("Codomain of mapping1 must be equal to the domain of mapping2")
-        self._m1 = mapping1
-        self._m2 = mapping2
-        SurfaceMapping.__init__(self, self._m1.domain(), self._m2.codomain())
 
-    def push_vector_forward(self,tangent_vector):
+    def __init__(self, *mappings):
+        r"""
+        Represent the composition of mappings.
+
+        Mappings must be listed in the order in which they will be applied.
+        """
+        if len(mappings) < 2:
+            raise ValueError('Need at least two mappings to compose.')
+        for i in range(1, len(mappings)):
+            if mappings[i-1].codomain() != mappings[i].domain():
+                raise ValueError(f'The codomain of map {i-1} does not match the domain of map {i}.')
+        self._m = []
+        for m in mappings:
+            if isinstance(m, SurfaceMappingComposition):
+                self._m += m.factors()
+            else:
+                self._m.append(m)
+        self._m = tuple(self._m)
+        SurfaceMapping.__init__(self, self._m[0].domain(), self._m[-1].codomain())
+
+    def push_vector_forward(self, tangent_vector):
         r"""Applies the mapping to the provided vector."""
-        return self._m2.push_vector_forward(self._m1.push_vector_forward(tangent_vector))
+        for mapping in self._m:
+            tangent_vector = mapping.push_vector_forward(tangent_vector)
+        return tangent_vector
 
     def pull_vector_back(self,tangent_vector):
         r"""Applies the inverse of the mapping to the provided vector."""
-        return self._m1.pull_vector_back(self._m2.pull_vector_back(tangent_vector))
+        for mapping in reversed(self._m):
+            tangent_vector = mapping.pull_vector_back(tangent_vector)
+        return tangent_vector
 
     def factors(self):
         r"""
-        Return the two factors of this surface mapping as a pair (f,g),
-        where the original map is f o g.
+        Return the factors of the map as a tuple ordered in the order of the application.
+        So for example, a return of `(f, g, h)` would indicate the map $h \circ g \circ f$.
         """
-        return self._m2, self._m1
+        return self._m
+
+    def is_invertible(self):
+        r"""Return if this mapping is invertible."""
+        for mapping in self._m:
+            if not mapping.is_invertible():
+                return False
+        return True
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+
+        Raises a NotImplementedError if the map is not invertible.
+        """
+        if self.is_invertible():
+            return SurfaceMappingComposition(*[~m for m in reversed(self._m)])
+        else:
+            raise NotImplementedError('This SurfaceMappingComposition is not invertible')
+
+    def __str__(self):
+        return f'Composition of {len(self._m)} surface mappings.'
+
+    def __repr__(self):
+        return f'Composition of {len(self._m)} surface mappings.'
 
 class IdentityMapping(SurfaceMapping):
     r"""
@@ -156,9 +260,19 @@ class IdentityMapping(SurfaceMapping):
             tangent_vector.vector(), \
             ring = ring)
 
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+        """
+        return self
+
 class MatrixListDeformedSurface(Surface):
     r"""
-    Apply a different matrix to each polygon in the surface. 
+    Apply a different matrix to each polygon in the surface.
     Here matrix_function is a python function mapping labels to 2x2 matrices with positive determinant.
     """
     def __init__(self, surface, matrix_function, ring=None):
@@ -214,6 +328,10 @@ class MatrixListDeformedSurfaceMapping(SurfaceMapping):
                 label, \
                 im*tangent_vector.point(), \
                 im*tangent_vector.vector())
+
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
 
 class SimilarityJoinPolygonsMapping(SurfaceMapping):
     r"""
@@ -282,20 +400,20 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
         if s.base_label()==p2:
             # The polygon with the base label is being removed.
             s2.change_base_label(p1)
-        
+
         s2.change_polygon(p1, ConvexPolygons(s.base_ring())(vs))
-        
+
         for i in range(len(vs)):
             p3,e3 = edge_map[i]
             p4,e4 = s.opposite_edge(p3,e3)
-            if p4 == p1 or p4 == p2: 
+            if p4 == p1 or p4 == p2:
                 pp,ee = inv_edge_map[(p4,e4)]
                 s2.change_edge_gluing(p1,i,pp,ee)
             else:
                 s2.change_edge_gluing(p1,i,p4,e4)
 
         s2.set_immutable()
-        
+
         self._saved_label=p1
         self._removed_label=p2
         self._remove_map = t
@@ -378,10 +496,15 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
                 tangent_vector.vector(), \
                 ring = ring)
 
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
+
 class SplitPolygonsMapping(SurfaceMapping):
     r"""
     Class for cutting a polygon along a diagonal.
-    
+
     EXAMPLES::
 
         sage: from flatsurf import *
@@ -393,25 +516,25 @@ class SplitPolygonsMapping(SurfaceMapping):
         sage: for pair in s2.label_iterator(polygons=True):
         ....:     print(pair)
         (0, Polygon: (0, 0), (1/2*a + 1, 1/2*a), (1/2*a + 1, 1/2*a + 1), (1, a + 1), (0, a + 1), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a))
-        (ExtraLabel(0), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))
+        (ExtraLabel(...), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))
         sage: for glue in s2.edge_iterator(gluings=True):
         ....:     print(glue)
-        ((0, 0), (ExtraLabel(0), 0))
+        ((0, 0), (ExtraLabel(...), 0))
         ((0, 1), (0, 5))
         ((0, 2), (0, 6))
-        ((0, 3), (ExtraLabel(0), 1))
-        ((0, 4), (ExtraLabel(0), 2))
+        ((0, 3), (ExtraLabel(...), 1))
+        ((0, 4), (ExtraLabel(...), 2))
         ((0, 5), (0, 1))
         ((0, 6), (0, 2))
-        ((ExtraLabel(0), 0), (0, 0))
-        ((ExtraLabel(0), 1), (0, 3))
-        ((ExtraLabel(0), 2), (0, 4))
+        ((ExtraLabel(...), 0), (0, 0))
+        ((ExtraLabel(...), 1), (0, 3))
+        ((ExtraLabel(...), 2), (0, 4))
     """
-    
+
     def __init__(self, s, p, v1, v2, new_label = None):
         r"""
         Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.
-        
+
         Warning: We do not ensure that new_label is not already in the list of labels unless it is None (as by default).
         """
         if s.is_mutable():
@@ -427,12 +550,12 @@ class SplitPolygonsMapping(SurfaceMapping):
             temp=v1
             v1=v2
             v2=temp
-            
+
         newvertices1=[poly.vertex(v2)-poly.vertex(v1)]
         for i in range(v2, v1+ne):
             newvertices1.append(poly.edge(i))
         newpoly1 = ConvexPolygons(s.base_ring())(newvertices1)
-        
+
         newvertices2=[poly.vertex(v1)-poly.vertex(v2)]
         for i in range(v1,v2):
             newvertices2.append(poly.edge(i))
@@ -465,9 +588,9 @@ class SplitPolygonsMapping(SurfaceMapping):
                 s2.change_edge_gluing(ll,ee,gl,ge)
             else:
                 s2.change_edge_gluing(ll,ee,lll,eee)
-        
+
         s2.set_immutable()
-        
+
         self._p=p
         self._v1=v1
         self._v2=v2
@@ -551,13 +674,17 @@ class SplitPolygonsMapping(SurfaceMapping):
                 tangent_vector.vector(), \
                 ring = ring)
 
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
 def subdivide_a_polygon(s):
     r"""
     Return a SurfaceMapping which cuts one polygon along a diagonal or None if the surface is triangulated.
     """
     from flatsurf.geometry.polygon import wedge_product
     for l,poly in s.label_iterator(polygons=True):
-        n = poly.num_edges() 
+        n = poly.num_edges()
         if n>3:
             for i in range(n):
                 e1=poly.edge(i)
@@ -571,7 +698,7 @@ def subdivide_a_polygon(s):
 
 def triangulation_mapping(s):
     r"""Return a  SurfaceMapping triangulating the provided surface.
-    
+
     EXAMPLES::
 
         sage: from flatsurf import *
@@ -630,7 +757,7 @@ def delaunay_triangulation_mapping(s):
     m=triangulation_mapping(s)
     if m is None:
         s1=s
-    else: 
+    else:
         s1=m.codomain()
     m1=one_delaunay_flip_mapping(s1)
     if m1 is None:
@@ -680,7 +807,7 @@ def delaunay_decomposition_mapping(s):
         else:
             return SurfaceMappingComposition(m,m1)
     return m
-    
+
 def canonical_first_vertex(polygon):
     r"""
     Return the index of the vertex with smallest y-coordinate.
@@ -697,7 +824,7 @@ def canonical_first_vertex(polygon):
         if pt[1]==best_pt[1]:
             return v
     return best
-   
+
 class CanonicalizePolygonsMapping(SurfaceMapping):
     r"""
     This is a mapping to a surface with the polygon vertices canonically determined.
@@ -734,7 +861,7 @@ class CanonicalizePolygonsMapping(SurfaceMapping):
         s2.change_base_label(s.base_label())
         s2.set_immutable()
         ss2=s.__class__(s2)
-        
+
         self._cv=cv
         self._translations=translations
 
@@ -757,6 +884,10 @@ class CanonicalizePolygonsMapping(SurfaceMapping):
             (~self._translations[l])(tangent_vector.point()), \
             tangent_vector.vector(), \
             ring = ring)
+
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
 
 class ReindexMapping(SurfaceMapping):
     r"""
@@ -786,18 +917,18 @@ class ReindexMapping(SurfaceMapping):
 
         self._f=f
         self._b=b
-        
+
         if new_base_label==None:
-            if s.base_label() in f:                
+            if s.base_label() in f:
                 new_base_label = f[s.base_label()]
             else:
                 new_base_label = s.base_label()
         s2=s.copy(mutable=True,lazy=True)
         s2.relabel(relabler, in_place=True)
         s2.underlying_surface().change_base_label(new_base_label)
-        
+
         SurfaceMapping.__init__(self, s, s2)
-            
+
     def push_vector_forward(self,tangent_vector):
         r"""Applies the mapping to the provided vector."""
         # There is no change- we just move it to the new surface.
@@ -816,6 +947,11 @@ class ReindexMapping(SurfaceMapping):
             tangent_vector.point(), \
             tangent_vector.vector(), \
             ring = ring)
+
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
 
 def my_sgn(val):
     if val>0:
@@ -847,10 +983,10 @@ def polygon_compare(poly1,poly2):
         if res!=0:
             return res
     return 0
-    
+
 def translation_surface_cmp(s1, s2):
     r"""
-    Compare two finite surfaces. 
+    Compare two finite surfaces.
     The surfaces will be considered equal if and only if there is a translation automorphism
     respecting the polygons and the base_labels.
     """
@@ -889,7 +1025,7 @@ def translation_surface_cmp(s1, s2):
 def canonicalize_translation_surface_mapping(s):
     r"""
     Return the translation surface in a canonical form.
-    
+
     EXAMPLES::
 
         sage: from flatsurf import *

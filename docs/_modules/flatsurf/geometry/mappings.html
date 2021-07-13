@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>flatsurf.geometry.mappings &#8212; sage-flatsurf 0.3 documentation</title>
+    <title>flatsurf.geometry.mappings &#8212; sage-flatsurf 0.4.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.mappings</a></li> 
       </ul>
@@ -42,7 +42,26 @@
           <div class="body" role="main">
             
   <h1>Source code for flatsurf.geometry.mappings</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mappings between translation surfaces.&quot;&quot;&quot;</span>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#*********************************************************************</span>
+<span class="c1">#  This file is part of sage-flatsurf.</span>
+<span class="c1">#</span>
+<span class="c1">#        Copyright (C) 2016-2021 Pat Hooper</span>
+<span class="c1">#</span>
+<span class="c1">#  sage-flatsurf is free software: you can redistribute it and/or modify</span>
+<span class="c1">#  it under the terms of the GNU General Public License as published by</span>
+<span class="c1">#  the Free Software Foundation, either version 2 of the License, or</span>
+<span class="c1">#  (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#  sage-flatsurf is distributed in the hope that it will be useful,</span>
+<span class="c1">#  but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">#  GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#  You should have received a copy of the GNU General Public License</span>
+<span class="c1">#  along with sage-flatsurf. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#*********************************************************************</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mappings between translation surfaces.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="nb">zip</span>
@@ -57,11 +76,11 @@
 
 <div class="viewcode-block" id="SurfaceMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMapping">[docs]</a><span class="k">class</span> <span class="nc">SurfaceMapping</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract class for any mapping between surfaces.&quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">codomain</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_domain</span><span class="o">=</span><span class="n">domain</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_codomain</span><span class="o">=</span><span class="n">codomain</span>
-    
+
 <div class="viewcode-block" id="SurfaceMapping.domain"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMapping.domain">[docs]</a>    <span class="k">def</span> <span class="nf">domain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the domain of the mapping.</span>
@@ -74,6 +93,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_codomain</span></div>
 
+<div class="viewcode-block" id="SurfaceMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true if this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the inverse mapping.</span>
+
+<span class="sd">        Raises a NotImplementedError if the map is not invertible.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_invertible</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">InverseMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This SurfaceMapping is not invertible&#39;</span><span class="p">)</span>
+
 <div class="viewcode-block" id="SurfaceMapping.push_vector_forward"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMapping.push_vector_forward">[docs]</a>    <span class="k">def</span> <span class="nf">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the mapping to the provided vector.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
@@ -81,21 +115,72 @@
 <div class="viewcode-block" id="SurfaceMapping.pull_vector_back"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMapping.pull_vector_back">[docs]</a>    <span class="k">def</span> <span class="nf">pull_vector_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the inverse of the mapping to the provided vector.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-        
+
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
         <span class="c1"># Compose SurfaceMappings</span>
         <span class="k">return</span> <span class="n">SurfaceMappingComposition</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">SurfaceMappingComposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InverseMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.InverseMapping">[docs]</a><span class="k">class</span> <span class="nc">InverseMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct the inverse of an invertible mapping.</span>
+
+<span class="sd">    EXAMPLES::</span>
+<span class="sd">        sage: from flatsurf import *</span>
+<span class="sd">        sage: s = translation_surfaces.regular_octagon()</span>
+<span class="sd">        sage: m = s.triangulation_mapping()</span>
+<span class="sd">        sage: type(m)</span>
+<span class="sd">        &lt;class &#39;flatsurf.geometry.mappings.SurfaceMappingComposition&#39;&gt;</span>
+<span class="sd">        sage: len(m.factors())</span>
+<span class="sd">        5</span>
+<span class="sd">        sage: t = m*~m</span>
+<span class="sd">        sage: v = t.domain().tangent_vector(</span>
+<span class="sd">        ....:    t.domain().base_label(),</span>
+<span class="sd">        ....:    (0,0),</span>
+<span class="sd">        ....:    t.domain().polygon(t.domain().base_label()).edge(0)</span>
+<span class="sd">        ....: )</span>
+<span class="sd">        sage: t.push_vector_forward(v) == v</span>
+<span class="sd">        True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mapping</span><span class="o">.</span><span class="n">is_invertible</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Can only construct an InverseMapping from a invertible SurfaceMapping.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="n">mapping</span>
+        <span class="n">SurfaceMapping</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="o">.</span><span class="n">_codomain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="o">.</span><span class="n">_domain</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InverseMapping.push_vector_forward"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.InverseMapping.push_vector_forward">[docs]</a>    <span class="k">def</span> <span class="nf">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tangent_vector</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the mapping to the provided vector.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="o">.</span><span class="n">pull_vector_back</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InverseMapping.pull_vector_back"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.InverseMapping.pull_vector_back">[docs]</a>    <span class="k">def</span> <span class="nf">pull_vector_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the pullback mapping to the provided vector.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="o">.</span><span class="n">push_vector_forward</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InverseMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.InverseMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the inverse mapping.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Inverse of </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Inverse of </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
 
 <span class="c1">#class FinitelyPerturbedSurface(Surface):</span>
 <span class="c1">#    def __init__(self, surface, polygon_dictionary=None, glue_dictionary=None, base_label=None, ring=None):</span>
 <span class="c1">#        r&quot;&quot;&quot;</span>
-<span class="c1">#        </span>
+<span class="c1">#</span>
 <span class="c1">#        Warning: No checks are made to make sure the surface is reasonable.</span>
-<span class="c1">#        </span>
+<span class="c1">#</span>
 <span class="c1">#        PARAMETERS::</span>
 <span class="c1">#            surface: The surface this is based on.</span>
 <span class="c1">#            polygon_dictionary: A dictionary mapping labels to polygons which will override whatever was on the original surface.</span>
@@ -147,33 +232,71 @@
 
 <div class="viewcode-block" id="SurfaceMappingComposition"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition">[docs]</a><span class="k">class</span> <span class="nc">SurfaceMappingComposition</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Composition of two mappings between surfaces.</span>
+<span class="sd">    Composition of mappings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping1</span><span class="p">,</span> <span class="n">mapping2</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Represent the mapping of mapping1 followed by mapping2.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">mapping1</span><span class="o">.</span><span class="n">codomain</span><span class="p">()</span> <span class="o">!=</span> <span class="n">mapping2</span><span class="o">.</span><span class="n">domain</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Codomain of mapping1 must be equal to the domain of mapping2&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_m1</span> <span class="o">=</span> <span class="n">mapping1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_m2</span> <span class="o">=</span> <span class="n">mapping2</span>
-        <span class="n">SurfaceMapping</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m1</span><span class="o">.</span><span class="n">domain</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m2</span><span class="o">.</span><span class="n">codomain</span><span class="p">())</span>
 
-<div class="viewcode-block" id="SurfaceMappingComposition.push_vector_forward"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition.push_vector_forward">[docs]</a>    <span class="k">def</span> <span class="nf">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">mappings</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Represent the composition of mappings.</span>
+
+<span class="sd">        Mappings must be listed in the order in which they will be applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappings</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need at least two mappings to compose.&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappings</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">mappings</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">codomain</span><span class="p">()</span> <span class="o">!=</span> <span class="n">mappings</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The codomain of map </span><span class="si">{</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1"> does not match the domain of map </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mappings</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">SurfaceMappingComposition</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">+=</span> <span class="n">m</span><span class="o">.</span><span class="n">factors</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)</span>
+        <span class="n">SurfaceMapping</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">codomain</span><span class="p">())</span>
+
+<div class="viewcode-block" id="SurfaceMappingComposition.push_vector_forward"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition.push_vector_forward">[docs]</a>    <span class="k">def</span> <span class="nf">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tangent_vector</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the mapping to the provided vector.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m2</span><span class="o">.</span><span class="n">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m1</span><span class="o">.</span><span class="n">push_vector_forward</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">))</span></div>
+        <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">:</span>
+            <span class="n">tangent_vector</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">push_vector_forward</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tangent_vector</span></div>
 
 <div class="viewcode-block" id="SurfaceMappingComposition.pull_vector_back"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition.pull_vector_back">[docs]</a>    <span class="k">def</span> <span class="nf">pull_vector_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the inverse of the mapping to the provided vector.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m1</span><span class="o">.</span><span class="n">pull_vector_back</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m2</span><span class="o">.</span><span class="n">pull_vector_back</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">))</span></div>
+        <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">):</span>
+            <span class="n">tangent_vector</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">pull_vector_back</span><span class="p">(</span><span class="n">tangent_vector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tangent_vector</span></div>
 
 <div class="viewcode-block" id="SurfaceMappingComposition.factors"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition.factors">[docs]</a>    <span class="k">def</span> <span class="nf">factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the two factors of this surface mapping as a pair (f,g),</span>
-<span class="sd">        where the original map is f o g.</span>
+<span class="sd">        Return the factors of the map as a tuple ordered in the order of the application.</span>
+<span class="sd">        So for example, a return of `(f, g, h)` would indicate the map $h \circ g \circ f$.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m1</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span></div>
+
+<div class="viewcode-block" id="SurfaceMappingComposition.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SurfaceMappingComposition.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return if this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mapping</span><span class="o">.</span><span class="n">is_invertible</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the inverse mapping.</span>
+
+<span class="sd">        Raises a NotImplementedError if the map is not invertible.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_invertible</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">SurfaceMappingComposition</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="o">~</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This SurfaceMappingComposition is not invertible&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Composition of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)</span><span class="si">}</span><span class="s1"> surface mappings.&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Composition of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">)</span><span class="si">}</span><span class="s1"> surface mappings.&#39;</span></div>
 
 <div class="viewcode-block" id="IdentityMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.IdentityMapping">[docs]</a><span class="k">class</span> <span class="nc">IdentityMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -198,11 +321,21 @@
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> \
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> \
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> \
-            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div></div>
+            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IdentityMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.IdentityMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the inverse mapping.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="MatrixListDeformedSurface"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.MatrixListDeformedSurface">[docs]</a><span class="k">class</span> <span class="nc">MatrixListDeformedSurface</span><span class="p">(</span><span class="n">Surface</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Apply a different matrix to each polygon in the surface. </span>
+<span class="sd">    Apply a different matrix to each polygon in the surface.</span>
 <span class="sd">    Here matrix_function is a python function mapping labels to 2x2 matrices with positive determinant.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">matrix_function</span><span class="p">,</span> <span class="n">ring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -257,7 +390,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span>
                 <span class="n">label</span><span class="p">,</span> \
                 <span class="n">im</span><span class="o">*</span><span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> \
-                <span class="n">im</span><span class="o">*</span><span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div></div>
+                <span class="n">im</span><span class="o">*</span><span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="MatrixListDeformedSurfaceMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.MatrixListDeformedSurfaceMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
 
 <div class="viewcode-block" id="SimilarityJoinPolygonsMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping">[docs]</a><span class="k">class</span> <span class="nc">SimilarityJoinPolygonsMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -326,20 +463,20 @@
         <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">()</span><span class="o">==</span><span class="n">p2</span><span class="p">:</span>
             <span class="c1"># The polygon with the base label is being removed.</span>
             <span class="n">s2</span><span class="o">.</span><span class="n">change_base_label</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
-        
+
         <span class="n">s2</span><span class="o">.</span><span class="n">change_polygon</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">ConvexPolygons</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">())(</span><span class="n">vs</span><span class="p">))</span>
-        
+
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vs</span><span class="p">)):</span>
             <span class="n">p3</span><span class="p">,</span><span class="n">e3</span> <span class="o">=</span> <span class="n">edge_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">p4</span><span class="p">,</span><span class="n">e4</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">p3</span><span class="p">,</span><span class="n">e3</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">p4</span> <span class="o">==</span> <span class="n">p1</span> <span class="ow">or</span> <span class="n">p4</span> <span class="o">==</span> <span class="n">p2</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">p4</span> <span class="o">==</span> <span class="n">p1</span> <span class="ow">or</span> <span class="n">p4</span> <span class="o">==</span> <span class="n">p2</span><span class="p">:</span>
                 <span class="n">pp</span><span class="p">,</span><span class="n">ee</span> <span class="o">=</span> <span class="n">inv_edge_map</span><span class="p">[(</span><span class="n">p4</span><span class="p">,</span><span class="n">e4</span><span class="p">)]</span>
                 <span class="n">s2</span><span class="o">.</span><span class="n">change_edge_gluing</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">pp</span><span class="p">,</span><span class="n">ee</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">s2</span><span class="o">.</span><span class="n">change_edge_gluing</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">p4</span><span class="p">,</span><span class="n">e4</span><span class="p">)</span>
 
         <span class="n">s2</span><span class="o">.</span><span class="n">set_immutable</span><span class="p">()</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_saved_label</span><span class="o">=</span><span class="n">p1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_removed_label</span><span class="o">=</span><span class="n">p2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_remove_map</span> <span class="o">=</span> <span class="n">t</span>
@@ -420,12 +557,17 @@
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> \
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> \
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> \
-                <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div></div>
+                <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimilarityJoinPolygonsMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+
 
 <div class="viewcode-block" id="SplitPolygonsMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SplitPolygonsMapping">[docs]</a><span class="k">class</span> <span class="nc">SplitPolygonsMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for cutting a polygon along a diagonal.</span>
-<span class="sd">    </span>
+
 <span class="sd">    EXAMPLES::</span>
 
 <span class="sd">        sage: from flatsurf import *</span>
@@ -437,25 +579,25 @@
 <span class="sd">        sage: for pair in s2.label_iterator(polygons=True):</span>
 <span class="sd">        ....:     print(pair)</span>
 <span class="sd">        (0, Polygon: (0, 0), (1/2*a + 1, 1/2*a), (1/2*a + 1, 1/2*a + 1), (1, a + 1), (0, a + 1), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a))</span>
-<span class="sd">        (ExtraLabel(0), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))</span>
+<span class="sd">        (ExtraLabel(...), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))</span>
 <span class="sd">        sage: for glue in s2.edge_iterator(gluings=True):</span>
 <span class="sd">        ....:     print(glue)</span>
-<span class="sd">        ((0, 0), (ExtraLabel(0), 0))</span>
+<span class="sd">        ((0, 0), (ExtraLabel(...), 0))</span>
 <span class="sd">        ((0, 1), (0, 5))</span>
 <span class="sd">        ((0, 2), (0, 6))</span>
-<span class="sd">        ((0, 3), (ExtraLabel(0), 1))</span>
-<span class="sd">        ((0, 4), (ExtraLabel(0), 2))</span>
+<span class="sd">        ((0, 3), (ExtraLabel(...), 1))</span>
+<span class="sd">        ((0, 4), (ExtraLabel(...), 2))</span>
 <span class="sd">        ((0, 5), (0, 1))</span>
 <span class="sd">        ((0, 6), (0, 2))</span>
-<span class="sd">        ((ExtraLabel(0), 0), (0, 0))</span>
-<span class="sd">        ((ExtraLabel(0), 1), (0, 3))</span>
-<span class="sd">        ((ExtraLabel(0), 2), (0, 4))</span>
+<span class="sd">        ((ExtraLabel(...), 0), (0, 0))</span>
+<span class="sd">        ((ExtraLabel(...), 1), (0, 3))</span>
+<span class="sd">        ((ExtraLabel(...), 2), (0, 4))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">new_label</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Warning: We do not ensure that new_label is not already in the list of labels unless it is None (as by default).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">is_mutable</span><span class="p">():</span>
@@ -471,12 +613,12 @@
             <span class="n">temp</span><span class="o">=</span><span class="n">v1</span>
             <span class="n">v1</span><span class="o">=</span><span class="n">v2</span>
             <span class="n">v2</span><span class="o">=</span><span class="n">temp</span>
-            
+
         <span class="n">newvertices1</span><span class="o">=</span><span class="p">[</span><span class="n">poly</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span><span class="o">-</span><span class="n">poly</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">v1</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">v1</span><span class="o">+</span><span class="n">ne</span><span class="p">):</span>
             <span class="n">newvertices1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         <span class="n">newpoly1</span> <span class="o">=</span> <span class="n">ConvexPolygons</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">())(</span><span class="n">newvertices1</span><span class="p">)</span>
-        
+
         <span class="n">newvertices2</span><span class="o">=</span><span class="p">[</span><span class="n">poly</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span><span class="o">-</span><span class="n">poly</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">v2</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">):</span>
             <span class="n">newvertices2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
@@ -509,9 +651,9 @@
                 <span class="n">s2</span><span class="o">.</span><span class="n">change_edge_gluing</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span><span class="n">ee</span><span class="p">,</span><span class="n">gl</span><span class="p">,</span><span class="n">ge</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">s2</span><span class="o">.</span><span class="n">change_edge_gluing</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span><span class="n">ee</span><span class="p">,</span><span class="n">lll</span><span class="p">,</span><span class="n">eee</span><span class="p">)</span>
-        
+
         <span class="n">s2</span><span class="o">.</span><span class="n">set_immutable</span><span class="p">()</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">=</span><span class="n">p</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_v1</span><span class="o">=</span><span class="n">v1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_v2</span><span class="o">=</span><span class="n">v2</span>
@@ -593,7 +735,11 @@
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> \
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> \
                 <span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> \
-                <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div></div>
+                <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SplitPolygonsMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.SplitPolygonsMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
 
 <div class="viewcode-block" id="subdivide_a_polygon"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.subdivide_a_polygon">[docs]</a><span class="k">def</span> <span class="nf">subdivide_a_polygon</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -601,7 +747,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">flatsurf.geometry.polygon</span> <span class="kn">import</span> <span class="n">wedge_product</span>
     <span class="k">for</span> <span class="n">l</span><span class="p">,</span><span class="n">poly</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">label_iterator</span><span class="p">(</span><span class="n">polygons</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span> 
+        <span class="n">n</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">n</span><span class="o">&gt;</span><span class="mi">3</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
                 <span class="n">e1</span><span class="o">=</span><span class="n">poly</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -615,7 +761,7 @@
 
 <div class="viewcode-block" id="triangulation_mapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.triangulation_mapping">[docs]</a><span class="k">def</span> <span class="nf">triangulation_mapping</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a  SurfaceMapping triangulating the provided surface.</span>
-<span class="sd">    </span>
+
 <span class="sd">    EXAMPLES::</span>
 
 <span class="sd">        sage: from flatsurf import *</span>
@@ -674,7 +820,7 @@
     <span class="n">m</span><span class="o">=</span><span class="n">triangulation_mapping</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">s1</span><span class="o">=</span><span class="n">s</span>
-    <span class="k">else</span><span class="p">:</span> 
+    <span class="k">else</span><span class="p">:</span>
         <span class="n">s1</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">codomain</span><span class="p">()</span>
     <span class="n">m1</span><span class="o">=</span><span class="n">one_delaunay_flip_mapping</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">m1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -724,7 +870,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SurfaceMappingComposition</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">m</span></div>
-    
+
 <div class="viewcode-block" id="canonical_first_vertex"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.canonical_first_vertex">[docs]</a><span class="k">def</span> <span class="nf">canonical_first_vertex</span><span class="p">(</span><span class="n">polygon</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the index of the vertex with smallest y-coordinate.</span>
@@ -741,7 +887,7 @@
         <span class="k">if</span> <span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">best_pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">return</span> <span class="n">v</span>
     <span class="k">return</span> <span class="n">best</span></div>
-   
+
 <div class="viewcode-block" id="CanonicalizePolygonsMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.CanonicalizePolygonsMapping">[docs]</a><span class="k">class</span> <span class="nc">CanonicalizePolygonsMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a mapping to a surface with the polygon vertices canonically determined.</span>
@@ -778,7 +924,7 @@
         <span class="n">s2</span><span class="o">.</span><span class="n">change_base_label</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">())</span>
         <span class="n">s2</span><span class="o">.</span><span class="n">set_immutable</span><span class="p">()</span>
         <span class="n">ss2</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_cv</span><span class="o">=</span><span class="n">cv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_translations</span><span class="o">=</span><span class="n">translations</span>
 
@@ -800,7 +946,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> \
             <span class="p">(</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">_translations</span><span class="p">[</span><span class="n">l</span><span class="p">])(</span><span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">()),</span> \
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> \
-            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div></div>
+            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CanonicalizePolygonsMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.CanonicalizePolygonsMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
 
 <div class="viewcode-block" id="ReindexMapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.ReindexMapping">[docs]</a><span class="k">class</span> <span class="nc">ReindexMapping</span><span class="p">(</span><span class="n">SurfaceMapping</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -830,18 +980,18 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_f</span><span class="o">=</span><span class="n">f</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="o">=</span><span class="n">b</span>
-        
+
         <span class="k">if</span> <span class="n">new_base_label</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">()</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>                
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">()</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">new_base_label</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">()]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_base_label</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">base_label</span><span class="p">()</span>
         <span class="n">s2</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">mutable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">s2</span><span class="o">.</span><span class="n">relabel</span><span class="p">(</span><span class="n">relabler</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">s2</span><span class="o">.</span><span class="n">underlying_surface</span><span class="p">()</span><span class="o">.</span><span class="n">change_base_label</span><span class="p">(</span><span class="n">new_base_label</span><span class="p">)</span>
-        
+
         <span class="n">SurfaceMapping</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
-            
+
 <div class="viewcode-block" id="ReindexMapping.push_vector_forward"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.ReindexMapping.push_vector_forward">[docs]</a>    <span class="k">def</span> <span class="nf">push_vector_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tangent_vector</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Applies the mapping to the provided vector.&quot;&quot;&quot;</span>
         <span class="c1"># There is no change- we just move it to the new surface.</span>
@@ -859,7 +1009,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">[</span><span class="n">tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()],</span> \
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> \
             <span class="n">tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> \
-            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div></div>
+            <span class="n">ring</span> <span class="o">=</span> <span class="n">ring</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReindexMapping.is_invertible"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.ReindexMapping.is_invertible">[docs]</a>    <span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return true to indicate this mapping is invertible.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+
 
 <div class="viewcode-block" id="my_sgn"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.my_sgn">[docs]</a><span class="k">def</span> <span class="nf">my_sgn</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">val</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
@@ -891,10 +1046,10 @@
         <span class="k">if</span> <span class="n">res</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">res</span>
     <span class="k">return</span> <span class="mi">0</span></div>
-    
+
 <div class="viewcode-block" id="translation_surface_cmp"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.translation_surface_cmp">[docs]</a><span class="k">def</span> <span class="nf">translation_surface_cmp</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two finite surfaces. </span>
+<span class="sd">    Compare two finite surfaces.</span>
 <span class="sd">    The surfaces will be considered equal if and only if there is a translation automorphism</span>
 <span class="sd">    respecting the polygons and the base_labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -933,7 +1088,7 @@
 <div class="viewcode-block" id="canonicalize_translation_surface_mapping"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.mappings.canonicalize_translation_surface_mapping">[docs]</a><span class="k">def</span> <span class="nf">canonicalize_translation_surface_mapping</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the translation surface in a canonical form.</span>
-<span class="sd">    </span>
+
 <span class="sd">    EXAMPLES::</span>
 
 <span class="sd">        sage: from flatsurf import *</span>
@@ -1020,7 +1175,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.mappings</a></li> 
       </ul>

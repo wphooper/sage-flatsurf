@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>flatsurf.geometry.similarity_surface &#8212; sage-flatsurf 0.3 documentation</title>
+    <title>flatsurf.geometry.similarity_surface &#8212; sage-flatsurf 0.4.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.similarity_surface</a></li> 
       </ul>
@@ -1354,7 +1354,7 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the minimal translation or half-translation cover of the surface.</span>
 
-<span class="sd">        Cover type may be either &quot;translation&quot;, &quot;half-translation&quot; or &quot;planar&quot;.</span>
+<span class="sd">        Cover type may be &quot;translation&quot;, &quot;half-translation&quot;, &quot;planar&quot; or &quot;dilation&quot;.</span>
 
 <span class="sd">        The minimal planar cover of a surface S is the smallest cover C so that</span>
 <span class="sd">        the developing map from the universal cover U to the plane induces a</span>
@@ -1405,6 +1405,10 @@
             <span class="kn">from</span> <span class="nn">flatsurf.geometry.translation_surface</span> <span class="kn">import</span> <span class="n">TranslationSurface</span>
             <span class="kn">from</span> <span class="nn">flatsurf.geometry.minimal_cover</span> <span class="kn">import</span> <span class="n">MinimalPlanarCover</span>
             <span class="k">return</span> <span class="n">TranslationSurface</span><span class="p">(</span><span class="n">MinimalPlanarCover</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cover_type</span> <span class="o">==</span> <span class="s1">&#39;dilation&#39;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">flatsurf.geometry.dilation_surface</span> <span class="kn">import</span> <span class="n">DilationSurface</span>
+            <span class="kn">from</span> <span class="nn">flatsurf.geometry.minimal_cover</span> <span class="kn">import</span> <span class="n">MinimalDilationCover</span>
+            <span class="k">return</span> <span class="n">DilationSurface</span><span class="p">(</span><span class="n">MinimalDilationCover</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided cover_type is not supported.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SimilaritySurface.minimal_translation_cover"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.similarity_surface.SimilaritySurface.minimal_translation_cover">[docs]</a>    <span class="k">def</span> <span class="nf">minimal_translation_cover</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2492,7 +2496,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.similarity_surface</a></li> 
       </ul>

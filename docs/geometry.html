@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Geometry Package &#8212; sage-flatsurf 0.3 documentation</title>
+    <title>The Geometry Package &#8212; sage-flatsurf 0.4.1 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="walk_through.html" title="A tour of sage-flatsurf"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">The Geometry Package</a></li> 
       </ul>
     </div>  
@@ -788,7 +788,7 @@ Vector space of dimension 2 over Number Field in c with defining polynomial x^2 
 <span class="mi">3</span><span class="o">/</span><span class="mi">8</span>
 
 <span class="n">sage</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="n">polygons</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)])</span>
-<span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>  <span class="c1"># abs tol 1e-13</span>
 <span class="p">[</span><span class="mf">0.16737532973071603</span><span class="p">,</span> <span class="mf">0.22741638234956674</span><span class="p">,</span> <span class="mf">0.10520828791971722</span><span class="p">]</span>
 <span class="n">sage</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">numerical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>   <span class="c1"># abs tol 1e-13</span>
 <span class="mf">0.5</span>
@@ -2756,7 +2756,7 @@ instead of just labels.</p>
 <dt id="flatsurf.geometry.similarity_surface.SimilaritySurface.minimal_cover">
 <code class="sig-name descname"><span class="pre">minimal_cover</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cover_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'translation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/similarity_surface.html#SimilaritySurface.minimal_cover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.similarity_surface.SimilaritySurface.minimal_cover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the minimal translation or half-translation cover of the surface.</p>
-<p>Cover type may be either “translation”, “half-translation” or “planar”.</p>
+<p>Cover type may be “translation”, “half-translation”, “planar” or “dilation”.</p>
 <p>The minimal planar cover of a surface S is the smallest cover C so that
 the developing map from the universal cover U to the plane induces a
 well defined map from C to the plane. This is an infinite translation
@@ -3944,6 +3944,8 @@ True
 <span class="o">....</span><span class="p">:</span>     <span class="k">return</span> <span class="n">matrix</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span><span class="o">-</span><span class="n">s</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
 <span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">rotation_matrix_angle</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)]</span>
 <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">rotation_matrix_angle</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)]</span>
+<span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">]</span>
 <span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">rotation_matrix_angle</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">)]</span>
 <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="o">/</span><span class="mi">7</span><span class="p">]</span>
 </pre></div>
@@ -4181,7 +4183,7 @@ and (ax+by+s,bx-ay+t) if sign=-1</p>
 <dl class="py method">
 <dt id="flatsurf.geometry.similarity.SimilarityGroup.an_element">
 <code class="sig-name descname"><span class="pre">an_element</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/similarity.html#SimilarityGroup.an_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.similarity.SimilarityGroup.an_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>File: sage/structure/parent.pyx (starting at line 2600)</p>
+<dd><p>File: sage/structure/parent.pyx (starting at line 2601)</p>
 <p>Returns a (preferably typical) element of this parent.</p>
 <p>This is used both for illustration and testing purposes. If
 the set <code class="docutils literal notranslate"><span class="pre">self</span></code> is empty, <a class="reference internal" href="#flatsurf.geometry.similarity.SimilarityGroup.an_element" title="flatsurf.geometry.similarity.SimilarityGroup.an_element"><code class="xref py py-meth docutils literal notranslate"><span class="pre">an_element()</span></code></a> raises the
@@ -4661,6 +4663,12 @@ Segment in polygon 0 starting at (0.9442719099991588?, 0) and ending at (1, 0.18
 <dd><p>This is a mapping to a surface with the polygon vertices canonically determined.
 A canonical labeling is when the canonocal_first_vertex is the zero vertex.</p>
 <dl class="py method">
+<dt id="flatsurf.geometry.mappings.CanonicalizePolygonsMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#CanonicalizePolygonsMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.CanonicalizePolygonsMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="flatsurf.geometry.mappings.CanonicalizePolygonsMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#CanonicalizePolygonsMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.CanonicalizePolygonsMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the pullback mapping to the provided vector.</p>
@@ -4679,6 +4687,12 @@ A canonical labeling is when the canonocal_first_vertex is the zero vertex.</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">IdentityMapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codomain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#IdentityMapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.IdentityMapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct an identity map between two “equal” surfaces.</p>
 <dl class="py method">
+<dt id="flatsurf.geometry.mappings.IdentityMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#IdentityMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.IdentityMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="flatsurf.geometry.mappings.IdentityMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#IdentityMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.IdentityMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the pullback mapping to the provided vector.</p>
@@ -4693,9 +4707,51 @@ A canonical labeling is when the canonocal_first_vertex is the zero vertex.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="flatsurf.geometry.mappings.InverseMapping">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">InverseMapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#InverseMapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.InverseMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the inverse of an invertible mapping.</p>
+<dl class="simple">
+<dt>EXAMPLES::</dt><dd><p>sage: from flatsurf import *
+sage: s = translation_surfaces.regular_octagon()
+sage: m = s.triangulation_mapping()
+sage: type(m)
+&lt;class ‘flatsurf.geometry.mappings.SurfaceMappingComposition’&gt;
+sage: len(m.factors())
+5
+sage: t = m*~m
+sage: v = t.domain().tangent_vector(
+….:    t.domain().base_label(),
+….:    (0,0),
+….:    t.domain().polygon(t.domain().base_label()).edge(0)
+….: )
+sage: t.push_vector_forward(v) == v
+True</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.InverseMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#InverseMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.InverseMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.InverseMapping.pull_vector_back">
+<code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#InverseMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.InverseMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the pullback mapping to the provided vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.InverseMapping.push_vector_forward">
+<code class="sig-name descname"><span class="pre">push_vector_forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#InverseMapping.push_vector_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.InverseMapping.push_vector_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the mapping to the provided vector.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="flatsurf.geometry.mappings.MatrixListDeformedSurface">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">MatrixListDeformedSurface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#MatrixListDeformedSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.MatrixListDeformedSurface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a different matrix to each polygon in the surface. 
+<dd><p>Apply a different matrix to each polygon in the surface.
 Here matrix_function is a python function mapping labels to 2x2 matrices with positive determinant.</p>
 <dl class="py method">
 <dt id="flatsurf.geometry.mappings.MatrixListDeformedSurface.base_label">
@@ -4740,6 +4796,12 @@ returns the pair (<code class="docutils literal notranslate"><span class="pre">l
 The matrix is determined by the matrix_function which should be a python
 object.</p>
 <dl class="py method">
+<dt id="flatsurf.geometry.mappings.MatrixListDeformedSurfaceMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#MatrixListDeformedSurfaceMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.MatrixListDeformedSurfaceMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="flatsurf.geometry.mappings.MatrixListDeformedSurfaceMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#MatrixListDeformedSurfaceMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.MatrixListDeformedSurfaceMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the inverse of the mapping to the provided vector.</p>
@@ -4757,6 +4819,12 @@ object.</p>
 <dt id="flatsurf.geometry.mappings.ReindexMapping">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">ReindexMapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relabler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_base_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#ReindexMapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.ReindexMapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a dictionary to relabel the polygons.</p>
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.ReindexMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#ReindexMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.ReindexMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="flatsurf.geometry.mappings.ReindexMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#ReindexMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.ReindexMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
@@ -4809,6 +4877,12 @@ object.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SimilarityJoinPolygonsMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SimilarityJoinPolygonsMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SimilarityJoinPolygonsMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the inverse of the mapping to the provided vector.</p>
@@ -4842,21 +4916,27 @@ object.</p>
 <span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">s2</span><span class="o">.</span><span class="n">label_iterator</span><span class="p">(</span><span class="n">polygons</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="o">....</span><span class="p">:</span>     <span class="nb">print</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">))</span>
-<span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Polygon</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">))</span>
+<span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">Polygon</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="p">))</span>
 <span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">glue</span> <span class="ow">in</span> <span class="n">s2</span><span class="o">.</span><span class="n">edge_iterator</span><span class="p">(</span><span class="n">gluings</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="o">....</span><span class="p">:</span>     <span class="nb">print</span><span class="p">(</span><span class="n">glue</span><span class="p">)</span>
-<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
+<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
 <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
-<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+<span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
 <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="p">((</span><span class="n">ExtraLabel</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.SplitPolygonsMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SplitPolygonsMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SplitPolygonsMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true to indicate this mapping is invertible.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="flatsurf.geometry.mappings.SplitPolygonsMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SplitPolygonsMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SplitPolygonsMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
@@ -4888,6 +4968,12 @@ object.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="flatsurf.geometry.mappings.SurfaceMapping.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMapping.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMapping.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if this mapping is invertible.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="flatsurf.geometry.mappings.SurfaceMapping.pull_vector_back">
 <code class="sig-name descname"><span class="pre">pull_vector_back</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tangent_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMapping.pull_vector_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMapping.pull_vector_back" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the inverse of the mapping to the provided vector.</p>
@@ -4903,13 +4989,19 @@ object.</p>
 
 <dl class="py class">
 <dt id="flatsurf.geometry.mappings.SurfaceMappingComposition">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">SurfaceMappingComposition</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMappingComposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMappingComposition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Composition of two mappings between surfaces.</p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">SurfaceMappingComposition</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">mappings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMappingComposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMappingComposition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Composition of mappings.</p>
 <dl class="py method">
 <dt id="flatsurf.geometry.mappings.SurfaceMappingComposition.factors">
 <code class="sig-name descname"><span class="pre">factors</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMappingComposition.factors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMappingComposition.factors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the two factors of this surface mapping as a pair (f,g),
-where the original map is f o g.</p>
+<dd><p>Return the factors of the map as a tuple ordered in the order of the application.
+So for example, a return of <cite>(f, g, h)</cite> would indicate the map $h circ g circ f$.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="flatsurf.geometry.mappings.SurfaceMappingComposition.is_invertible">
+<code class="sig-name descname"><span class="pre">is_invertible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#SurfaceMappingComposition.is_invertible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.SurfaceMappingComposition.is_invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return if this mapping is invertible.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -5006,7 +5098,7 @@ then by lexigraphical ording on edge vectors.</p>
 <dl class="py function">
 <dt id="flatsurf.geometry.mappings.translation_surface_cmp">
 <code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.mappings.</span></code><code class="sig-name descname"><span class="pre">translation_surface_cmp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/mappings.html#translation_surface_cmp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.mappings.translation_surface_cmp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two finite surfaces. 
+<dd><p>Compare two finite surfaces.
 The surfaces will be considered equal if and only if there is a translation automorphism
 respecting the polygons and the base_labels.</p>
 </dd></dl>
@@ -5777,7 +5869,7 @@ represents and edge and w represents the non-zero weight assigned.</p>
         <li class="right" >
           <a href="walk_through.html" title="A tour of sage-flatsurf"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">sage-flatsurf 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">The Geometry Package</a></li> 
       </ul>
     </div>

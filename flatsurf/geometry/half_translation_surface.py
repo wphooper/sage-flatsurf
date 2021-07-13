@@ -78,6 +78,9 @@ class HalfTranslationSurface(HalfDilationSurface, RationalConeSurface):
 
         if return_adjacent_edges:
             while edges:
+                # Note that iteration order here is different for different
+                # versions of Python. Therefore, the output in the doctest
+                # above is random.
                 pair = p,e = next(iter(edges))
                 ve = self.polygon(p).edge(e)
                 angle = 0

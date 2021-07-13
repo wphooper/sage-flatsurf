@@ -91,3 +91,42 @@ class ConeSurface(SimilaritySurface):
         Return the area of this surface.
         """
         return self._s.area()
+
+    def _test_edge_matrix(self, **options):
+        r"""
+        Check that all edges are glued by rotations.
+
+        EXAMPLES::
+
+            sage: from flatsurf import *
+
+            sage: P = polygons(vertices=[(0,0), (3,0), (3,4)])
+            sage: s = similarity_surfaces.billiard(P)
+            sage: type(s)
+            <class 'flatsurf.geometry.cone_surface.ConeSurface'>
+            sage: TestSuite(s).run()
+
+            sage: ss = similarity_surfaces.example()
+            sage: cs = ConeSurface(ss.underlying_surface())
+            sage: TestSuite(cs).run()
+            Failure in _test_edge_matrix:
+            ...
+            The following tests failed: _test_edge_matrix
+        """
+        tester = self._tester(**options)
+        from flatsurf.geometry.similarity_surface import SimilaritySurface
+        from flatsurf.geometry.matrix_2x2 import is_rotation
+        if self.is_finite():
+            it = self.label_iterator()
+        else:
+            it = islice(self.label_iterator(), 30)
+
+        for lab in it:
+            p = self.polygon(lab)
+            for e in range(p.num_edges()):
+                # Warning: check the matrices computed from the edges,
+                # rather the ones overriden by TranslationSurface.
+                m = SimilaritySurface.edge_matrix(self,lab,e)
+                # Check that this is a rotation matrix.
+                tester.assertTrue(is_rotation(m),
+                    "edge_matrix between edge e={} and e'={} has matrix\n{}\nwhich is not a rotation".format((lab,e), self.opposite_edge((lab,e)), m))

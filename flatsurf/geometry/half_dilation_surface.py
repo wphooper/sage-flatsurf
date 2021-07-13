@@ -388,3 +388,7 @@ class GL2RMapping(SurfaceMapping):
                 tangent_vector.polygon_label(), \
                 self._im*tangent_vector.point(), \
                 self._im*tangent_vector.vector())
+
+    def is_invertible(self):
+        r"""Return `True` to indicate this mapping is invertible."""
+        return True

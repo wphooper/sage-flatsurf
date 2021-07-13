@@ -64,6 +64,45 @@ def is_similarity(m):
     n = m * m.transpose()
     return n[0,1].is_zero() and n[1,0].is_zero()
 
+def is_rotation(m):
+    r"""
+    Return ``True`` if ``m`` is a rotation and ``False`` otherwise.
+
+    EXAMPLES::
+
+        sage: from flatsurf.geometry.matrix_2x2 import is_rotation
+
+        sage: is_rotation(matrix([[3,4],[-4,3]]))
+        False
+        sage: is_rotation(matrix([[3/5,4/5],[-4/5,3/5]]))
+        True
+    """
+    return \
+        m[0][0] == m[1][1] and \
+        m[0][1] == -m[1][0] and \
+        (m[0][0]**2 + m[0][1]**2).is_one()
+
+def is_rational_rotation(m):
+    r"""
+    Return ``True`` if ``m`` is a rotation by a rational multiple of
+    pi and ``False`` otherwise.
+
+    EXAMPLES::
+
+        sage: from flatsurf.geometry.matrix_2x2 import is_rational_rotation
+
+        sage: is_rational_rotation(matrix([[3/5,4/5],[-4/5,3/5]]))
+        False
+
+        sage: x = var('x')
+        sage: field = NumberField(x**2-3, embedding=AA(sqrt(3)), name='a')
+        sage: a = field.gen()
+        sage: is_rational_rotation(matrix([[1/2,a/2],[-a/2,1/2]]))
+        True
+    """
+    return is_rotation(m) and is_cosine_sine_of_rational(m[0][0], m[1][0])
+
+
 def homothety_rotation_decomposition(m):
     r"""
     Return a couple composed of the homothety and a rotation matrix.

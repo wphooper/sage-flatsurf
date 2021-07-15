@@ -3907,6 +3907,41 @@ True
 </dd></dl>
 
 <dl class="py function">
+<dt id="flatsurf.geometry.matrix_2x2.is_rational_rotation">
+<code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.matrix_2x2.</span></code><code class="sig-name descname"><span class="pre">is_rational_rotation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/matrix_2x2.html#is_rational_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.matrix_2x2.is_rational_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if <code class="docutils literal notranslate"><span class="pre">m</span></code> is a rotation by a rational multiple of
+pi and <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">flatsurf.geometry.matrix_2x2</span> <span class="kn">import</span> <span class="n">is_rational_rotation</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_rational_rotation</span><span class="p">(</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">],[</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">]]))</span>
+<span class="kc">False</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">x</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">field</span> <span class="o">=</span> <span class="n">NumberField</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">embedding</span><span class="o">=</span><span class="n">AA</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gen</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_rational_rotation</span><span class="p">(</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">],[</span><span class="o">-</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]]))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="flatsurf.geometry.matrix_2x2.is_rotation">
+<code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.matrix_2x2.</span></code><code class="sig-name descname"><span class="pre">is_rotation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/matrix_2x2.html#is_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.matrix_2x2.is_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if <code class="docutils literal notranslate"><span class="pre">m</span></code> is a rotation and <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">flatsurf.geometry.matrix_2x2</span> <span class="kn">import</span> <span class="n">is_rotation</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_rotation</span><span class="p">(</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]]))</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_rotation</span><span class="p">(</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">],[</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">5</span><span class="p">]]))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt id="flatsurf.geometry.matrix_2x2.is_similarity">
 <code class="sig-prename descclassname"><span class="pre">flatsurf.geometry.matrix_2x2.</span></code><code class="sig-name descname"><span class="pre">is_similarity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flatsurf/geometry/matrix_2x2.html#is_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flatsurf.geometry.matrix_2x2.is_similarity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if <code class="docutils literal notranslate"><span class="pre">m</span></code> is a similarity and <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>

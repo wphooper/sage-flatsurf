@@ -35,13 +35,12 @@ class HalfDilationSurface(SimilaritySurface):
     def GL2R_mapping(self, matrix):
         r"""
         Deprecated. Use apply_matrix instead.
-        
-        Apply a 2x2 matrix to the polygons making up this surface. 
+        Apply a 2x2 matrix to the polygons making up this surface.
         Returns the flatsurf.geometry.SurfaceMapping from this surface to its image.
         """
         deprecation(13109, "GL2R_mapping is deprecated. Use apply_matrix(mapping=True) instead.")
         return GL2RMapping(self, matrix)
-        
+
     def __rmul__(self,matrix):
         r"""
         EXAMPLES::
@@ -76,13 +75,13 @@ class HalfDilationSurface(SimilaritySurface):
     def apply_matrix(self,m,in_place=True, mapping=False):
         r"""
         Carry out the GL(2,R) action of m on this surface and return the result.
-        
-        If in_place=True, then this is done in place and changes the surface. 
+
+        If in_place=True, then this is done in place and changes the surface.
         This can only be carried out if the surface is finite and mutable.
-        
-        If mapping=True, then we return a GL2RMapping between this surface and its image. 
+
+        If mapping=True, then we return a GL2RMapping between this surface and its image.
         In this case in_place must be False.
-        
+
         If in_place=False, then a copy is made before the deformation.
         """
         if mapping==True:
@@ -109,7 +108,7 @@ class HalfDilationSurface(SimilaritySurface):
                 us.change_polygon(label,m*self.polygon(label))
             if m.det()<self.base_ring().zero():
                 # Polygons were all reversed orientation. Need to redo gluings.
-                
+
                 # First pass record new gluings in a dictionary.
                 new_glue={}
                 seen_labels=set()
@@ -129,7 +128,7 @@ class HalfDilationSurface(SimilaritySurface):
                 for (p1,e1),(p2,e2) in iteritems(new_glue):
                     us.change_edge_gluing(p1,e1,p2,e2)
             return self
-                
+
     def _edge_needs_flip_Linfinity(self, p1, e1, p2, e2):
         r"""
         Check whether the provided edge which bounds two triangles should be flipped
@@ -352,7 +351,7 @@ class GL2RImageSurface(Surface):
 class GL2RMapping(SurfaceMapping):
     r"""
     This class pushes a surface forward under a matrix.
-    
+
     Note that for matrices of negative determinant we need to relabel edges (because
     edges must have a counterclockwise cyclic order). For each n-gon in the surface,
     we relabel edges according to the involution e mapsto n-1-e.

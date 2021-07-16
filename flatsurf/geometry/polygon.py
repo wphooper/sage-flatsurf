@@ -1718,89 +1718,82 @@ class ConvexPolygon(Polygon):
                 raise ValueError("Vertex "+str(i)+" is not on the circle.")
         return circle
 
-    def rotate_to_upper_half_and_scale(self, index):
-        """
-        Returns a pair `(p, g)` where `p` is a polygon and `g` is a `Similarity`.
-
-        The polygon `p` is the obtained by moving the vertex with the provided
-        `index` to the origin, and rotating and scaling the polygon so that
-        the edge `edge` has vector $(1,0)$. The similarity `g` is the similarity
-        used to map this polygon to `p`. The vertices of `p` are then reindexed
-        so that the vertex at the origin has index zero. This means that `g`
-        sends vertex `index` of this polygon to vertex `0` of `p`, and sends
-        vertex $n$ of this polygon to vertex $n-index$ of `p` (with subtraction
-        performed modulo the number of sides).
-
-        This code was contributed by Zhi Heng Liu and Seth Foster.
-
-        EXAMPLES::
-
-            sage: from flatsurf import *
-            sage: CP = ConvexPolygons(QQ)
-            sage: p1 = CP(vertices=[(-1,0),(0,-1),(1,-1),(-1,1)], check=True)
-            sage: p1.rotate_to_upper_half_and_scale(2)
-            (Polygon: (0, 0), (1, 0), (3/4, 1/4), (1/4, 1/4),
-             (x, y) |-> (-1/4*x + 1/4*y + 1/2, -1/4*x - 1/4*y))
-        """
-        from flatsurf.geometry.similarity import SimilarityGroup
-        P = self.parent()
-        numSides = self.num_edges()
-        v = self.vertex(index)
-        e = self.edge(index)
-        SG = SimilarityGroup(self.base_ring())
-        forward_map = SG(e[0], e[1], v[0], v[1])
-        backward_map = ~forward_map
-        p = P(vertices=[backward_map(self.vertex((index + i)%numSides)) for i in range(numSides)])
-        return p, backward_map
-
-    def standardize(self, group = "translation"):
+    def standardize(self, reindex=False, group = "translation"):
         r"""
-        Return a standardized form of the polygon up to a given group, together
-        with a non-empty dictionary. The standardized polygon will always have
-        vertex zero at the origin. The dictionary returned will have keys
-        contained in the set of vertex numbers and values given by group
-        elements (of type `Similarity`) which carry the original polygon to its
-        standardization sending the vertex associated to the key to the origin.
-        These group elements will send vertex `v` of the original polygon to
-        vertex `v-key` (modulo the number of edges) in the returned polygon.
+        Return a standardized form of the polygon up to a given group.
 
-        The group should be one of "translation", "half_translation",
-        "half_dilation", "dilation" or "similarity".
+        There is an additional part of the return relating to the map from the
+        original polygon to its standardized form.
 
-        The polygon returned by the standardization will always be the same for
-        two polygons which differ by a group element.
+        The `group` parameter must be one of "translation", "half_translation",
+        "half_dilation", "dilation" or "similarity". The polygon returned by
+        the standardization will always be the same for two polygons which
+        differ by a group element.
 
-        In particular the size of the symmetry group of the polygon intersected
-        with the provided group will be the same as the length of the returned
-        dictionary.
+        The `reindex` parameter determines if the algorithm should consider
+        polygons as marked by their vertex labels or unmarked polygons. To
+        apply the algorithm in the unmarked case, you must set `reindex=True`.
+        By default we consider marked polygons.
 
-        For `group='translation'`, this translates the polygon so that it is
+        The format of the return is governed by `reindex` parameter. If
+        `reindex=False` (the default), the return consists of a pair `(p, f)`
+        where `p` is the standardized polygon and `f` is the `Similarity`
+        carrying this polygon to `p` and respecting the vertex indices. If
+        `reindex=True`, then the return has the form `(p, d)` where `p`
+        is the standized polygon and `d` is a non-empty dictionary. The
+        dictionary `d` will have keys contained in the set of vertex numbers
+        and values given by group elements (of type `Similarity`) which carry
+        the original polygon to its standardization sending the vertex
+        associated to the key to the origin. These group elements will send
+        vertex `v` of the original polygon to vertex `v - key` (modulo the
+        number of edges) in the returned polygon.
+
+        All standardized polygons will have vertex zero at the origin.
+
+        This code was contributed by Seth Foster and Zhi Heng Liu and modified
+        and documented by Pat Hooper.
+
+        For `group='translation' and `reindex=False` this returns the polygon
+        translated so that vertex zero is at the origin.
+
+        When `reindex=True`, this translates the polygon so that it is
         contained in the upper half plane, with one vertex at the origin (the
         new vertex 0) and possibly one vertex on the positive real-axis (only
         possible for new vertex 1).
-
-        This code was contributed by Zhi Heng Liu and Seth Foster.
 
         EXAMPLES FOR THE TRANSLATION GROUP::
 
             sage: from flatsurf.geometry.polygon import ConvexPolygons
             sage: CP = ConvexPolygons(QQ)
-            sage: p1 = CP(vertices=[(0,0),(1,-1),(2,-1),(0,1)], check=True)
+            sage: p1 = CP(vertices=[(1,0),(2,-1),(3,-1),(1,1)], check=True)
             sage: p1.standardize()
-            (Polygon: (0, 0), (1, 0), (-1, 2), (-1, 1), {1: (x, y) |-> (x - 1, y + 1)})
+            (Polygon: (0, 0), (1, -1), (2, -1), (0, 1), (x, y) |-> (x - 1, y))
+            sage: p1.standardize(reindex=True)
+            (Polygon: (0, 0), (1, 0), (-1, 2), (-1, 1), {1: (x, y) |-> (x - 2, y + 1)})
 
-        For `group='dilation'`, the translation standardization is performed
+        For `group='dilation' and `reindex=False` this returns the polygon
+        translated so that vertex zero is at the origin and so that the largest
+        absolute value of a coordinate of edge vector zero is `1`.
+
+        When `reindex=True`, the translation standardization is performed
         followed by a dilation guaranteeing that the maximum y-coordinate of a
         vertex is one.
 
         EXAMPLES FOR THE DILATION GROUP::
 
-            sage: p1.standardize(group='dilation')
+            sage: (2*p1).standardize(group='dilation')
+            (Polygon: (0, 0), (1, -1), (2, -1), (0, 1), (x, y) |-> (1/2*x - 1, 1/2*y))
+            sage: p1.standardize(reindex=True, group='dilation')
             (Polygon: (0, 0), (1/2, 0), (-1/2, 1), (-1/2, 1/2),
-             {1: (x, y) |-> (1/2*x - 1/2, 1/2*y + 1/2)})
+             {1: (x, y) |-> (1/2*x - 1, 1/2*y + 1/2)})
 
-        For `group='half_translation'`, the polygon returned is either the
-        standardization up to translation or the standarization of the rotation
+        For `group='half_translation'` and `reindex=False` this returns the
+        polygon translated so that vertex zero is at the origin and then
+        possibly rotated by 180 degrees. We apply this rotation if vertex one
+        is in the lower half plane or on the negative real axis.
+
+        When `reindex=True`, the polygon returned is either the
+        standardization up to translation or the standardization of the rotation
         of the polygon by 180 degrees. The minimal one according to the `cmp`
         method is returned. If these two standardizations are the same, then
         the common standardization is returned and the dictionary returned
@@ -1809,23 +1802,35 @@ class ConvexPolygon(Polygon):
         EXAMPLES FOR THE HALF-TRANSLATION GROUP::
 
             sage: p1.standardize(group='half_translation')
-            (Polygon: (0, 0), (0, 1), (-1, 2), (-2, 2), {3: (x, y) |-> (-x, -y + 1)})
+            (Polygon: (0, 0), (-1, 1), (-2, 1), (0, -1), (x, y) |-> (-x + 1, -y))
+            sage: p1.standardize(reindex=True, group='half_translation')
+            (Polygon: (0, 0), (0, 1), (-1, 2), (-2, 2), {3: (x, y) |-> (-x + 1, -y + 1)})
 
             sage: p2 = CP(vertices=[(0,0),(1,-2),(2,0),(1,2)], check=True)
-            sage: p2.standardize(group='half_translation')
+            sage: p2.standardize(reindex=True, group='half_translation')
             (Polygon: (0, 0), (1, 2), (0, 4), (-1, 2),
              {1: (x, y) |-> (x - 1, y + 2), 3: (x, y) |-> (-x + 1, -y + 2)})
 
-        When `group='half_dilation'`, either the dilation standardization or
-        the dilation standardization of the 180 degree rotation is returned,
-        following the same rules as for the half translation case.
+        When `group='half_dilation'` and `reindex=False` the polygon is scaled
+        as in the `group='dilation'` case and then a 180 degree rotation is
+        applied if vertex one is in the lower half plane or on the negative real
+        axis.
+
+        When `reindex=True`, we consider similarity images of the polygon where
+        one vertex sent to the origin and the subsequent vertex is sent to
+        `(1, 0)`. We return the maximal polygon with this property according
+        to the `cmp` method. (In particular, in the returned polygon, edge 0
+        will be one of the shortest edges.)
 
         EXAMPLES FOR THE HALF-DILATION GROUP::
 
-            sage: p1.standardize(group='half_dilation')
+            sage: (2*p1).standardize(group='half_dilation')
+            (Polygon: (0, 0), (-1, 1), (-2, 1), (0, -1), (x, y) |-> (-1/2*x + 1, -1/2*y))
+
+            sage: p1.standardize(reindex=True, group='half_dilation')
             (Polygon: (0, 0), (0, 1/2), (-1/2, 1), (-1, 1),
-             {3: (x, y) |-> (-1/2*x, -1/2*y + 1/2)})
-            sage: p2.standardize(group='half_dilation')
+             {3: (x, y) |-> (-1/2*x + 1/2, -1/2*y + 1/2)})
+            sage: p2.standardize(reindex=True, group='half_dilation')
             (Polygon: (0, 0), (1/4, 1/2), (0, 1), (-1/4, 1/2),
              {1: (x, y) |-> (1/4*x - 1/4, 1/4*y + 1/2),
               3: (x, y) |-> (-1/4*x + 1/4, -1/4*y + 1/2)})
@@ -1838,95 +1843,143 @@ class ConvexPolygon(Polygon):
         EXAMPLES FOR THE SIMILARITY GROUP::
 
             sage: p1.standardize(group='similarity')
-            (Polygon: (0, 0), (1, 0), (-1, 2), (-1, 1), {1: (x, y) |-> (x - 1, y + 1)})
-            sage: p2.standardize(group='similarity')
-            (Polygon: (0, 0), (1, 0), (2/5, 4/5), (-3/5, 4/5),
-             {0: (x, y) |-> (1/5*x - 2/5*y, 2/5*x + 1/5*y),
-              2: (x, y) |-> (-1/5*x + 2/5*y + 2/5, -2/5*x - 1/5*y + 4/5)})
+            (Polygon: (0, 0), (1, 0), (3/2, 1/2), (-1/2, 1/2),
+             (x, y) |-> (1/2*x - 1/2*y - 1/2, 1/2*x + 1/2*y - 1/2))
+
+            sage: p1.standardize(reindex=True, group='similarity')
+            (Polygon: (0, 0), (1, 0), (2, 1), (2, 2), {3: (x, y) |-> (-y + 1, x - 1)})
+            sage: p2.standardize(reindex=True, group='similarity')
+            (Polygon: (0, 0), (1, 0), (8/5, 4/5), (3/5, 4/5),
+             {1: (x, y) |-> (1/5*x + 2/5*y + 3/5, -2/5*x + 1/5*y + 4/5),
+              3: (x, y) |-> (-1/5*x - 2/5*y + 1, 2/5*x - 1/5*y)})
         """
-        if group == "translation" or group == "dilation":
+        if reindex:
+            if group == "translation" or group == "dilation":
+                from flatsurf.geometry.similarity import SimilarityGroup
+                SG = SimilarityGroup(self.base_ring())
+                P = self.parent()
+                V = self.vertices()
+                transXY = (V[0][0], V[0][1])
+                label = 0
+                numSides = len(V)
+                for i in range(numSides):
+                    if (V[i][1] < transXY[1]) or (V[i][1] == transXY[1] and V[i][0] < transXY[0]):
+                        transXY = V[i]
+                        label = i
+                p = P(edges=[self.edge((i + label)%numSides) for i in range(numSides)])
+                translation_map = SG(1, 0, -transXY[0], -transXY[1])
+                if group == "translation":
+                    return p, {label : translation_map}
+
+                if group == "dilation":
+                    V = p.vertices()
+                    ymax = V[0][1]
+                    for i in range(1, numSides):
+                        if V[i][1] > ymax:
+                            ymax = V[i][1]
+                    factor = 1 / ymax
+                    p = P(vertices=[p.vertex(i)*factor for i in range(numSides)])
+                    dilation_map = SG(factor, 0, 0, 0)
+                    return p, {label : dilation_map * translation_map}
+
+            if group == "half_translation" or group == "half_dilation":
+                from flatsurf.geometry.similarity import SimilarityGroup
+                SG = SimilarityGroup(self.base_ring())
+                M = matrix([[-1, 0],[0, -1]])
+                if group == "half_translation":
+                    ret1 = self.standardize(reindex=True)
+                    ret2 = (M * self).standardize(reindex=True)
+                else:
+                    ret1 = self.standardize(reindex=True, group = "dilation")
+                    ret2 = (M * self).standardize(reindex=True, group = "dilation")
+                p1 = ret1[0]
+                p1_map_label = list(ret1[1].items())[0][0]
+                p1_map = list(ret1[1].items())[0][1]
+                p2 = ret2[0]
+                p2_map_label = list(ret2[1].items())[0][0]
+                p2_map =  list(ret2[1].items())[0][1] * SG(-1, 0, 0, 0)
+
+                sign = p1.cmp(p2, area=False) # The polygons have the same area anyway.
+                if sign > 0:
+                    return p2, {p2_map_label : p2_map}
+                elif sign == 0:
+                    return p1, {p1_map_label : p1_map, p2_map_label : p2_map}
+                return p1, {p1_map_label : p1_map}
+
+            if group == "similarity":
+                from flatsurf.geometry.similarity import SimilarityGroup
+                SG = SimilarityGroup(self.base_ring())
+                P = self.parent()
+                # Look for the shortest edges.
+                shortest_edges = [0]
+                e = self.edge(0)
+                length_squared = e[0]**2 + e[1]**2
+                ne = self.num_edges()
+                for i in range(1, ne):
+                    e = self.edge(i)
+                    temp = e[0]**2 + e[1]**2
+                    if temp < length_squared:
+                        length_squared = temp
+                        shortest_edges = [i]
+                    elif temp == length_squared:
+                        shortest_edges.append(i)
+
+                it = iter(shortest_edges)
+                i = next(it)
+                v = self.vertex(i)
+                e = self.edge(i)
+                g = ~SG(e[0], e[1], v[0], v[1])
+                p = P(vertices=[g(self.vertex((j+i)%ne)) for j in range(ne)])
+                d = {i: g}
+                for i in it:
+                    v = self.vertex(i)
+                    e = self.edge(i)
+                    g = ~SG(e[0], e[1], v[0], v[1])
+                    pp = P(vertices=[g(self.vertex((j+i)%ne)) for j in range(ne)])
+                    s = pp.cmp(p, area=False)
+                    if s > 0:
+                        p = pp
+                        d = {i: g}
+                    elif s == 0:
+                        d[i]=g
+                return p, d
+            raise ValueError('Invalid group parameter.')
+        else:
             from flatsurf.geometry.similarity import SimilarityGroup
             SG = SimilarityGroup(self.base_ring())
-            P = self.parent()
-            V = self.vertices()
-            transXY = (V[0][0], V[0][1])
-            label = 0
-            numSides = len(V)
-            for i in range(numSides):
-                if (V[i][1] < transXY[1]) or (V[i][1] == transXY[1] and V[i][0] < transXY[0]):
-                    transXY = V[i]
-                    label = i
-            p = P(edges=[self.edge((i + label)%numSides) for i in range(numSides)])
-            translation_map = SG(1, 0, -transXY[0], -transXY[1])
-            if group == "translation":
-                return p, {label : translation_map}
-
-            if group == "dilation":
-                V = p.vertices()
-                ymax = V[0][1]
-                for i in range(1, numSides):
-                    if V[i][1] > ymax:
-                        ymax = V[i][1]
-                factor = 1 / ymax
-                p = P(vertices=[p.vertex(i)*factor for i in range(numSides)])
-                dilation_map = SG(factor, 0, 0, 0)
-                return p, {label : dilation_map * translation_map}
-
-        if group == "half_translation" or group == "half_dilation":
-            from flatsurf.geometry.similarity import SimilarityGroup
-            SG = SimilarityGroup(self.base_ring())
-            M = matrix([[-1, 0],[0, -1]])
-            if group == "half_translation":
-                ret1 = self.standardize()
-                ret2 = (M * self).standardize()
+            if group == 'translation':
+                v = self.vertex(0)
+                g = SG(1, 0, -v[0], -v[1])
+            elif group == 'dilation' or group == 'half_dilation':
+                v = self.vertex(0)
+                e = self.edge(0)
+                x = e[0].abs()
+                y = e[1].abs()
+                if x >= y:
+                    m = x
+                else:
+                    m = y
+                if group == 'half_dilation':
+                    if not (e[1] > 0 or (e[1]==0 and e[0]>0)):
+                        m *= -1
+                g = SG(~m, 0, -v[0]/m, -v[1]/m)
+            elif group == 'half_translation':
+                v = self.vertex(0)
+                e = self.edge(0)
+                if e[1] > 0 or (e[1]==0 and e[0]>0):
+                    g = SG(1, 0, -v[0], -v[1])
+                else:
+                    g = SG(-1, 0, v[0], v[1])
+            elif group == 'similarity':
+                v = self.vertex(0)
+                e = self.edge(0)
+                g = ~SG(e[0], e[1], v[0], v[1])
             else:
-                ret1 = self.standardize(group = "dilation")
-                ret2 = (M * self).standardize(group = "dilation")
-            p1 = ret1[0]
-            p1_map_label = list(ret1[1].items())[0][0]
-            p1_map = list(ret1[1].items())[0][1]
-            p2 = ret2[0]
-            p2_map_label = list(ret2[1].items())[0][0]
-            p2_map =  list(ret2[1].items())[0][1] * SG(-1, 0, 0, 0)
+                raise ValueError('Invalid group parameter.')
+            P = self.parent()
+            p = P(vertices=[g(self.vertex(i)) for i in range(self.num_edges())])
+            return p,g
 
-            sign = p1.cmp(p2, area=False) # The polygons have the same area anyway.
-            if sign > 0:
-                return p2, {p2_map_label : p2_map}
-            elif sign == 0:
-                return p1, {p1_map_label : p1_map, p2_map_label : p2_map}
-            return p1, {p1_map_label : p1_map}
-
-        if group == "similarity":
-            # This code might be typically quicker if we loop through the
-            # edges first and only check the longest edges or shortest edges.
-            # -Pat Hooper
-            V = self.vertices()
-            numSides = len(V)
-            candidates = []
-            transXY = {}
-            polygon_and_map = {}
-            SGs = {}
-            for i in range(numSides):
-                transXY[i] = (-self.vertex(i)[0],-self.vertex(i)[1])
-                ret = self.rotate_to_upper_half_and_scale(i)
-                ret_poly = ret[0]
-                ret_map = ret[1]
-                polygon_and_map[i] = ret_map
-                candidates.append(ret_poly)
-
-            min_poly = candidates[0]
-            for c in candidates[1:]:
-                if c.cmp(min_poly, area = False) < 0:
-                    min_poly = c
-
-            minimal_candidate_indices = []
-
-            for i in range(numSides):
-                if candidates[i].cmp(min_poly, area = False) == 0:
-                    SGs[i] = polygon_and_map[i]
-                    minimal_candidate_indices.append(i)
-
-            return candidates[minimal_candidate_indices[0]], SGs
 class Polygons(UniqueRepresentation, Parent):
     Element = Polygon
 

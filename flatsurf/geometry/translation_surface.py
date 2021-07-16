@@ -83,72 +83,6 @@ class TranslationSurface(HalfTranslationSurface, DilationSurface):
                 return v
         return best
 
-    def standardize_polygons(self, in_place=False):
-        r"""
-        Replaces each polygon with a polygon with a new polygon which differs by translation
-        and reindexing. The new polygon will have the property that vertex zero is the origin,
-        and all vertices lie either in the upper half plane, or on the x-axis with non-negative
-        x-coordinate.
-
-        This is done to the current surface if in_place=True. A mutable copy is created and returned
-        if in_place=False (as default).
-
-        EXAMPLES::
-
-            sage: from flatsurf import *
-            sage: s=translation_surfaces.veech_double_n_gon(4)
-            sage: s.polygon(1)
-            Polygon: (0, 0), (-1, 0), (-1, -1), (0, -1)
-            sage: [s.opposite_edge(0,i) for i in range(4)]
-            [(1, 0), (1, 1), (1, 2), (1, 3)]
-            sage: ss=s.standardize_polygons()
-            sage: ss.polygon(1)
-            Polygon: (0, 0), (1, 0), (1, 1), (0, 1)
-            sage: [ss.opposite_edge(0,i) for i in range(4)]
-            [(1, 2), (1, 3), (1, 0), (1, 1)]
-            sage: TestSuite(ss).run()
-
-        Make sure first vertex is sent to origin::
-            sage: from flatsurf import *
-            sage: P = ConvexPolygons(QQ)
-            sage: p = P(vertices = ([(1,1),(2,1),(2,2),(1,2)]))
-            sage: s = Surface_list(QQ)
-            sage: s.add_polygon(p)
-            0
-            sage: s.change_polygon_gluings(0, [(0,2),(0,3),(0,0),(0,1)])
-            sage: s.change_base_label(0)
-            sage: ts = TranslationSurface(s)
-            sage: ts.standardize_polygons().polygon(0)
-            Polygon: (0, 0), (1, 0), (1, 1), (0, 1)
-        """
-        if self.is_finite():
-            if in_place:
-                if not self.is_mutable():
-                    raise ValueError("An in_place call for standardize_polygons can only be done for a mutable surface.")
-                s=self
-            else:
-                s=self.copy(mutable=True)
-            cv = {} # dictionary for non-zero canonical vertices
-            translations={} # translations bringing the canonical vertex to the origin.
-            for l,polygon in s.label_iterator(polygons=True):
-                best=0
-                best_pt=polygon.vertex(best)
-                for v in range(1,polygon.num_edges()):
-                    pt=polygon.vertex(v)
-                    if (pt[1]<best_pt[1]) or (pt[1]==best_pt[1] and pt[0]<best_pt[0]):
-                        best=v
-                        best_pt=pt
-                # We replace the polygon if the best vertex is not the zero vertex, or
-                # if the coordinates of the best vertex differs from the origin.
-                if not (best==0 and best_pt.is_zero()):
-                    cv[l]=best
-            for l,v in iteritems(cv):
-                s.set_vertex_zero(l,v,in_place=True)
-            return s
-        else:
-            assert in_place == False, "In place standardization only available for finite surfaces."
-            return TranslationSurface(LazyStandardizedPolygonSurface(self))
-
     def cmp(self, s2, limit=None):
         r"""
         Compare two surfaces. This is an ordering returning -1, 0, or 1.
@@ -234,57 +168,6 @@ class TranslationSurface(HalfTranslationSurface, DilationSurface):
         """
         from flatsurf.geometry.mappings import canonicalize_translation_surface_mapping, IdentityMapping
         return canonicalize_translation_surface_mapping(self)
-
-    def canonicalize(self, in_place=False):
-        r"""
-        Return a canonical version of this translation surface.
-
-        EXAMPLES:
-
-        We will check if an element lies in the Veech group::
-
-            sage: from flatsurf import *
-            sage: s = translation_surfaces.octagon_and_squares()
-            sage: s
-            TranslationSurface built from 3 polygons
-            sage: a = s.base_ring().gen()
-            sage: mat = Matrix([[1,2+a],[0,1]])
-            sage: s1 = s.canonicalize()
-            sage: s1.underlying_surface().set_immutable()
-            sage: s2 = (mat*s).canonicalize()
-            sage: s2.underlying_surface().set_immutable()
-            sage: s1.cmp(s2) == 0
-            True
-            sage: hash(s1) == hash(s2)
-            True
-        """
-        # Old version
-        #return self.canonicalize_mapping().codomain()
-        if in_place:
-            if not self.is_mutable():
-                raise ValueError("canonicalize with in_place=True is only defined for mutable translation surfaces.")
-            s=self
-        else:
-            s=self.copy(mutable=True)
-        if not s.is_finite():
-            raise ValueError("canonicalize is only defined for finite translation surfaces.")
-        ret=s.delaunay_decomposition(in_place=True)
-        s.standardize_polygons(in_place=True)
-        ss=s.copy(mutable=True)
-        labels={label for label in s.label_iterator()}
-        labels.remove(s.base_label())
-        for label in labels:
-            ss.underlying_surface().change_base_label(label)
-            if ss.cmp(s)>0:
-                s.underlying_surface().change_base_label(label)
-        # We now have the base_label correct.
-        # We will use the label walker to generate the canonical labeling of polygons.
-        w=s.walker()
-        w.find_all_labels()
-        s.relabel(w.label_dictionary(), in_place=True)
-        # Set immutable
-        s.underlying_surface().set_immutable()
-        return s
 
     def rel_deformation(self, deformation, local=False, limit=100):
         r"""
@@ -476,7 +359,7 @@ class TranslationSurface(HalfTranslationSurface, DilationSurface):
 
 class MinimalTranslationCover(Surface):
     r"""
-    Do not use translation_surface.MinimalTranslationCover. Use 
+    Do not use translation_surface.MinimalTranslationCover. Use
     minimal_cover.MinimalTranslationCover instead. This class is being
     deprecated.
     """

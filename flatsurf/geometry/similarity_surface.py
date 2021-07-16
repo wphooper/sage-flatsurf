@@ -2421,3 +2421,229 @@ class SimilaritySurface(SageObject):
         S = S.eliminateMarkedPoints().surface()
         S.delaunay()
         return from_pyflatsurf(S)
+
+    def cmp(self, s2, limit=None):
+        r"""
+        Compare two similarity surfaces. This is an ordering returning -1, 0, or 1.
+
+        Two surfaces `s1` and `s2` will be considered equal if and only if
+        there is a bijection `f` from the labels of `s1` to the labels of `s2`
+        such that:
+
+        * the bijection sends the base label of `s1` to the base label of `s2`
+        * the polygon associated to label `l` from `s1` is the same polygon as
+          the polygon associated to label `f(l)` on `s2`.
+        * the polygons are glued in the same way.
+
+        If the two surfaces are infinite, we just examine the first limit polygons.
+        """
+        if self.is_finite():
+            if s2.is_finite():
+                assert limit is None, "Limit only enabled for finite surfaces."
+
+                #print("comparing number of polygons")
+                sign = self.num_polygons()-s2.num_polygons()
+                if sign>0:
+                    return 1
+                if sign<0:
+                    return -1
+                #print("comparing polygons")
+                lw1=self.walker()
+                lw2=s2.walker()
+                for p1,p2 in zip(lw1.polygon_iterator(), lw2.polygon_iterator()):
+                    # Uses Polygon.cmp:
+                    ret = p1.cmp(p2)
+                    if ret != 0:
+                        return ret
+                # Polygons are identical. Compare edge gluings.
+                #print("comparing edge gluings")
+                for pair1,pair2 in zip(lw1.edge_iterator(), lw2.edge_iterator()):
+                    l1,e1 = self.opposite_edge(pair1)
+                    l2,e2 = s2.opposite_edge(pair2)
+                    num1 = lw1.label_to_number(l1)
+                    num2 = lw2.label_to_number(l2)
+                    ret = (num1 > num2) - (num1 < num2)
+                    if ret:
+                        return ret
+                    ret = (e1 > e2) - (e1 < e2)
+                    if ret:
+                        return ret
+                return 0
+            else:
+                # s1 is finite but s2 is infinite.
+                return -1
+        else:
+            if s2.is_finite():
+                # s1 is infinite but s2 is finite.
+                return 1
+            else:
+                # both surfaces are infinite.
+                lw1=self.walker()
+                lw2=s2.walker()
+                count = 0
+                for (l1,p1),(l2,p2) in zip(lw1.label_polygon_iterator(), lw2.label_polygon_iterator()):
+                    # Uses Polygon.cmp:
+                    ret = p1.cmp(p2)
+                    if ret != 0:
+                        print("Polygons differ")
+                        return ret
+                    # If here the number of edges should be equal.
+                    for e in range(p1.num_edges()):
+                        ll1,ee1 = self.opposite_edge(l1,e)
+                        ll2,ee2 = s2.opposite_edge(l2,e)
+                        num1 = lw1.label_to_number(ll1, search=True, limit=limit)
+                        num2 = lw2.label_to_number(ll2, search=True, limit=limit)
+                        ret = (num1 > num2) - (num1 < num2)
+                        if ret:
+                            return ret
+                        ret = (ee1 > ee2) - (ee1 < ee2)
+                        if ret:
+                            return ret
+                    if count >= limit:
+                        break
+                    count += 1
+                return 0
+
+    def canonicalize(self, cellular = False, group = None):
+        r"""
+        Return a "canonical" representative of the orbit of the surface over
+        the provided group. The result will be a surface of the same type,
+        satisfying the property that when the surface is deformed under the
+        given group and if polygons are joined or split, the canonicalized
+        surface remains the same.
+
+        The `group` parameter must be one of "translation", "half_translation",
+        "half_dilation", "dilation" or "similarity". If `group` is not
+        provided the group is determined by the type of surface.
+
+        EXAMPLES::
+
+            sage: from flatsurf import *
+            sage: s = dilation_surfaces.genus_two_square(1/3, 1/3, 1/3, 1/3)
+
+            sage: s1 = s.canonicalize(group='similarity')
+            sage: m = matrix([[1, -1], [1,  1]])
+            sage: s2 = s.copy(mutable=True)
+            sage: s2.apply_matrix(m, in_place=True)
+            DilationSurface built from 3 polygons
+            sage: s2.join_polygons(1, 1)
+            DilationSurface built from 2 polygons
+            sage: s2 = (m*s).canonicalize(group='similarity')
+            sage: s1 == s2
+            True
+
+            sage: ss = s.triangulate()
+            sage: s1 = s.canonicalize(cellular=True, group='similarity')
+            sage: s2 = (m*s).canonicalize(cellular=True, group='similarity')
+            sage: s1 == s2
+            True
+        """
+        if not self.is_finite():
+            raise ValueError("canonicalize is only defined for finite translation surfaces.")
+
+        from .translation_surface import TranslationSurface
+        from .half_translation_surface import HalfTranslationSurface
+        from .dilation_surface import DilationSurface
+        from .half_dilation_surface import HalfDilationSurface
+        from .similarity_surface import SimilaritySurface
+
+        if group is None:
+            if isinstance(self, TranslationSurface):
+                group = 'translation'
+            elif isinstance(self, HalfTranslationSurface):
+                group = 'half_translation'
+            elif isinstance(self, DilationSurface):
+                group = 'dilation'
+            elif isinstance(self, HalfDilationSurface):
+                group = 'half_dilation'
+            else:
+                group = 'similarity'
+
+        if cellular:
+            s = self
+            pd = {} # polygon standardization dictionary
+            for label,p in s.label_iterator(polygons=True):
+                pp,d = p.standardize(reindex=True, group=group)
+                try:
+                    l = pd[pp]
+                except KeyError:
+                    l = []
+                    pd[pp] = l
+                for i,g in d.items():
+                    l.append((label, i, g))
+
+            # Find the minimal polygon with the smallest length list attached
+            it = iter(pd.items())
+            min_pp,min_l = next(it)
+            for pp,l in it:
+                if len(l) < len(min_l) or (len(l)==len(min_l) and pp.cmp(min_pp)<0):
+                    min_pp = pp
+                    min_l = l
+
+            if isinstance(self, TranslationSurface):
+                surface_group = 'translation'
+            elif isinstance(self, HalfTranslationSurface):
+                surface_group = 'half_translation'
+            elif isinstance(self, DilationSurface):
+                surface_group = 'dilation'
+            elif isinstance(self, HalfDilationSurface):
+                surface_group = 'half_dilation'
+            else:
+                surface_group = 'similarity'
+
+            def surface_from_data(label0, v0, g0):
+                # Return the image of the surface under the derivative of g0 with:
+                # * the base label changed to label0,
+                # * the polygon associated to label0 reindexed so that vertex v0
+                #   becomes the new vertex 0.
+                # * other polygons relabeled so that edge zero is the quickest
+                #   path back to the base_label (according to a LabelWalker)
+                # * other polgyons standardized, not allowing for reindexing.
+                s0 = s.copy(mutable=True)
+                s0.apply_matrix(g0.derivative(), in_place=True)
+                s0.set_vertex_zero(label0, v0, in_place=True)
+                assert s0.polygon(label0) == min_pp, 'Bug: Base polygon not standardized!'
+                us0 = s0.underlying_surface()
+                us0.change_base_label(label0)
+                walker = us0.walker()
+                # The code involving the walker is somewhat delicate as it depends on how the
+                # label walker works. We are making changes to the surface while simultaneously
+                # walking around it!
+                assert len(walker.label_dictionary())==1
+                wit = walker.label_polygon_iterator()
+                next(wit) # Skip the base label
+                for label,polygon in wit:
+                    v = walker.edge_back(label)
+                    s0.set_vertex_zero(label, v, in_place=True)
+                    polygon = s0.polygon(label).standardize(group=surface_group)[0]
+                    us0.change_polygon(label, polygon)
+                TestSuite(s0).run()
+                return s0
+
+            it = iter(min_l)
+            data = next(it)
+            min_data = [data]
+            min_s = surface_from_data(*data)
+            TestSuite(min_s).run()
+            for data in it:
+                s0 = surface_from_data(*data)
+                sign = s0.cmp(min_s)
+                if sign < 0:
+                    min_s = s0
+                    min_data = [data]
+                elif sign == 0:
+                    min_data.append(data)
+            # The min_data can be used to construct all the maps to the
+            # standardized surface.
+
+            walker = min_s.walker()
+            walker.find_all_labels()
+            relabel_dict = walker.label_dictionary()
+            standardized_s,success = min_s.relabel(relabel_dict)
+            assert success, 'Failure in relabeling!'
+            return standardized_s
+        else:
+            # cellular = False, so we run delunay decomposition first.
+            s1 = self.delaunay_decomposition()
+            s2 = s1.canonicalize(cellular=True, group = group)
+            return s2

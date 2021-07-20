@@ -2504,7 +2504,8 @@ class SimilaritySurface(SageObject):
                     count += 1
                 return 0
 
-    def canonicalize(self, cellular = False, group = None):
+    def canonicalize(self, group = None, cellular = False,
+                     cellular_data = False, derivatives = False):
         r"""
         Return a "canonical" representative of the orbit of the surface over
         the provided group. The result will be a surface of the same type,
@@ -2512,9 +2513,12 @@ class SimilaritySurface(SageObject):
         given group and if polygons are joined or split, the canonicalized
         surface remains the same.
 
+
+
         The `group` parameter must be one of "translation", "half_translation",
         "half_dilation", "dilation" or "similarity". If `group` is not
         provided the group is determined by the type of surface.
+
 
         EXAMPLES::
 
@@ -2581,15 +2585,21 @@ class SimilaritySurface(SageObject):
                     min_l = l
 
             if isinstance(self, TranslationSurface):
+                SurfaceType = TranslationSurface
                 surface_group = 'translation'
             elif isinstance(self, HalfTranslationSurface):
+                SurfaceType = HalfTranslationSurface
                 surface_group = 'half_translation'
             elif isinstance(self, DilationSurface):
+                SurfaceType = DilationSurface
                 surface_group = 'dilation'
             elif isinstance(self, HalfDilationSurface):
+                SurfaceType = HalfDilationSurface
                 surface_group = 'half_dilation'
             else:
+                SurfaceType = SimilaritySurface
                 surface_group = 'similarity'
+            change_type = SurfaceType != type(s)
 
             def surface_from_data(label0, v0, g0):
                 # Return the image of the surface under the derivative of g0 with:
@@ -2600,10 +2610,14 @@ class SimilaritySurface(SageObject):
                 #   path back to the base_label (according to a LabelWalker)
                 # * other polgyons standardized, not allowing for reindexing.
                 s0 = s.copy(mutable=True)
-                s0.apply_matrix(g0.derivative(), in_place=True)
-                s0.set_vertex_zero(label0, v0, in_place=True)
-                assert s0.polygon(label0) == min_pp, 'Bug: Base polygon not standardized!'
+                m = g0.derivative()
                 us0 = s0.underlying_surface()
+                s0.set_vertex_zero(label0, v0, in_place=True)
+                for label, polygon in s0.label_iterator(polygons=True):
+                    if label == label0:
+                        us0.change_polygon(label, min_pp)
+                    else:
+                        us0.change_polygon(label, m*polygon)
                 us0.change_base_label(label0)
                 walker = us0.walker()
                 # The code involving the walker is somewhat delicate as it depends on how the
@@ -2617,14 +2631,15 @@ class SimilaritySurface(SageObject):
                     s0.set_vertex_zero(label, v, in_place=True)
                     polygon = s0.polygon(label).standardize(group=surface_group)[0]
                     us0.change_polygon(label, polygon)
-                TestSuite(s0).run()
+                if change_type:
+                    s0 = SurfaceType(us0)
+                #TestSuite(s0).run()
                 return s0
 
             it = iter(min_l)
             data = next(it)
             min_data = [data]
             min_s = surface_from_data(*data)
-            TestSuite(min_s).run()
             for data in it:
                 s0 = surface_from_data(*data)
                 sign = s0.cmp(min_s)
@@ -2641,9 +2656,18 @@ class SimilaritySurface(SageObject):
             relabel_dict = walker.label_dictionary()
             standardized_s,success = min_s.relabel(relabel_dict)
             assert success, 'Failure in relabeling!'
-            return standardized_s
+            if cellular_data:
+                return standardized_s, min_data
+            else:
+                return standardized_s
         else:
             # cellular = False, so we run delunay decomposition first.
             s1 = self.delaunay_decomposition()
-            s2 = s1.canonicalize(cellular=True, group = group)
-            return s2
+            s2,data = s1.canonicalize(cellular=True, cellular_data = True, group = group)
+            if derivatives:
+                derivative_list = []
+                for _,__,g in data:
+                    derivative_list.append(g.derivative())
+                return s2, derivative_list
+            else:
+                return s2

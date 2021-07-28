@@ -1307,6 +1307,249 @@ class TranslationSurfaceGenerators:
         return TranslationSurface(s)
 
     @staticmethod
+    def bouw_moller(m, n, field = None, primitive=True, symmetries=False, test=False):
+        r'''
+        Construct the Bouw-Moller surface $(Y_{m,n}, eta_{m,n})$ as described in the
+        paper:
+            * Hooper, W. P. (2013). Grid graphs and lattice surfaces. International
+              Mathematics Research Notices, 2013(12), 2657-2698.
+
+        Here `m` and `n` must be integers greater than or equal to $2$ with one
+        strictly larger.
+
+        By default the surface will be defined over an appropriate `NumberField`,
+        but a Field can be selected with the `field` parameter, which must contain
+        both `cos(pi/lcm)` and `sin(pi/lcm)`, where `lcm` is the least common
+        multiple of $m$ and $n$.
+
+        The `primitive` parameter only has an effect if `m` and `n` are even. In
+        this case if `primitive` is `True` (the default), the surface $(Y^e_{m,n},
+        eta^e_{m,n})$ is returned instead of $(Y_{m,n}, eta_{m,n})$. The surface
+        $(Y_{m,n}, eta_{m,n})$, which is returned when `primitive=False` is a double
+        cover of $(Y^e_{m,n}, eta^e_{m,n})$.
+
+        The parameter `symmetries` effects the output. If set to `True`, a pair is
+        returned consisting of the surface and a list of matrices that generate the
+        Veech group. Note that these matrices have determinant $-1$ and represent
+        affine reflections.
+
+        If the parameter `test` is set to `True` then some basic tests are performed
+        when the surface is generated. It runs the returned surface's `TestSuite`
+        and also checks that the claimed matrices are in the Veech group.
+
+        EXAMPLES::
+
+            sage: from flatsurf import *
+            sage: translation_surfaces.bouw_moller(4,6, test=True)
+            TranslationSurface built from 2 polygons
+            sage: translation_surfaces.bouw_moller(4,6, primitive=False, test=True)
+            TranslationSurface built from 4 polygons
+            sage: s, veech_group_generators = translation_surfaces.bouw_moller(5, 3, symmetries=True)
+            sage: s
+            TranslationSurface built from 5 polygons
+
+        Check Veech group elements::
+
+            sage: sc = s.canonicalize()
+            sage: for m in veech_group_generators:
+            ....:     print((m*s).canonicalize()==sc)
+            True
+            True
+            True
+        '''
+        from sage.arith.misc import gcd
+        from sage.functions.trig import cos, sin
+        from sage.matrix.constructor import matrix
+        from sage.misc.sage_unittest import TestSuite
+        from sage.rings.qqbar import number_field_elements_from_algebraics
+        from sage.symbolic.constants import pi
+
+        n = ZZ(n)
+        m = ZZ(m)
+        if not (n>=2 and m>=2 and max(m,n)>=3):
+            raise ValueError('The integers m and n must satisfy n>=2 and m>=2 and max(m,n)>=3.')
+        # Setup the field and lists containing
+        # cos(i*pi/lcm) and sin(i*pi/lcm).
+        lcm = m*n/gcd(m,n)
+
+        if field is None:
+            cos_temp = AA(cos(pi/lcm))
+            sin_temp = AA(sin(pi/lcm))
+            field, (cos_K, sin_K), phi = \
+                number_field_elements_from_algebraics([cos_temp, sin_temp], embedded=True)
+            cosine = [field.one(), cos_K]
+            sine = [field.zero(), sin_K]
+        else:
+            cosine = [field.one(), field(AA(cos(pi/lcm)))]
+            sine = [field.zero(), field(AA(sin(pi/lcm)))]
+        for _ in range(2, 2*lcm):
+            cosine.append(cosine[1]*cosine[-1]-sine[1]*sine[-1])
+            sine.append(sine[1]*cosine[-2]+cosine[1]*sine[-1])
+
+        def semiregular_polygon(a, b):
+            r'''
+            Construct the polygon $P_n(a,b)$ from section 4.2 of the
+            article "Grid Graphs and Lattice Surfaces."
+            '''
+            edges = []
+            edge_mapping = []
+            for i in range(2*n):
+                if i%2 == 0:
+                    if a == 0:
+                        edge_mapping.append(None)
+                    else:
+                        edge_mapping.append(len(edges))
+                        edges.append(a*vector(AA,[cosine[i*lcm/n], sine[i*lcm/n]])),
+                else:
+                    if b==0:
+                        edge_mapping.append(None)
+                    else:
+                        edge_mapping.append(len(edges))
+                        edges.append(b*vector(AA,[cosine[i*lcm/n], sine[i*lcm/n]]))
+            if len(edges)>2:
+                return ConvexPolygons(field)(edges=edges), edge_mapping
+            else:
+                # Bigon!
+                return None, edge_mapping
+
+        def p(k):
+            r'''
+            Return the polygon $P(k)$ from equation (6) of "Grid Graphs and
+            Lattice Surfaces."
+            '''
+            if n%2 ==1:
+                return semiregular_polygon(sine[(k+1)*lcm/m],sine[k*lcm/m])
+            elif k%2 == 0:
+                return semiregular_polygon(sine[k*lcm/m],sine[(k+1)*lcm/m])
+            else:
+                return semiregular_polygon(sine[(k+1)*lcm/m],sine[k*lcm/m])
+
+        s = Surface_list(field)
+        edge_mappings = []
+        if m%2 == 0 and n%2 == 0 and primitive:
+            k_limit = m/2
+        else:
+            k_limit = m
+        for k in range(0, k_limit):
+            pp,edge_mapping = p(k)
+            if pp: # else pp would be a bigon.
+                s.add_polygon(pp, label=k)
+            edge_mappings.append(edge_mapping)
+        for k in range(1, k_limit, 2): # Iterate through k odd
+            for i in range(1, 2*n, 2):
+                if edge_mappings[k][i] is not None:
+                    j = (i+n)%(2*n)
+                    try:
+                        s.change_edge_gluing(k, edge_mappings[k][i],
+                                             k-1, edge_mappings[k-1][j])
+                    except ValueError:
+                        # Bigon case
+                        s.change_edge_gluing(k, edge_mappings[k][i],
+                                             k, edge_mappings[k][j])
+            if k < k_limit-1:
+                for i in range(0, 2*n, 2):
+                    if edge_mappings[k][i] is not None:
+                        j = (i+n)%(2*n)
+                        try:
+                            s.change_edge_gluing(k, edge_mappings[k][i],
+                                                 k+1, edge_mappings[k+1][j])
+                        except IndexError:
+                            #Bigon case
+                            s.change_edge_gluing(k, edge_mappings[k][i],
+                                                 k, edge_mappings[k][j])
+        if m%2 == 0 and n%2 == 0 and primitive:
+            if m==2:
+                k = 0
+                for i in range(1, 2*n, 2):
+                    if edge_mappings[k][i] is not None:
+                        j = (i+n)%(2*n)
+                        s.change_edge_gluing(k, edge_mappings[k][i],
+                                             k, edge_mappings[k][j])
+            k = m/2 - 1
+            if k%2==1:
+                for i in range(0, 2*n, 2):
+                    if edge_mappings[k][i] is not None:
+                        j = (i+n)%(2*n)
+                        s.change_edge_gluing(k, edge_mappings[k][i],
+                                             k, edge_mappings[k][j])
+            else:
+                for i in range(1, 2*n, 2):
+                    if edge_mappings[k][i] is not None:
+                        j = (i+n)%(2*n)
+                        s.change_edge_gluing(k, edge_mappings[k][i],
+                                             k, edge_mappings[k][j])
+
+        try:
+            s.polygon(0)
+            s.change_base_label(0)
+        except ValueError:
+            # Polygon 0 is a bigon!
+            s.change_base_label(1)
+        s.set_immutable()
+        ts = TranslationSurface(s)
+
+        if test or symmetries:
+            A = matrix(field, [
+                [-1, -2*cosine[lcm/m]],
+                [0,  1],
+            ])
+            B = matrix(field, [
+                [-1, 2*cosine[lcm/n]],
+                [0,  1],
+            ])
+            C = matrix(field, [
+                [ 0, -1],
+                [-1,  0],
+            ])
+            E = matrix(field, [
+                [-1, 0],
+                [ 0, 1]
+            ])
+            Dmu = matrix(field, [
+                [1/sine[lcm/n], -cosine[lcm/n]/sine[lcm/n]],
+                [ 0, 1]
+            ])
+            tsc = ts.canonicalize()
+
+            if m != n:
+                if m%2!=0 or n%2!=0:
+                    mats = [
+                        matrix(ts.base_ring(), Dmu*A*~Dmu),
+                        matrix(ts.base_ring(), Dmu*B*~Dmu),
+                        matrix(ts.base_ring(), Dmu*C*~Dmu)
+                    ]
+                else:
+                    mats = [
+                        matrix(ts.base_ring(), Dmu*A*~Dmu),
+                        matrix(ts.base_ring(), Dmu*B*~Dmu),
+                        matrix(ts.base_ring(), Dmu*C*A*C*~Dmu),
+                        matrix(ts.base_ring(), Dmu*C*B*C*~Dmu)
+                    ]
+            else:
+                if m%2 == 1:
+                    mats = [
+                        matrix(ts.base_ring(), Dmu*A*~Dmu),
+                        matrix(ts.base_ring(), Dmu*C*~Dmu),
+                        matrix(ts.base_ring(), Dmu*E*~Dmu)
+                    ]
+                else:
+                    mats = [
+                        matrix(ts.base_ring(), Dmu*A*~Dmu),
+                        matrix(ts.base_ring(), Dmu*E*~Dmu),
+                        matrix(ts.base_ring(), Dmu*C*A*C*~Dmu)
+                    ]
+
+        if test:
+            TestSuite(ts).run()
+            for mat in mats:
+                assert (mat*ts).canonicalize() == tsc
+
+        if symmetries:
+            return ts, mats
+        else:
+            return ts
+
+    @staticmethod
     def from_flipper(h):
         r"""
         Build a (half-)translation surface from a flipper pseudo-Anosov.

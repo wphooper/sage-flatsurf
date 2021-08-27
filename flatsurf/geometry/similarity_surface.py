@@ -2318,15 +2318,12 @@ class SimilaritySurface(SageObject):
         For infinite surfaces we use reference equality.
         Raises a value error if the surfaces are defined over different rings.
         """
-        if not self.is_finite():
-            return self is other
         if self is other:
             return True
+        if not self.is_finite() or not other.is_finite():
+            return False
         if not isinstance(other, SimilaritySurface):
             raise TypeError
-        if not other.is_finite():
-            raise ValueError("Can not compare infinite surfaces.")
-        if self.base_ring() != other.base_ring():
             raise ValueError("Refusing to compare surfaces with different base rings.")
         if not self.is_mutable() and not other.is_mutable():
             hash1 = hash(self)
@@ -2544,7 +2541,7 @@ class SimilaritySurface(SageObject):
                 except KeyError:
                     num1 = Infinity
                 try:
-                    num2 = lw2.label_to_number(ll1)
+                    num2 = lw2.label_to_number(ll2)
                     if num2 > count:
                         num2 = Infinity
                 except KeyError:

@@ -2424,7 +2424,8 @@ class SimilaritySurface(SageObject):
 
     def cmp(self, s2, limit=None):
         r"""
-        Compare two similarity surfaces. This is an ordering returning -1, 0, or 1.
+        Compare two similarity surfaces defined over the same `base_ring`.
+        This is an ordering returning -1, 0, or 1.
 
         Two surfaces `s1` and `s2` will be considered equal if and only if
         there is a bijection `f` from the labels of `s1` to the labels of `s2`
@@ -2435,74 +2436,130 @@ class SimilaritySurface(SageObject):
           the polygon associated to label `f(l)` on `s2`.
         * the polygons are glued in the same way.
 
-        If the two surfaces are infinite, we just examine the first limit polygons.
+        If the two surfaces are infinite, we just examine the first limit polygons,
+        where `limit` is a positive integer.
+
+        Below we explain how the comparison works together with verification tests.
+        Tests are listed in the order in which they are carried out sooner. Below,
+        we consider `s1` to be smaller than `s2` if `s1.cmp(s2) < 0`.
+
+        NUMBER OF POLYGONS::
+
+        Surface `s1` is smaller than `s2` if `s1` is made of fewer polygons.
+
+            sage: from flatsurf import *
+            sage: s1 = translation_surfaces.regular_octagon()
+            sage: s2 = translation_surfaces.octagon_and_squares()
+            sage: s1.cmp(s2) < 0
+            True
+            sage: s2.cmp(s1) > 0
+            True
+
+            sage: s2 = translation_surfaces.infinite_staircase()
+            sage: s2 = s2.copy(new_field=s1.base_ring())
+            sage: s1.cmp(s2) < 0
+            True
+            sage: s2.cmp(s1) > 0
+            True
+
+        POLYGONS AND GLUINGS::
+
+        If the surfaces have the same number of polygons, then the polygons are
+        considered in the order returned by a LabelWalker (returned by
+        `s.walker()`). When reaching a new pair of polygons, if the polygons
+        differ then the result from comparing the polygons is returned. To compare
+        the :func:`flatsurf.geometry.polygon.Polygon.cmp` method is used with
+        `area=False`.
+
+        For example, in the following `s1` is smaller than `s2` because the base
+        polygon of `s1` has fewer sides than the base polygon of `s2`.
+
+            sage: s1 = translation_surfaces.square_torus()
+            sage: s2 = translation_surfaces.regular_octagon()
+            sage: s1 = s1.copy(new_field=s2.base_ring())
+            sage: s1.cmp(s2) < 0
+            True
+            sage: s2.cmp(s1) > 0
+            True
+
+        As we walk over the polygons, if the polygons are the same, we also compare the
+        gluings of the polygon. We iterate over the edge of the current polygon, and
+        check the polygon the edge is glued to. We only make a comparison if one of
+        polygons opposite the edge has been visited already in our walk over the
+        polygons. In this case, if the opposite polygons were visited at different
+        times, the polygon which was visited first belongs to the smaller surface.
+        It is possible that the polygons were visited by the walkers at the same
+        time but the number of the opposite edges are different. In this case, the
+        smaller surface is the one for which this number is smaller.
+
+        In the following example, the polygon index sets is given by `{1, 2}` and the
+        order matches the walker. Here `s1` is smaller because when the edge `0` of
+        polygon `1` is considered, in `s1` the edge is glued to polygon `1` while in
+        `s2` the edge is glued to polygon `2`.
+
+            sage: S = SymmetricGroup(2)
+            sage: s1 = translation_surfaces.origami(S('(1,2)'), S.one())
+            sage: s2 = translation_surfaces.origami(S.one(), S('(1,2)'))
+            sage: s1.cmp(s2) < 0
+            True
+            sage: s2.cmp(s1) > 0
+            True
         """
+        if not self.base_ring() == s2.base_ring():
+            raise ValueError("cmp only implemented for SimilaritySurfaces defined over the same base_ring")
         if self.is_finite():
             if s2.is_finite():
-                assert limit is None, "Limit only enabled for finite surfaces."
-
-                #print("comparing number of polygons")
+                assert limit is None, "Limit only enabled for infinite surfaces."
+                # Compare the number of polygons.
                 sign = self.num_polygons()-s2.num_polygons()
                 if sign>0:
                     return 1
                 if sign<0:
                     return -1
-                #print("comparing polygons")
-                lw1=self.walker()
-                lw2=s2.walker()
-                for p1,p2 in zip(lw1.polygon_iterator(), lw2.polygon_iterator()):
-                    # Uses Polygon.cmp:
-                    ret = p1.cmp(p2)
-                    if ret != 0:
-                        return ret
-                # Polygons are identical. Compare edge gluings.
-                #print("comparing edge gluings")
-                for pair1,pair2 in zip(lw1.edge_iterator(), lw2.edge_iterator()):
-                    l1,e1 = self.opposite_edge(pair1)
-                    l2,e2 = s2.opposite_edge(pair2)
-                    num1 = lw1.label_to_number(l1)
-                    num2 = lw2.label_to_number(l2)
-                    ret = (num1 > num2) - (num1 < num2)
-                    if ret:
-                        return ret
-                    ret = (e1 > e2) - (e1 < e2)
-                    if ret:
-                        return ret
-                return 0
+                limit = self.num_polygons()
             else:
-                # s1 is finite but s2 is infinite.
                 return -1
-        else:
-            if s2.is_finite():
-                # s1 is infinite but s2 is finite.
-                return 1
-            else:
-                # both surfaces are infinite.
-                lw1=self.walker()
-                lw2=s2.walker()
-                count = 0
-                for (l1,p1),(l2,p2) in zip(lw1.label_polygon_iterator(), lw2.label_polygon_iterator()):
-                    # Uses Polygon.cmp:
-                    ret = p1.cmp(p2)
-                    if ret != 0:
-                        print("Polygons differ")
+        elif s2.is_finite():
+            # s1 is infinite but s2 is finite.
+            return 1
+        # The limit should be a small integer, either passed in the case of infinite surfaces
+        # or set to be the common number of polygons of the two surfaces in the finite case.
+        limit = int(limit)
+        lw1=self.walker()
+        lw2=s2.walker()
+        count = 0
+        for (l1,p1),(l2,p2) in zip(lw1.label_polygon_iterator(), lw2.label_polygon_iterator()):
+            # Uses Polygon.cmp:
+            ret = p1.cmp(p2, area=False)
+            if ret != 0:
+                return ret
+            # If we've reached this point, the number of edges are equal.
+            for e in range(p1.num_edges()):
+                ll1,ee1 = self.opposite_edge(l1,e)
+                ll2,ee2 = s2.opposite_edge(l2,e)
+                try:
+                    num1 = lw1.label_to_number(ll1)
+                    if num1 > count:
+                        num1 = Infinity
+                except KeyError:
+                    num1 = Infinity
+                try:
+                    num2 = lw2.label_to_number(ll1)
+                    if num2 > count:
+                        num2 = Infinity
+                except KeyError:
+                    num2 = Infinity
+                ret = (num1 > num2) - (num1 < num2)
+                if ret:
+                    return ret
+                if num1 != Infinity:
+                    ret = (ee1 > ee2) - (ee1 < ee2)
+                    if ret:
                         return ret
-                    # If here the number of edges should be equal.
-                    for e in range(p1.num_edges()):
-                        ll1,ee1 = self.opposite_edge(l1,e)
-                        ll2,ee2 = s2.opposite_edge(l2,e)
-                        num1 = lw1.label_to_number(ll1, search=True, limit=limit)
-                        num2 = lw2.label_to_number(ll2, search=True, limit=limit)
-                        ret = (num1 > num2) - (num1 < num2)
-                        if ret:
-                            return ret
-                        ret = (ee1 > ee2) - (ee1 < ee2)
-                        if ret:
-                            return ret
-                    if count >= limit:
-                        break
-                    count += 1
-                return 0
+            count += 1
+            if count >= limit:
+                break
+        return 0
 
     def canonicalize(self, group = None, cellular = False,
                      cellular_data = False, derivatives = False):

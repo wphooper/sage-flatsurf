@@ -2562,17 +2562,35 @@ class SimilaritySurface(SageObject):
                      cellular_data = False, derivatives = False):
         r"""
         Return a "canonical" representative of the orbit of the surface over
-        the provided group. The result will be a surface of the same type,
-        satisfying the property that when the surface is deformed under the
-        given group and if polygons are joined or split, the canonicalized
-        surface remains the same.
-
-
+        the provided `group`.
 
         The `group` parameter must be one of "translation", "half_translation",
         "half_dilation", "dilation" or "similarity". If `group` is not
         provided the group is determined by the type of surface.
 
+        The result will be a surface of the same type, satisfying the property
+        that when the surface is multiplied by 2x2 matrix in the given `group`,
+        then the result will be the same. If `cellular` is True, then polygons
+        will not be split or joined, and so each polygon will be relabeled,
+        combinatorially rotated (so that the vertices and edges are relabeled
+        by a cyclic change), polygons will be relabeled, and a new `base_label`
+        will be assigned. In case `cellular` is False (the default)
+        polygons may also be joined or split, and the resulting surface will be
+        additionally invariant polygons under polygon joins and splits.
+
+        Typically just the canonicalized surface is returned. The surface will
+        have polygons labels given by {0, ..., n-1}, where there are n polygons.
+        The `base_label` will be `0`.
+
+        If `cellular` is `True` and `cellular_data` is `True`, then a pair is
+        retuirned consisting of the canonicalized surface and a data list.
+        Each element of the data list represents a cellular map with derivative
+        in the provided `group` that sends `self` to the canonicalization. Each
+        element of the data list is a triple of the form `(label, zv, m)`, where
+        `label` is the label of a polygon in `self` that is sent to the
+        base polygon of the canonicalization by such a map, `zv` is the vertex
+        of the polygon that maps to vertex `0` of the base polygon of the
+        canonicalization, and `m` is the derivative of the map.
 
         EXAMPLES::
 
@@ -2595,9 +2613,29 @@ class SimilaritySurface(SageObject):
             sage: s2 = (m*s).canonicalize(cellular=True, group='similarity')
             sage: s1 == s2
             True
+
+            sage: s = translation_surfaces.octagon_and_squares()
+            sage: cs, data = s.canonicalize(group='similarity', cellular=True, cellular_data=True)
+            sage: len(data) # Number of orientation-preserving dilational symmetries.
+            8
+            sage: from flatsurf.geometry.surface import LazyCellularCanonicalizeSurface
+            sage: from flatsurf.geometry.translation_surface import TranslationSurface
+            sage: all_match = True
+            sage: for datum in data:
+            ....:     test_surface = TranslationSurface(LazyCellularCanonicalizeSurface(s, *datum))
+            ....:     all_match = all_match and (test_surface == cs)
+            sage: all_match
+            True
+            sage: cs2 = (matrix([[2, -3], [3, 2]])*s).canonicalize(group='similarity', cellular=True)
+            sage: cs == cs2
+            True
+            sage: s = translation_surfaces.octagon_and_squares()
+            sage: cs, data = s.canonicalize(group='half_translation', cellular=True, cellular_data=True)
+            sage: len(data) # There are only 2 half-translation symmetries of s
+            2
         """
         if not self.is_finite():
-            raise ValueError("canonicalize is only defined for finite translation surfaces.")
+            raise ValueError("canonicalize is only defined for finite surfaces.")
 
         from .translation_surface import TranslationSurface
         from .half_translation_surface import HalfTranslationSurface
@@ -2618,7 +2656,11 @@ class SimilaritySurface(SageObject):
                 group = 'similarity'
 
         if cellular:
-            s = self
+            from flatsurf.geometry.surface import LazyCellularCanonicalizeSurface
+            if self.is_mutable():
+                s = self.copy(mutable=False)
+            else:
+                s = self
             pd = {} # polygon standardization dictionary
             for label,p in s.label_iterator(polygons=True):
                 pp,d = p.standardize(reindex=True, group=group)
@@ -2628,7 +2670,7 @@ class SimilaritySurface(SageObject):
                     l = []
                     pd[pp] = l
                 for i,g in d.items():
-                    l.append((label, i, g))
+                    l.append((label, i, g.derivative()))
 
             # Find the minimal polygon with the smallest length list attached
             it = iter(pd.items())
@@ -2655,47 +2697,12 @@ class SimilaritySurface(SageObject):
                 surface_group = 'similarity'
             change_type = SurfaceType != type(s)
 
-            def surface_from_data(label0, v0, g0):
-                # Return the image of the surface under the derivative of g0 with:
-                # * the base label changed to label0,
-                # * the polygon associated to label0 reindexed so that vertex v0
-                #   becomes the new vertex 0.
-                # * other polygons relabeled so that edge zero is the quickest
-                #   path back to the base_label (according to a LabelWalker)
-                # * other polgyons standardized, not allowing for reindexing.
-                s0 = s.copy(mutable=True)
-                m = g0.derivative()
-                us0 = s0.underlying_surface()
-                s0.set_vertex_zero(label0, v0, in_place=True)
-                for label, polygon in s0.label_iterator(polygons=True):
-                    if label == label0:
-                        us0.change_polygon(label, min_pp)
-                    else:
-                        us0.change_polygon(label, m*polygon)
-                us0.change_base_label(label0)
-                walker = us0.walker()
-                # The code involving the walker is somewhat delicate as it depends on how the
-                # label walker works. We are making changes to the surface while simultaneously
-                # walking around it!
-                assert len(walker.label_dictionary())==1
-                wit = walker.label_polygon_iterator()
-                next(wit) # Skip the base label
-                for label,polygon in wit:
-                    v = walker.edge_back(label)
-                    s0.set_vertex_zero(label, v, in_place=True)
-                    polygon = s0.polygon(label).standardize(group=surface_group)[0]
-                    us0.change_polygon(label, polygon)
-                if change_type:
-                    s0 = SurfaceType(us0)
-                #TestSuite(s0).run()
-                return s0
-
             it = iter(min_l)
             data = next(it)
             min_data = [data]
-            min_s = surface_from_data(*data)
+            min_s = SurfaceType(LazyCellularCanonicalizeSurface(s, *data))
             for data in it:
-                s0 = surface_from_data(*data)
+                s0 = SurfaceType(LazyCellularCanonicalizeSurface(s, *data))
                 sign = s0.cmp(min_s)
                 if sign < 0:
                     min_s = s0
@@ -2705,15 +2712,10 @@ class SimilaritySurface(SageObject):
             # The min_data can be used to construct all the maps to the
             # standardized surface.
 
-            walker = min_s.walker()
-            walker.find_all_labels()
-            relabel_dict = walker.label_dictionary()
-            standardized_s,success = min_s.relabel(relabel_dict)
-            assert success, 'Failure in relabeling!'
             if cellular_data:
-                return standardized_s, min_data
+                return min_s, min_data
             else:
-                return standardized_s
+                return min_s
         else:
             # cellular = False, so we run delunay decomposition first.
             s1 = self.delaunay_decomposition()

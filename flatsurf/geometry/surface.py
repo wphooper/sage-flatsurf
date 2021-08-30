@@ -478,12 +478,22 @@ class Surface(SageObject):
         from sage.rings.rational_field import QQ
         s=Surface(QQ,0,finite=True)
 
-        # Check for override:
-        tester.assertNotEqual(self.polygon.__func__,
-                              s.polygon.__func__,
-            "Method polygon of Surface must be overridden. The Surface is of type "+str(type(self))+".")
-        tester.assertNotEqual(self.opposite_edge.__func__, s.opposite_edge.__func__,
-            "Method opposite_edge of Surface must be overridden. The Surface is of type "+str(type(self))+".")
+        # Check for overrides:
+        try:
+            tester.assertNotEqual(self.polygon.__func__,
+                                  s.polygon.__func__,
+                "Method polygon of Surface must be overridden. The Surface is of type "+str(type(self))+".")
+        except AttributeError:
+            # Remark: If @cached_method is applied to the polygon method, then the polygon method will no
+            # longer be a function. Rather, it will be a 'sage.misc.cachefunc.CachedMethodCaller' object.
+            pass
+        try:
+            tester.assertNotEqual(self.opposite_edge.__func__, s.opposite_edge.__func__,
+                "Method opposite_edge of Surface must be overridden. The Surface is of type "+str(type(self))+".")
+        except AttributeError:
+            # Remark: If @cached_method is applied to the polygon method, then the polygon method will no
+            # longer be a function. Rather, it will be a 'sage.misc.cachefunc.CachedMethodCaller' object.
+            pass
 
         # Check not overridden:
         tester.assertEqual(self.base_ring.__func__, s.base_ring.__func__, \
@@ -1433,23 +1443,43 @@ class LabelWalker:
         """
         return len(self._labels)
 
+    def next(self):
+        r"""
+        Return the next pair `(label, e)` that will be walked across under iteration.
+
+        Returns None if the walking is finished.
+        """
+        if len(self._walk) > 0:
+            return self._walk[0]
+        else:
+            return None
+
+    def walk(self):
+        r"""
+        Walks over one edge (the one given by `next()`).
+        """
+        label,e = self._walk.popleft()
+        pair = self._s.opposite_edge(label,e)
+        opposite_label,opposite_edge = pair
+        e=e+1
+        if e < self._s.polygon(label).num_edges():
+            self._walk.appendleft((label,e))
+        if not opposite_label in self._label_dict:
+            n=len(self._labels)
+            self._labels.append(opposite_label)
+            self._label_dict[opposite_label]=n
+            self._walk.append((opposite_label,0))
+            self._label_edge_back[opposite_label]=opposite_edge
+
     def find_a_new_label(self):
         r"""
         Finds a new label, stores it, and returns it. Returns None if we have already found all labels.
         """
+        count = len(self._labels)
         while len(self._walk)>0:
-            label,e = self._walk.popleft()
-            opposite_label,opposite_edge=self._s.opposite_edge(label,e)
-            e=e+1
-            if e < self._s.polygon(label).num_edges():
-                self._walk.appendleft((label,e))
-            if not opposite_label in self._label_dict:
-                n=len(self._labels)
-                self._labels.append(opposite_label)
-                self._label_dict[opposite_label]=n
-                self._walk.append((opposite_label,0))
-                self._label_edge_back[opposite_label]=opposite_edge
-                return opposite_label
+            self.walk()
+            if len(self._labels) > count:
+                return self._labels[-1]
         return None
 
     def find_new_labels(self,n):
@@ -1499,6 +1529,191 @@ class LabelWalker:
 
     def surface(self):
         return self._s
+#####
+##### LazyCellularCanonicalizeSurface
+#####
+
+from sage.misc.cachefunc import cached_method
+from flatsurf.geometry.matrix_2x2 import similarity_from_vectors, is_similarity
+
+class LazyCellularCanonicalizeSurface(Surface):
+    r"""
+    Construct a "canonicalized" version of a similarity surface lazily.
+
+    This canonicalization is "cellular" in the sense that polygons are not changed,
+    except by relabeling, combinatorial rotation (vertex relabeling) and similarity.
+
+    Laziness is useful for finding a (say) minimal surface (perhaps in the sense of
+    :meth:`~flatsurf.geometry.similarity_surface.SimilaritySurface.cmp`)
+    from a list of surfaces: Typically surfaces will be apparently different
+    very early, making it quick to determine the minimal one.
+
+    The canonicalized surface will have labels given by a consecutive
+    sequence of non-negative integers with the `base_label` set to
+    zero.
+
+    The base polygon will differ by similarity and combinatorial rotation from
+    ```
+    p = similarity_surface.polygon(base_label)
+    ```
+    where `base_label` is either passed to the constructor or (by default)
+    `similarity_surface.base_label()`. The polygon is combinatorially rotated
+    so the `zero_vertex` of `p` becomes the vertex of the polygon with index
+    zero. The similarity applied has derivative given by the `matrix` parameter
+    and translates the `zero_vertex` to the origin. (On the resulting surface
+    all vertices of polygons with index zero will be at the origin.) Thus,
+    `matrix` must be a `2x2` matrix in the `base_ring` of `similarity_surface`.
+    If not provided, `matrix` is set to be the identity matrix.
+
+    Similarities and combinatorial rotations are also applied to the other polygons,
+    which are also relabeled. The best way to think of how these maps are chosen
+    depends on an understanding of :class:`~flatsurf.geometry.surface.LabelWalker`,
+    which does a breadth-first walk over the polygons of the surface. If `w` is a
+    `LabelWalker` on a `LazyCellularCanonicalizeSurface`, then `w` will visit the
+    polygons in the same order as the usual order on non-negative integers. Furthermore,
+    `w.edge_back(l)` will be zero for each `l > 0`. This convention explains the
+    combinatorial rotations applied to polygons. (It also implies that repeatedly
+    crossing edge zero of polygons will lead back to the base polygon.) Edges with
+    index zero will also always be parallel, of the same length as their opposite,
+    so that the edges are glued by translation. Vertex zero of polygons with label
+    `l > 0` will always be at the origin. These two facts explain the similarity
+    applied to polygons, which can also be accessed with the `similarity` method.
+
+    The :meth:`~flatsurf.geometry.surface.LazyCellularCanonicalizeSurface._test_walker`
+    method checks that the conventions above are satisfied.
+
+    EXAMPLES::
+
+        sage: from flatsurf.geometry.polyhedra import platonic_dodecahedron
+        sage: dodec = platonic_dodecahedron()[1]
+        sage: from sage.matrix.constructor import matrix
+        sage: m = matrix(QQ,[[0,-2],[2,0]])
+        sage: from flatsurf.geometry.surface import LazyCellularCanonicalizeSurface
+        sage: s = LazyCellularCanonicalizeSurface(dodec, base_label=1, zero_vertex=2, matrix=m)
+        sage: s.polygon(5)
+        Polygon: (0, 0), (-2*a, -2*a^2 + 6), (-2*a^3 + 4*a, 2), (-2*a, 2*a^2 - 2), (0, 4)
+        sage: s.opposite_edge(7, 1)
+        (6, 4)
+        sage: TestSuite(s).run()
+        sage: s.polygon(0).edge(0) == m*dodec.polygon(1).edge(2)
+        True
+    """
+
+    def __init__(self, similarity_surface, base_label = None, zero_vertex = 0,
+                 matrix = None, allow_mutable = False):
+        if similarity_surface.is_mutable() and not allow_mutable:
+            raise ValueError('Surface should be immutable.')
+        self._s = similarity_surface
+        if base_label is None:
+            base_label = self._s.base_label()
+        self._old_data = [(base_label, zero_vertex)]
+        Surface.__init__(self, self._s.base_ring(), 0, finite = self._s.is_finite())
+
+        from sage.matrix.matrix_space import MatrixSpace
+        self._matrix_space = MatrixSpace(self.base_ring(), 2, 2)
+
+        from flatsurf.geometry.polygon import ConvexPolygons
+        self._polygons = ConvexPolygons(self.base_ring())
+
+        if matrix is None:
+            matrix = self._matrix_space.one()
+        else:
+            matrix = self._matrix_space(matrix)
+
+            if not is_similarity(matrix):
+                raise ValueError('`matrix` must be a similarity.')
+
+        self._found_labels = {base_label:0}
+        self._matrices = [matrix]
+        self._walker = LabelWalker(self)
+
+    def _test_walker(self, **options):
+        r'''
+        We test the relationship of this class and `LabelWalker` as
+        laid out in the class documentation.
+        '''
+        from sage.modules.free_module import VectorSpace
+        tester = self._tester(**options)
+        w = self.walker()
+        n = min(30, self.num_polygons())
+        while len(w.label_dictionary()) < n:
+            w.find_a_new_label()
+        d = w.label_dictionary()
+        for i in range(n):
+            tester.assertEqual(
+                d[i], i,
+                f'Walker visited label {d[i]} at time {i}. (Should be equal.)')
+            tester.assertEqual(
+                self.polygon(i).vertex(0),
+                VectorSpace(self.base_ring(), 2).zero(),
+                f'Vertex 0 of polygon {i} should be the origin.')
+            if i > 0:
+                tester.assertEqual(
+                    w.edge_back(i), 0,
+                    f'Edge back of polygon {i} should be zero.')
+                ll,ee = self.opposite_edge(i,0)
+                tester.assertEqual(
+                    self.polygon(i).edge(0), -self.polygon(ll).edge(ee),
+                    f'Edge zero of polygon {i} should be the negation of its opposite ({ll},{ee}).')
+
+    def _walk(self):
+        pair = self._walker.next()
+        if pair:
+            l,e = pair
+            ll, zv = self._old_data[l]
+            ne = self._s.polygon(ll).num_edges()
+            lll, eee = self._s.opposite_edge(ll, (zv + e)%ne)
+            if lll not in self._found_labels:
+                self._found_labels[lll] = len(self._old_data)
+                self._old_data.append((lll, eee))
+                self._matrices.append(self._matrix_space(
+                    similarity_from_vectors(
+                        self._s.polygon(lll).edge(eee),
+                        -self.polygon(l).edge(e)
+                        )
+                ))
+            self._walker.walk()
+
+    @cached_method
+    def polygon(self, label):
+        r"""
+        Return the polygon with the provided label.
+        """
+        label = int(label)
+        if label < 0 or label >= self.num_polygons():
+            raise ValueError(f'Invalid label: {label}')
+        while label >= len(self._old_data):
+            self._walk()
+        l, zv = self._old_data[label]
+        p = self._s.polygon(l)
+        ne = p.num_edges()
+        m = self._matrices[label]
+        return self._polygons(
+            edges=[m*p.edge((zv+k)%ne) for k in range(ne)]
+        )
+
+    def opposite_edge(self, label, e):
+        r"""
+        Given the label ``label`` of a polygon and an edge ``e`` in that polygon
+        returns the pair (``ll``, ``ee``) to which this edge is glued.
+        """
+        label = int(label)
+        if label < 0 or label >= self.num_polygons():
+            raise ValueError(f'Invalid label: {label}')
+        while label >= len(self._old_data):
+            self._walk()
+        l, zv = self._old_data[label]
+        ne = self._s.polygon(l).num_edges()
+        ll, ee = self._s.opposite_edge(l, (e+zv)%ne)
+        ne2 = self._s.polygon(ll).num_edges()
+        while not ll in self._found_labels:
+            self._walk()
+        label2 = self._found_labels[ll]
+        zv2 = self._old_data[label2][1]
+        return (label2, (ne2 + ee - zv2) % ne2)
+
+    def num_polygons(self):
+        return self._s.num_polygons()
 
 ######
 ###### ExtraLabels
@@ -1543,7 +1758,7 @@ class ExtraLabel(SageObject):
 class LabelComparator(object):
     r"""
     Implements a total ordering on labels, which may be of varying types.
-    
+
     We use hashes, so if hash(label1) < hash(label2) we declare label1 < label2.
     For objects with the same hash, we store an arbitary ordering.
     """
@@ -1565,7 +1780,7 @@ class LabelComparator(object):
         # At this point we know label is not in lst
         lst.append(label)
         return len(lst)-1
-            
+
     def lt(self, l1, l2):
         r"""
         Return the truth value of l1 < l2.
@@ -1580,22 +1795,21 @@ class LabelComparator(object):
         if l1 == l2:
             return False
         return self._get_resolver_index(h1, l1) < self._get_resolver_index(h1, l2)
-    
+
     def le(self, l1, l2):
         r"""
         Return the truth value of l1 <= l2.
         """
         return self.lt(l1, l2) or l1 == l2
-    
+
     def gt(self, l1, l2):
         r"""
         Return the truth value of l1 > l2.
         """
         return self.lt(l2, l1)
-    
+
     def ge(self, l1, l2):
         r"""
         Return the truth value of l1 >= l2.
         r"""
         return self.lt(l2, l1) or l1 == l2
-

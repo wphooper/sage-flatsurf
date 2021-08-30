@@ -599,6 +599,46 @@ class MatrixActionOnPolygons(Action):
             return x.parent()(vertices=vertices)
         raise ValueError("Can not act on a polygon with matrix with zero determinant")
 
+class AffineActionOnPolygons(Action):
+    def __init__(self, polygons):
+        from sage.groups.affine_gps.affine_group import AffineGroup
+        R = polygons.base_ring()
+        # I think it would be better to use g(m), but using g*m:
+        Action.__init__(self, AffineGroup(2,R), polygons, True, operator.matmul)
+
+    def _act_(self, g, x):
+        r"""
+        Apply the affine transformation `g` to the polygon `x`.
+
+        The Affine non-zero determinant. If the determinant is
+        negative, then the vertices and edges are relabeled according to the
+        involutions `v \mapsto (n-v)%n` and  `e \mapsto n-1-e` respectively.
+
+        EXAMPLES::
+
+            sage: from sage.groups.affine_gps.affine_group import AffineGroup
+            sage: AG = AffineGroup(2, QQ)
+            sage: from flatsurf import *
+            sage: s = polygons.square()
+            sage: g = AG([[1,2],[3,7]],[5,6])
+            sage: g@s
+            Polygon: (5, 6), (6, 9), (8, 16), (7, 13)
+            sage: g = AG([[1,2],[3,5]],[5,6]) # Note: orientation reversing
+            sage: g@s
+            Polygon: (5, 6), (7, 11), (8, 14), (6, 9)
+        """
+        det = g.matrix().det()
+        # Note that this necessarily positive or negative because
+        # The affine group is a group.
+        if det > 0:
+            return x.parent()(vertices=[g(v) for v in x.vertices()])
+        else:
+            # Note that in this case we reverse the order
+            vertices = [g(x.vertex(0))]
+            for i in range(x.num_edges() - 1, 0, -1):
+                vertices.append(g(x.vertex(i)))
+            return x.parent()(vertices=vertices)
+
 class PolygonPosition:
     r"""
     Class for describing the position of a point within or outside of a polygon.
@@ -1989,6 +2029,7 @@ class Polygons(UniqueRepresentation, Parent):
             raise ValueError("'ring' must be a ring")
         self._ring = ring
         self.register_action(MatrixActionOnPolygons(self))
+        self.register_action(AffineActionOnPolygons(self))
 
     def base_ring(self):
         return self._ring
@@ -2096,6 +2137,9 @@ class Polygons(UniqueRepresentation, Parent):
                     raise ValueError("the polygon does not close up")
 
         return self.element_class(self, vertices, check)
+
+    def _an_element_(self):
+        return self([(2,0),(-1, 1),(1,1),(-2,0),(0,-2)])
 
 class ConvexPolygons(Polygons):
     r"""

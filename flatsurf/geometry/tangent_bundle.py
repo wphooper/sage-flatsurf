@@ -321,13 +321,13 @@ class SimilaritySurfaceTangentVector:
         r"""
         Return the new tangent vector obtained by rotating this one in the clockwise
         direction until the vector is parallel to w, and scaling so that the length matches
-        that of w. 
-        
-        Note that we always do some rotation so that if w is parallel to this vector, then a 
+        that of w.
+
+        Note that we always do some rotation so that if w is parallel to this vector, then a
         -360 degree rotation is performed.
-        
+
         The vector w must be nonzero.
-        
+
         On an infinite surface, this is potentially an infinite calculation
         so we impose a limit (representing the maximal number of polygons
         that must be rotated through.) This is the variable rotate_limit
@@ -390,13 +390,13 @@ class SimilaritySurfaceTangentVector:
         r"""
         Return the new tangent vector obtained by rotating this one in the counterclockwise
         direction until the vector is parallel to w, and scaling so that the length matches
-        that of w. 
-        
-        Note that we always do some rotation so that if w is parallel to this vector, then a 
+        that of w.
+
+        Note that we always do some rotation so that if w is parallel to this vector, then a
         360 degree rotation is performed.
-        
+
         The vector w must be nonzero.
-        
+
         On an infinite surface, this is potentially an infinite calculation
         so we impose a limit (representing the maximal number of polygons
         that must be rotated through.) This is the variable rotate_limit
@@ -547,4 +547,3 @@ class SimilaritySurfaceTangentBundle:
         point=polygon.vertex(edge_index+1)
         vector=-polygon.edge(edge_index)
         return SimilaritySurfaceTangentVector(self, polygon_label, point, vector)
-

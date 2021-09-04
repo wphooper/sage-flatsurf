@@ -1529,6 +1529,7 @@ class LabelWalker:
 
     def surface(self):
         return self._s
+
 #####
 ##### LazyCellularCanonicalizeSurface
 #####
@@ -1584,18 +1585,37 @@ class LazyCellularCanonicalizeSurface(Surface):
 
     EXAMPLES::
 
-        sage: from flatsurf.geometry.polyhedra import platonic_dodecahedron
-        sage: dodec = platonic_dodecahedron()[1]
-        sage: from sage.matrix.constructor import matrix
-        sage: m = matrix(QQ,[[0,-2],[2,0]])
+        sage: from flatsurf import *
+        sage: s0 = similarity_surfaces.example()
         sage: from flatsurf.geometry.surface import LazyCellularCanonicalizeSurface
-        sage: s = LazyCellularCanonicalizeSurface(dodec, base_label=1, zero_vertex=2, matrix=m)
-        sage: s.polygon(5)
-        Polygon: (0, 0), (-2*a, -2*a^2 + 6), (-2*a^3 + 4*a, 2), (-2*a, 2*a^2 - 2), (0, 4)
-        sage: s.opposite_edge(7, 1)
-        (6, 4)
-        sage: TestSuite(s).run()
-        sage: s.polygon(0).edge(0) == m*dodec.polygon(1).edge(2)
+        sage: m = matrix(QQ,[[0,-2],[2,0]])
+        sage: cs = LazyCellularCanonicalizeSurface(s0, base_label=1, zero_vertex=2, matrix=m)
+        sage: TestSuite(cs).run()
+        sage: s1 = SimilaritySurface(cs)
+        sage: s1.polygon(0)
+        Polygon: (0, 0), (6, -2), (6, 2)
+        sage: s1.polygon(1)
+        Polygon: (0, 0), (-6, 2), (-8, -4)
+        sage: m = cs.mapping(s1)
+        sage: TestSuite(m).run()
+        sage: # Check the label and zero_vertex works defining cs is correct:
+        sage: m.image_vertex(1, 2)
+        (0, 0)
+        sage: # Check that the matrix is correct:
+        sage: m.affine_transformation(1).matrix()[:2,:2] == mat
+        True
+        sage: im = cs.inverse_mapping(s1)
+        sage: TestSuite(im).run()
+        sage: ~m == im
+        True
+        sage: ~im == m
+        True
+        sage: from flatsurf.geometry.mappings import IdentityMapping
+        sage: id0 = IdentityMapping(s0)
+        sage: im*m == id0
+        True
+        sage: id1 = IdentityMapping(s1)
+        sage: m*im == id1
         True
     """
 
@@ -1607,6 +1627,10 @@ class LazyCellularCanonicalizeSurface(Surface):
         if base_label is None:
             base_label = self._s.base_label()
         self._old_data = [(base_label, zero_vertex)]
+        # _old_data stores a list where self_old_data[new_label] is a pair
+        # consisting of the old_label of the polygon and the index of the
+        # vertex of the old polygon that is mapped to vertex zero of the new
+        # polygon.
         Surface.__init__(self, self._s.base_ring(), 0, finite = self._s.is_finite())
 
         from sage.matrix.matrix_space import MatrixSpace
@@ -1714,6 +1738,29 @@ class LazyCellularCanonicalizeSurface(Surface):
 
     def num_polygons(self):
         return self._s.num_polygons()
+
+    def mapping(self, codomain):
+        r"""
+        Return the natural mapping from the surface that was canonicalized
+        to the codomain, which must be a `SimilaritySurface` (or a more general
+        surface type) whose underlying surface is this canonicalization.
+        """
+        if not codomain.underlying_surface() is self:
+            raise ValueError('Can only construct canonicalization_mapping to self.')
+        from .mappings import LCCSCanonicalizationMapping
+        return LCCSCanonicalizationMapping(self, codomain)
+
+    def inverse_mapping(self, domain):
+        r"""
+        Return the natural mapping from `domain`, which must be a
+        `SimilaritySurface` (or a more general
+        surface type) whose underlying surface is this canonicalization,
+        to the surface that was canonicalized.
+        """
+        if not domain.underlying_surface() is self:
+            raise ValueError('Can only construct canonicalization_mapping to self.')
+        from .mappings import LCCSCanonicalizationInverseMapping
+        return LCCSCanonicalizationInverseMapping(self, domain)
 
 ######
 ###### ExtraLabels

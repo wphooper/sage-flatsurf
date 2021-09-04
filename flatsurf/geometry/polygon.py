@@ -61,6 +61,8 @@ from sage.structure.element import Element
 from sage.categories.action import Action
 from sage.modules.free_module_element import vector
 from sage.modules.free_module import VectorSpace
+from sage.rings.ring import Ring
+from sage.structure.sage_object import SageObject
 from sage.structure.sequence import Sequence
 
 from .matrix_2x2 import angle
@@ -603,7 +605,7 @@ class AffineActionOnPolygons(Action):
     def __init__(self, polygons):
         from sage.groups.affine_gps.affine_group import AffineGroup
         R = polygons.base_ring()
-        # I think it would be better to use g(m), but using g*m:
+        # I think it would be better to use `g(m)`, but using `g @ m`:
         Action.__init__(self, AffineGroup(2,R), polygons, True, operator.matmul)
 
     def _act_(self, g, x):
@@ -3343,3 +3345,141 @@ class PolygonCreator():
         if len(self._v)<2:
             raise ValueError("Not enough vertices!")
         return ConvexPolygons(self._field)(self._w)
+
+class Partition(SageObject):
+    r'''
+    This class is represents a labeled disjoint collection of strictly convex
+    polygons defined over a common base ring.
+
+    The `container()` method allows for determining which of the polygons
+    contains a given tangent vector in the plane.
+
+    A `Partition` can be constructed from a `base_ring` and a dictionary
+    mapping labels to polygons.
+
+    EXAMPLES::
+
+        sage: from flatsurf.geometry.polygon import *
+        sage: CP = ConvexPolygons(QQ)
+        sage: poly3 = CP(vertices=[(2,2),(1,3),(0,2),(0,0)])
+        sage: poly4 = CP(vertices=[(2,0),(2,2),(0,0)])
+        sage: part2 = Partition(QQ, {3:poly3, 4:poly4})
+        sage: TestSuite(part2).run()
+        sage: part2.container(vector(QQ,(1,2)), vector(QQ,(0,1)))
+        3
+    '''
+    def __init__(self, base_ring, data):
+        if not isinstance(base_ring, Ring):
+            raise ValueError('base_ring should be a Ring')
+        self._base_ring = base_ring
+        self._data = data
+
+    def _test_polygons(self, **options):
+        r"""
+        Check that the polygons lie in `ConvexPolygons(base_ring)`.
+        """
+        tester = self._tester(**options)
+        CP = ConvexPolygons(self.base_ring())
+        for label, poly in self._data.items():
+            tester.assertEqual(poly.parent(),CP,
+                f'Polygon with label {label} doesn\'t have parent `ConvexPolygons(base_ring)`.')
+
+    def base_ring(self):
+        r'''
+        Return the base ring.
+        '''
+        return self._base_ring
+
+    def polygon(self, label):
+        r'''
+        Return the polygon associated to the given label.
+        '''
+        return self._data[label]
+
+    def plot(self):
+        r'''
+        Plot the partition.
+        '''
+        it = iter(self._data.items())
+        label,poly = next(it)
+        plt = poly.plot()
+        for label,poly in it:
+            plt += poly.plot()
+        return plt
+
+    def container(self, pt, vect):
+        r'''
+        Return the label of the polygon containing the tangent vector
+        based at `pt` and with direction provided by `vect`.
+
+        To be in a polygon, the tangent vector must be based in the interior
+        of the polygon, or based on the boundary and pointed into the polygon,
+        or tangent to the polygon and pointed in the counterclockwise
+        direction around the polygon.
+
+        EXAMPLES::
+
+            sage: from flatsurf.geometry.polygon import *
+            sage: CP = ConvexPolygons(QQ)
+            sage: poly0 = CP(vertices=[(0,0),(2,0),(2,2),(1,2)])
+            sage: poly1 = CP(vertices=[(1,2),(0,2),(0,0)])
+            sage: poly2 = CP(vertices=[(0,2),(2,2),(1,3)])
+            sage: part1 = Partition(QQ, {0:poly0, 1:poly1, 2:poly2})
+            sage: TestSuite(part1).run()
+            sage: part1.container(vector(QQ,(1,1)),vector(QQ,(1,0)))
+            0
+            sage: part1.container(vector(QQ,(3/2,2)),vector(QQ,(1,0)))
+            2
+            sage: part1.container(vector(QQ,(3/2,2)),vector(QQ,(-1,0)))
+            0
+            sage: part1.container(vector(QQ,(1,2)),vector(QQ,(1,1)))
+            2
+            sage: part1.container(vector(QQ,(1,2)),vector(QQ,(1,0)))
+            2
+            sage: part1.container(vector(QQ,(1,2)),vector(QQ,(-1,0)))
+            1
+            sage: part1.container(vector(QQ,(1,2)),vector(QQ,(-1,-2)))
+            0
+        '''
+        for label,poly in self._data.items():
+            pos = poly.get_point_position(pt)
+            if pos.is_inside():
+                if pos.is_in_interior():
+                    return label
+                elif pos.is_in_edge_interior():
+                    edge_vector = poly.edge(pos.get_edge())
+                    wp = wedge_product(edge_vector,vect)
+                    if wp > 0:
+                        return label
+                    if wp == 0:
+                        if dot_product(edge_vector,vect) > 0:
+                            return label
+                elif pos.is_vertex():
+                    v = pos.get_vertex()
+                    edge_vector = poly.edge(v)
+                    wp = wedge_product(edge_vector,vect)
+                    if wp < 0:
+                        continue
+                    if wp == 0:
+                        if dot_product(edge_vector,vect) < 0:
+                            continue
+                    edge_vector = poly.edge((v+poly.num_edges()-1)%poly.num_edges())
+                    wp = wedge_product(edge_vector,vect)
+                    if wp > 0:
+                        return label
+                else:
+                    raise ValueError('Inside polygon but not in interior, in interior of an edge, or at a vertex. This is a bug.')
+        # Searching for the container failed. Print some error:
+        if vect == vect.parent().zero():
+            raise ValueError('This method requires a non-zero `vect`.')
+        raise ValueError(f'The pair ({pt}, {vect}) does not represent a tangent vector in the partition.')
+
+    def __eq__(self, other):
+        r'''
+        Check that two partitions are identical.
+        '''
+        if not isinstance(other,Partition):
+            raise ValueError('Can only compare to other partitions.')
+        if not self.base_ring() == other.base_ring():
+            return False
+        return self._data == other._data

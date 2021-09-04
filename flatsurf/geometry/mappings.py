@@ -27,10 +27,12 @@ from flatsurf.geometry.polygon import ConvexPolygons, wedge_product
 from flatsurf.geometry.surface import Surface, Surface_list, Surface_dict, ExtraLabel
 from flatsurf.geometry.similarity_surface import SimilaritySurface
 
+from sage.groups.affine_gps.affine_group import AffineGroup
+from sage.matrix.constructor import matrix
 from sage.rings.infinity import Infinity
 from sage.structure.sage_object import SageObject
 
-class SurfaceMapping:
+class SurfaceMapping(SageObject):
     r"""Abstract class for any mapping between surfaces."""
 
     def __init__(self, domain, codomain):
@@ -51,25 +53,50 @@ class SurfaceMapping:
 
     def is_invertible(self):
         r"""Return true if this mapping is invertible."""
+        # Maps are not invertible by default
         return False
+
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is affine in local coordinates.
+
+        Note that this requires that the map is affine at points in the
+        interiors of edges.
+        """
+        # Maps are not locally affine by default
+        return False
+
+    def is_cellular(self):
+        r"""
+        Return `True` if the map is cellular, i.e., polygons defining the
+        surface in the domain are mapped bijectively to polygons in the
+        codomain.
+        """
+        # Maps are not cellular by default.
+        return False
+
+    def is_orientation_preserving(self):
+        r"""
+        Return `True` if the mapping is orientation-preserving and
+        `False` if not.
+
+        By default we return `True`.
+        """
+        return True
 
     def __invert__(self):
         r"""
         Return the inverse mapping.
 
-        Raises a NotImplementedError if the map is not invertible.
+        Raises a NotImplementedError by default.
         """
-        if self.is_invertible():
-            return InverseMapping(self)
-        else:
-            raise NotImplementedError('This SurfaceMapping is not invertible')
+        raise NotImplementedError('__invert__ has not been implemented.')
 
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        raise NotImplementedError
-
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the inverse of the mapping to the provided vector."""
+    def push_vector_forward(self,tangent_vector, ring=None):
+        r"""
+        Applies the mapping to the provided vector. If the ring parameter
+        is set, then the output will be a tangent vector in the provided ring.
+        """
         raise NotImplementedError
 
     def __mul__(self,other):
@@ -79,112 +106,60 @@ class SurfaceMapping:
     def __rmul__(self,other):
         return SurfaceMappingComposition(self,other)
 
-class InverseMapping(SurfaceMapping):
-    r"""
-    Construct the inverse of an invertible mapping.
+    def __call__(self, x, ring=None):
+        from flatsurf.geometry.tangent_bundle import SimilaritySurfaceTangentVector
+        if isinstance(x, SimilaritySurfaceTangentVector):
+            return self.push_vector_forward(x, ring=ring)
 
-    EXAMPLES::
-        sage: from flatsurf import *
-        sage: s = translation_surfaces.regular_octagon()
-        sage: m = s.triangulation_mapping()
-        sage: type(m)
-        <class 'flatsurf.geometry.mappings.SurfaceMappingComposition'>
-        sage: len(m.factors())
-        5
-        sage: t = m*~m
-        sage: v = t.domain().tangent_vector(
-        ....:    t.domain().base_label(),
-        ....:    (0,0),
-        ....:    t.domain().polygon(t.domain().base_label()).edge(0)
-        ....: )
-        sage: t.push_vector_forward(v) == v
-        True
-    """
-    def __init__(self, mapping):
-        if not mapping.is_invertible():
-            raise ValueError('Can only construct an InverseMapping from a invertible SurfaceMapping.')
-        self._m = mapping
-        SurfaceMapping.__init__(self, self._m._codomain, self._m._domain)
+    def __eq__(self, other):
+        if self is other:
+            return True
+        if self.domain() != other.domain():
+            return False
+        if self.codomain() != other.codomain():
+            return False
+        l = self._domain.base_label()
+        p = self._domain.polygon(l)
+        pt = p.vertex(0)
+        v1 = p.edge(0)
+        tv1_self = self._domain.tangent_vector(l, pt, v1)
+        tv1_other = other._domain.tangent_vector(l, pt, v1)
+        if self.push_vector_forward(tv1_self) != other.push_vector_forward(tv1_other):
+            return False
+        v2 = - p.edge(p.num_edges()-1)
+        tv2_self = self._domain.tangent_vector(l, pt, v2)
+        tv2_other = other._domain.tangent_vector(l, pt, v2)
+        if self.push_vector_forward(tv2_self) != other.push_vector_forward(tv2_other):
+            return False
+        if matrix([v1,v2]).det() == 0:
+            raise ValueError('Base polygon of self.domain() is not strictly convex!')
+        if self.is_locally_affine() and other.is_locally_affine():
+            # If two tangent vectors based at the same point are linear
+            # independent and have the same image under locally affine
+            # maps, then the maps are the same!
+            return True
+        raise NotImplemented('Comparison of mappings is not fully implemented unless both maps are locally affine.')
 
-    def push_vector_forward(self, tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        return self._m.pull_vector_back(tangent_vector)
+    def __hash__(self):
+        if self.is_locally_affine():
+            l = self._domain.base_label()
+            p = self._domain.polygon(l)
+            pt = p.vertex(0)
+            v1 = p.edge(0)
+            iv1 = self.push_vector_forward(
+                self._domain.tangent_vector(l, pt, v1)
+            )
+            v2 = - p.edge(p.num_edges()-1)
+            if matrix([v1,v2]).det() == 0:
+                raise ValueError('Base polygon of domain() is not strictly convex!')
+            iv2 = self.push_vector_forward(
+                self._domain.tangent_vector(l, pt, v2)
+            )
+            return 23 * hash(self.domain()) + 47 * hash(self.codomain()) + \
+                173 * hash(iv1) + 59 * hash(iv2)
+        else:
+            raise NotImplemented('Hash is only implemented for locally affine maps.')
 
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the pullback mapping to the provided vector."""
-        return self._m.push_vector_forward(tangent_vector)
-
-    def is_invertible(self):
-        r"""Return true to indicate this mapping is invertible."""
-        return True
-
-    def __invert__(self):
-        r"""
-        Return the inverse mapping.
-        """
-        return self._m
-
-    def __str__(self):
-        return f'Inverse of {str(self._m)}'
-
-    def __repr__(self):
-        return f'Inverse of {repr(self._m)}'
-
-
-#class FinitelyPerturbedSurface(Surface):
-#    def __init__(self, surface, polygon_dictionary=None, glue_dictionary=None, base_label=None, ring=None):
-#        r"""
-#
-#        Warning: No checks are made to make sure the surface is reasonable.
-#
-#        PARAMETERS::
-#            surface: The surface this is based on.
-#            polygon_dictionary: A dictionary mapping labels to polygons which will override whatever was on the original surface.
-#            glue_dictionary: A dictionary mapping edges to edges, which will override whatever was on the original surface. It will automatically be made symmetric.
-#            base_label: A label representing the base_label on the new surface.
-#            ring: A new ring containing the vertices.
-#        """
-#        self._s=surface
-#        if polygon_dictionary is None:
-#            self._pdict={}
-#        else:
-#            self._pdict=dict(polygon_dictionary)
-#        self._gdict={}
-#        if not glue_dictionary is None:
-#            for edge1,edge2 in iteritems(glue_dictionary):
-#                self._gdict[edge1]=edge2
-#                self._gdict[edge2]=edge1
-#        if base_label is None:
-#            self._base_label = surface.base_label()
-#        else:
-#            self._base_label = base_label
-#        if ring is None:
-#            self._ring = surface.base_ring()
-#        else:
-#            self._ring = ring
-#        self._is_finite = surface.is_finite()
-#        Surface.__init__(self, )
-
-#    def base_ring(self):
-#        return self._ring
-
-#    def base_label(self):
-#        return self._base_label
-
-#    def polygon(self, lab):
-#        p = self._pdict.get(lab)
-#        if p is None:
-#            return self._s.polygon(lab)
-#        return p
-
-#    def opposite_edge(self, p, e):
-#        edge = self._gdict.get((p,e))
-#        if edge is None:
-#            return self._s.opposite_edge(p,e)
-#        return edge
-
-#    def is_finite(self):
-#        return self._is_finite
 
 class SurfaceMappingComposition(SurfaceMapping):
     r"""
@@ -217,12 +192,6 @@ class SurfaceMappingComposition(SurfaceMapping):
             tangent_vector = mapping.push_vector_forward(tangent_vector)
         return tangent_vector
 
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the inverse of the mapping to the provided vector."""
-        for mapping in reversed(self._m):
-            tangent_vector = mapping.pull_vector_back(tangent_vector)
-        return tangent_vector
-
     def factors(self):
         r"""
         Return the factors of the map as a tuple ordered in the order of the application.
@@ -236,6 +205,49 @@ class SurfaceMappingComposition(SurfaceMapping):
             if not mapping.is_invertible():
                 return False
         return True
+
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is known to be affine in local coordinates.
+
+        We return True if all the maps in the composition are locally affine.
+        """
+        for mapping in self._m:
+            if not mapping.is_locally_affine():
+                return False
+        return True
+
+    def is_cellular(self):
+        r"""
+        Return `True` if the map is known to be cellular.
+
+        That is, polygons defining the surface in the domain are mapped
+        bijectively to polygons in the codomain.
+
+        We return `True` if all the maps being composed are cellular.
+        """
+        for mapping in self._m:
+            if not mapping.is_cellular():
+                return False
+        return True
+
+    def is_orientation_preserving(self):
+        r"""
+        Return `True` if the mapping is orientation-preserving and
+        `False` if not.
+
+        By default we return `True`.
+        """
+        return True
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+
+        Raises a NotImplementedError by default.
+        """
+        raise NotImplementedError('__invert__ has not been implemented.')
+
 
     def __invert__(self):
         r"""
@@ -254,26 +266,212 @@ class SurfaceMappingComposition(SurfaceMapping):
     def __repr__(self):
         return f'Composition of {len(self._m)} surface mappings.'
 
-class IdentityMapping(SurfaceMapping):
+class CellularMapping(SurfaceMapping):
+    r"""Abstract class for a cellular mapping between surfaces.
+
+    A cellular mapping is one that sends the polygons making up
+    the domain of the surface to polygons making up the codomain
+    of the surface.
+    """
+    def __init__(self, domain, codomain, ring = None, locally_affine = False):
+        r"""
+        Construct a CellularMapping. Note this class is abstract.
+
+        Parameters are the domain surface, the codomain surface, the `ring` such
+        that all maps between polygons are restrictions of affine maps defined
+        over the given `ring`.
+        """
+        if ring is None:
+            if domain.base_ring() == codomain.base_ring():
+                self._ring = domain.base_ring()
+            else:
+                from sage.structure.element import get_coercion_model
+                cm = get_coercion_model()
+                self._ring = cm.common_parent(domain.base_ring(), codomain.base_ring())
+        else:
+            if not ring.has_coerce_map_from(domain.base_ring()):
+                raise ValueError(
+                    'The ring used must have a coersion from the base ring of the domain surface.'
+                )
+            self._ring = ring
+        self._locally_affine = locally_affine
+        self._codomain_tb = codomain.tangent_bundle(ring)
+        SurfaceMapping.__init__(self, domain, codomain)
+
+    # Implement the following two methods:
+    def image_vertex(self, domain_label, domain_vertex):
+        r"""
+        The pair `(domain_label, domain_vertex)` determines a vertex
+        of a polygon. This maps to a vertex of a polygon in the codomain,
+        and the corresponding pair is returned.
+        """
+        raise NotImplementedError
+
+    def affine_transformation(self, domain_label):
+        r"""
+        Return the affine transformation carrying the polygon
+        with label `domain_label` to the image polygon.
+
+        The returned element should be in the AffineGroup over
+        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
+        """
+        raise NotImplementedError
+
+    def ring(self):
+        return self._ring
+
+    def affine_group(self):
+        return AffineGroup(2, self._ring)
+
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is affine in local coordinates.
+
+        Note that this requires that the map is affine at points in the
+        interiors of edges.
+        """
+        return self._locally_affine
+
+    def is_cellular(self):
+        r"""
+        Return `True` if the map is known to be cellular.
+
+        That is, polygons defining the surface in the domain are mapped
+        bijectively to polygons in the codomain.
+        """
+        return True
+
+    def _test_vertices(self, **options):
+        r"""
+        Check that the map sends vertices to the vertices it claims it does.
+        """
+        tester = self._tester(**options)
+        count = 0
+        for l in self.domain().label_iterator():
+            p = self.domain().polygon(l)
+            ne = p.num_edges()
+            g = self.affine_transformation(l)
+            ll = self.image_vertex(l,0)[0]
+            pp = self.codomain().polygon(ll)
+            tester.assertEqual(ne, pp.num_edges(),
+                f'A cellular map can not send a polygon with {ne} edges to one with {pp.num_edges()}! Domain label is {l}.')
+            for v in range(ne):
+                vv = self.image_vertex(l,v)[1]
+                tester.assertEqual(g(p.vertex(v)), pp.vertex(vv),
+                    f'The map is supposed to send vertex ({l},{v}) to ({ll}, {vv}), but does not.')
+            count += 1
+            if (not self.domain().is_finite()) and count >= 30:
+                break
+
+    def image_edge(self, domain_label, domain_edge):
+        r"""
+        Return the pair
+        """
+        if self.is_orientation_preserving():
+            return self.image_vertex(domain_label, domain_edge)
+        else:
+            ne = self.domain().polygon(domain_label).num_edges()
+            return self.image_vertex(domain_label, (domain_edge+1)%ne)
+
+    def affine_transformation(self, domain_label):
+        r"""
+        Return the affine transformation carrying the polygon
+        with label `domain_label` to the image polygon.
+
+        The returned element should be in the AffineGroup over
+        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
+        """
+        raise NotImplementedError
+
+    def push_vector_forward(self, tangent_vector, ring=None):
+        r"""
+        Applies the mapping to the provided vector.
+        """
+        domain_label = tangent_vector.polygon_label()
+        codomain_label = self.image_vertex(domain_label,0)[0]
+        at = self.affine_transformation(domain_label)
+        if ring is None:
+            return self._codomain_tb(
+                codomain_label,
+                at(tangent_vector.point()),
+                at.matrix()[:2,:2]*tangent_vector.vector()
+            )
+        else:
+            return self.codomain().tangent_bundle(ring)(
+                codomain_label,
+                at(tangent_vector.point()),
+                at.matrix()[:2,:2]*tangent_vector.vector()
+            )
+
+    def _test_affine_along_edges(self, **options):
+        r"""
+        Check that the map is cellular: i.e., that it sends polygons
+        to polygons.
+        """
+        tester = self._tester(**options)
+        count = 0
+        AG = self.affine_group()
+        for l,e in self.domain().edge_iterator():
+            g = self.affine_transformation(l)
+            ll, ee = self.domain().opposite_edge(l,e)
+            gg = self.affine_transformation(ll)
+            t1 = self.domain().edge_transformation(l, e)
+            image_l,image_e = self.image_edge(l, e)
+            t2 = self.codomain().edge_transformation(image_l, image_e)
+            tester.assertEqual(gg*AG(t1), AG(t2)*g,
+                f'The mapping is not affine along edge ({l},{e}).')
+            count += 1
+            if (not self.domain().is_finite()) and count >= 30:
+                break
+
+class IdentityMapping(CellularMapping):
     r"""
     Construct an identity map between two "equal" surfaces.
+
+    Surfaces should have the same labels, the same polygons, and the same
+    gluings, but the surfaces may be defined over slightly different rings.
+    The map will be defined over the common parent.
+
+    EXAMPLES::
+
+        sage: from flatsurf import *
+        sage: s1 = translation_surfaces.regular_octagon()
+        sage: s2 = s1.copy(new_field=AA)
+        sage: from flatsurf.geometry.mappings import IdentityMapping
+        sage: m = IdentityMapping(s1, s2)
+        sage: m.ring() == s2.base_ring()
+        True
+        sage: TestSuite(m).run()
+
+        sage: m2 = IdentityMapping(s1, s1)
+        sage: TestSuite(m2).run()
     """
-    def __init__(self, domain, codomain):
-        SurfaceMapping.__init__(self, domain, codomain)
+    def __init__(self, domain, codomain = None, ring = None):
+        if codomain is None:
+            codomain = domain
+        CellularMapping.__init__(self, domain, codomain, ring=ring, locally_affine = True)
+
+    def _test_equality_of_domain_and_codomain(self, **options):
+        r"""
+        Check that the map is cellular: i.e., that it sends polygons
+        to polygons.
+        """
+        tester = self._tester(**options)
+        s1 = self.domain()
+        s2 = self.codomain()
+        if s1.base_ring() != s2.base_ring():
+            r = self.ring()
+            if s1 != r:
+                s1 = s1.copy(new_field = r)
+            if s2 != r:
+                s2 = s2.copy(new_field = r)
+        tester.assertEqual(s1, s2,
+                f'The domain and codomain must be equal in the identity map up to a change of base_ring.')
 
     def push_vector_forward(self,tangent_vector):
         r"""Applies the mapping to the provided vector."""
         ring = tangent_vector.bundle().base_ring()
         return self._codomain.tangent_vector( \
-            tangent_vector.polygon_label(), \
-            tangent_vector.point(), \
-            tangent_vector.vector(), \
-            ring = ring)
-
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the pullback mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        return self._domain.tangent_vector( \
             tangent_vector.polygon_label(), \
             tangent_vector.point(), \
             tangent_vector.vector(), \
@@ -289,70 +487,131 @@ class IdentityMapping(SurfaceMapping):
         """
         return self
 
-class MatrixListDeformedSurface(Surface):
-    r"""
-    Apply a different matrix to each polygon in the surface.
-    Here matrix_function is a python function mapping labels to 2x2 matrices with positive determinant.
-    """
-    def __init__(self, surface, matrix_function, ring=None):
-        self._s=surface
-        self._m=matrix_function
-        if ring is None:
-            self._base_ring = self._s.base_ring()
-        else:
-            self._base_ring=ring
-        self._P = ConvexPolygons(self._base_ring)
-        Surface.__init__(self)
+    def image_vertex(self, domain_label, domain_vertex):
+        r"""
+        The pair `(domain_label, domain_vertex)` determines a vertex
+        of a polygon. This maps to a vertex of a polygon in the codomain,
+        and the corresponding pair is returned.
+        """
+        return (domain_label, domain_vertex)
 
-    def base_ring(self):
-        return self._base_ring
 
-    def base_label(self):
-        return self._s.base_label()
+    def affine_transformation(self, domain_label):
+        r"""
+        Return the affine transformation carrying the polygon
+        with label `domain_label` to the image polygon.
 
-    def polygon(self, lab):
-        p = self._s.polygon(lab)
-        edges = [ self._m(lab) * p.edge(e) for e in range(p.num_edges())]
-        return self._P(edges)
+        The returned element should be in the AffineGroup over
+        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
+        """
+        return self.affine_group().one()
 
-    def opposite_edge(self, p, e):
-        return self._s.opposite_edge(p,e)
+class LCCSCanonicalizationMapping(CellularMapping):
+    r'''
+    This class represents the natural mapping from a surface to its
+    :class:`~flatsurf.geometry.surface.LazyCellularCanonicalizeSurface`.
 
-    def is_finite(self):
-        return self._s.is_finite()
+    Typically you would get this map from the
+    :meth:`~flatsurf.geometry.surface.LazyCellularCanonicalizeSurface.canonicalization_mapping`
+    and tests are in that function declaration.
+    '''
+    def __init__(self, lccs, codomain):
+        from .surface import LazyCellularCanonicalizeSurface
+        # lccs should be the The LazyCellularCanonicalizeSurface
+        if not isinstance(lccs, LazyCellularCanonicalizeSurface):
+            raise ValueError('Parameter `lccs` must be an instance of LazyCellularCanonicalizeSurface.')
+        self._lccs = lccs # The LazyCellularCanonicalizeSurface
+        CellularMapping.__init__(self, self._lccs._s, codomain, locally_affine = True)
 
-class MatrixListDeformedSurfaceMapping(SurfaceMapping):
-    r"""
-    This mapping applies a possibly different linear matrix to each polygon.
-    The matrix is determined by the matrix_function which should be a python
-    object.
-    """
-    def __init__(self, s, matrix_function, ring=None):
-        codomain = MatrixListDeformedSurface(s,matrix_function,ring = ring)
-        self._m=matrix_function
-        SurfaceMapping.__init__(self, s, codomain)
+    def image_vertex(self, domain_label, domain_vertex):
+        r"""
+        The pair `(domain_label, domain_vertex)` determines a vertex
+        of a polygon. This maps to a vertex of a polygon in the codomain,
+        and the corresponding pair is returned.
+        """
+        p = self._lccs._s.polygon(domain_label)
+        il = self._lccs._found_labels[domain_label]
+        zv = self._lccs._old_data[il][1] # Vertex in p mapping to the zero vertex
+        ne = p.num_edges()
+        return (il, (ne + domain_vertex - zv)%ne)
 
-    def push_vector_forward(self,tangent_vector):
-        label = tangent_vector.polygon_label()
-        m = self._m(label)
-        return self.codomain().tangent_vector(
-                label, \
-                m*tangent_vector.point(), \
-                m*tangent_vector.vector())
+    def affine_transformation(self, domain_label):
+        r"""
+        Return the affine transformation carrying the polygon
+        with label `domain_label` to the image polygon.
 
-    def pull_vector_back(self,tangent_vector):
-        label = tangent_vector.polygon_label()
-        im = ~self._m(label)
-        return self.domain().tangent_vector(
-                label, \
-                im*tangent_vector.point(), \
-                im*tangent_vector.vector())
+        The returned element should be in the AffineGroup over
+        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
+        """
+        i,v = self.image_vertex(domain_label, 0)
+        zv = self.domain().polygon(domain_label).num_edges() - v # This vertex maps to 0.
+        return self.affine_group()(self._lccs._matrices[i]) * \
+            self.affine_group().translation(-self._domain.polygon(domain_label).vertex(zv))
 
     def is_invertible(self):
         r"""Return true to indicate this mapping is invertible."""
         return True
 
-class SimilarityJoinPolygonsMapping(SurfaceMapping):
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+        """
+        return self._lccs.inverse_mapping(self.codomain())
+
+class LCCSCanonicalizationInverseMapping(CellularMapping):
+    r'''
+    This class represents the natural mapping from a surface to its
+    :class:`~flatsurf.geometry.surface.LazyCellularCanonicalizeSurface`.
+
+    Typically you would get this map from the
+    :meth:`~flatsurf.geometry.surface.LazyCellularCanonicalizeSurface.canonicalization_mapping`
+    and tests are in that function declaration.
+    '''
+    def __init__(self, lccs, domain):
+        from .surface import LazyCellularCanonicalizeSurface
+        # lccs should be the The LazyCellularCanonicalizeSurface
+        if not isinstance(lccs, LazyCellularCanonicalizeSurface):
+            raise ValueError('Parameter `lccs` must be an instance of LazyCellularCanonicalizeSurface.')
+        self._lccs = lccs # The LazyCellularCanonicalizeSurface
+        CellularMapping.__init__(self, domain, self._lccs._s, locally_affine = True)
+
+    def image_vertex(self, domain_label, domain_vertex):
+        r"""
+        The pair `(domain_label, domain_vertex)` determines a vertex
+        of a polygon. This maps to a vertex of a polygon in the codomain,
+        and the corresponding pair is returned.
+        """
+        image_label, zv = self._lccs._old_data[domain_label]
+        # zv is the label in the original surface (self._lccs._s) that
+        # corresponds to the 0 vertex on the canonicalized surface.
+        ne = self.domain().polygon(domain_label).num_edges()
+        return (image_label, (domain_vertex+zv)%ne)
+
+    def affine_transformation(self, domain_label):
+        r"""
+        Return the affine transformation carrying the polygon
+        with label `domain_label` to the image polygon.
+
+        The returned element should be in the AffineGroup over
+        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
+        """
+        image_label, zv = self._lccs._old_data[domain_label]
+        return \
+            self.affine_group().translation(self._codomain.polygon(image_label).vertex(zv)) * \
+            self.affine_group()( ~ self._lccs._matrices[domain_label] )
+
+    def is_invertible(self):
+        r"""Return true to indicate this mapping is invertible."""
+        return True
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+        """
+        return self._lccs.mapping(self.domain())
+
+
+class JoinPolygonsMapping(SurfaceMapping):
     r"""
     Return a SurfaceMapping joining two polygons together along the edge provided to the constructor.
 
@@ -371,7 +630,7 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
         sage: s0.set_immutable()
         sage: s=TranslationSurface(s0)
         sage: from flatsurf.geometry.mappings import *
-        sage: m=SimilarityJoinPolygonsMapping(s,0,2)
+        sage: m=JoinPolygonsMapping(s,0,2)
         sage: s2=m.codomain()
         sage: for label,polygon in s2.label_iterator(polygons=True):
         ....:     print("Polygon "+str(label)+" is "+str(polygon)+".")
@@ -388,7 +647,7 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
         Join polygon with label p1 of s to polygon sharing edge e1.
         """
         if s.is_mutable():
-            raise ValueError("Can only construct SimilarityJoinPolygonsMapping for immutable surfaces.")
+            raise ValueError("Can only construct JoinPolygonsMapping for immutable surfaces.")
 
         ss2=s.copy(lazy=True,mutable=True)
         s2=ss2.underlying_surface()
@@ -420,7 +679,7 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
             # The polygon with the base label is being removed.
             s2.change_base_label(p1)
 
-        s2.change_polygon(p1, ConvexPolygons(s.base_ring())(vs))
+        s2.change_polygon(p1, ConvexPolygons(s.base_ring())(vs).translate(poly1.vertex(0)))
 
         for i in range(len(vs)):
             p3,e3 = edge_map[i]
@@ -450,7 +709,9 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
         r"""
         Return the vertices of the newly glued polygon which bound the diagonal formed by the glue.
         """
-        return (self._glued_edge,self._glued_edge+self._domain.polygon(self._removed_label).num_edges())
+        return (self._glued_edge,
+                (self._glued_edge+self._domain.polygon(self._removed_label).num_edges()-1) %
+                     self._codomain.polygon(self._saved_label).num_edges())
 
     def push_vector_forward(self,tangent_vector):
         r"""Applies the mapping to the provided vector."""
@@ -468,57 +729,92 @@ class SimilarityJoinPolygonsMapping(SurfaceMapping):
                 tangent_vector.vector(), \
                 ring = ring)
 
-    def pull_vector_back(self,tangent_vector):
-        r"""
-        Applies the inverse of the mapping to the provided vector.
-        """
-        ring = tangent_vector.bundle().base_ring()
-        if tangent_vector.polygon_label() == self._saved_label:
-            p=tangent_vector.point()
-            v=self._domain.polygon(self._saved_label).vertex(self._glued_edge)
-            e=self._domain.polygon(self._saved_label).edge(self._glued_edge)
-            from flatsurf.geometry.polygon import wedge_product
-            wp = wedge_product(p-v,e)
-            if wp > 0:
-                # in polygon with the removed label
-                return self.domain().tangent_vector( \
-                    self._removed_label, \
-                    (~ self._remove_map)(tangent_vector.point()), \
-                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
-                    ring = ring)
-            if wp < 0:
-                # in polygon with the removed label
-                return self.domain().tangent_vector( \
-                    self._saved_label, \
-                    tangent_vector.point(), \
-                    tangent_vector.vector(), \
-                    ring = ring)
-            # Otherwise wp==0
-            w = tangent_vector.vector()
-            wp = wedge_product(w,e)
-            if wp > 0:
-                # in polygon with the removed label
-                return self.domain().tangent_vector( \
-                    self._removed_label, \
-                    (~ self._remove_map)(tangent_vector.point()), \
-                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
-                    ring = ring)
-            return self.domain().tangent_vector( \
-                self._saved_label, \
-                tangent_vector.point(), \
-                tangent_vector.vector(), \
-                ring = ring)
-        else:
-            return self._domain.tangent_vector( \
-                tangent_vector.polygon_label(), \
-                tangent_vector.point(), \
-                tangent_vector.vector(), \
-                ring = ring)
+#    def pull_vector_back(self,tangent_vector):
+#        r"""
+#        Applies the inverse of the mapping to the provided vector.
+#        """
+#        ring = tangent_vector.bundle().base_ring()
+#        if tangent_vector.polygon_label() == self._saved_label:
+#            p=tangent_vector.point()
+#            v=self._domain.polygon(self._saved_label).vertex(self._glued_edge)
+#            e=self._domain.polygon(self._saved_label).edge(self._glued_edge)
+#            from flatsurf.geometry.polygon import wedge_product
+#            wp = wedge_product(p-v,e)
+#            if wp > 0:
+#                # in polygon with the removed label
+#                return self.domain().tangent_vector( \
+#                    self._removed_label, \
+#                    (~ self._remove_map)(tangent_vector.point()), \
+#                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
+#                    ring = ring)
+#            if wp < 0:
+#                # in polygon with the removed label
+#                return self.domain().tangent_vector( \
+#                    self._saved_label, \
+#                    tangent_vector.point(), \
+#                    tangent_vector.vector(), \
+#                    ring = ring)
+#            # Otherwise wp==0
+#            w = tangent_vector.vector()
+#            wp = wedge_product(w,e)
+#            if wp > 0:
+#                # in polygon with the removed label
+#                return self.domain().tangent_vector( \
+#                    self._removed_label, \
+#                    (~ self._remove_map)(tangent_vector.point()), \
+#                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
+#                    ring = ring)
+#            return self.domain().tangent_vector( \
+#                self._saved_label, \
+#                tangent_vector.point(), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+#        else:
+#            return self._domain.tangent_vector( \
+#                tangent_vector.polygon_label(), \
+#                tangent_vector.point(), \
+#                tangent_vector.vector(), \
+#                ring = ring)
 
     def is_invertible(self):
         r"""Return true to indicate this mapping is invertible."""
         return True
 
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+
+        Raises a NotImplementedError by default.
+        """
+        v1, v2 = self.glued_vertices()
+        print((v1,v2))
+        return SplitPolygonsMapping(self.codomain(), self._saved_label, v1, v2, new_label = self.removed_label())
+
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is affine in local coordinates.
+
+        Note that this requires that the map is affine at points in the
+        interiors of edges.
+        """
+        return True
+
+    def is_cellular(self):
+        r"""
+        Return `True` if the map is cellular, i.e., polygons defining the
+        surface in the domain are mapped bijectively to polygons in the
+        codomain.
+        """
+        return True
+
+    def is_orientation_preserving(self):
+        r"""
+        Return `True` if the mapping is orientation-preserving and
+        `False` if not.
+
+        By default we return `True`.
+        """
+        return True
 
 class SplitPolygonsMapping(SurfaceMapping):
     r"""
@@ -752,7 +1048,7 @@ def flip_edge_mapping(s,p1,e1):
     r"""
     Return a mapping whose domain is s which flips the provided edge.
     """
-    m1=SimilarityJoinPolygonsMapping(s,p1,e1)
+    m1=JoinPolygonsMapping(s,p1,e1)
     v1,v2=m1.glued_vertices()
     removed_label = m1.removed_label()
     m2=SplitPolygonsMapping(m1.codomain(), p1, (v1+1)%4, (v1+3)%4, new_label = removed_label)
@@ -812,13 +1108,13 @@ def delaunay_decomposition_mapping(s):
     if len(edge_vectors)>0:
         ev=edge_vectors.pop()
         p,e=ev.edge_pointing_along()
-        m1=SimilarityJoinPolygonsMapping(s1,p,e)
+        m1=JoinPolygonsMapping(s1,p,e)
         s2=m1.codomain()
         while len(edge_vectors)>0:
             ev=edge_vectors.pop()
             ev2=m1.push_vector_forward(ev)
             p,e=ev2.edge_pointing_along()
-            mtemp=SimilarityJoinPolygonsMapping(s2,p,e)
+            mtemp=JoinPolygonsMapping(s2,p,e)
             m1=SurfaceMappingComposition(m1,mtemp)
             s2=m1.codomain()
         if m is None:
@@ -1099,4 +1395,3 @@ def canonicalize_translation_surface_mapping(s):
 
     m3=ReindexMapping(s2,w.label_dictionary(),0)
     return SurfaceMappingComposition(m,m3)
-    

@@ -119,11 +119,12 @@ class SimilaritySurfaceTangentVector:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.surface()==other.surface() and \
-                self.polygon_label() == other.polygon_label() and \
+            if self.surface() != other.surface():
+                return False
+            return self.polygon_label() == other.polygon_label() and \
                 self.point() == other.point() and \
                 self.vector() == other.vector()
-        raise NotImplemented
+        raise NotImplementedError('Comparison between SimilaritySurfaceTangentVector and other types of objects.')
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -472,6 +473,8 @@ class SimilaritySurfaceTangentBundle:
         if ring is None:
             self._base_ring=self._s.base_ring()
         else:
+            if not ring.has_coerce_map_from(self._s.base_ring()):
+                raise ValueError('There is no coerce map from the base_ring of the surface to the base_ring of the ring of the tangent bundle being constructed.')
             self._base_ring=ring
         from sage.modules.free_module import VectorSpace
         self._V = VectorSpace(self._base_ring, 2)

@@ -35,9 +35,69 @@ from sage.structure.sage_object import SageObject
 class SurfaceMapping(SageObject):
     r"""Abstract class for any mapping between surfaces."""
 
-    def __init__(self, domain, codomain):
+    def __init__(self, domain, codomain, ring = None):
+        if ring is None:
+            ring = codomain.base_ring()
+            if ring != domain.base_ring():
+                raise ValueError('If the base rings of the domain and codomain are different, then the ring of the mapping must be explicitly set.')
+        else:
+            if not ring.has_coerce_map_from(domain.base_ring()):
+                raise ValueError(f'There is no coerce map from the base_ring of the domain to {ring}.')
+            if not ring.has_coerce_map_from(codomain.base_ring()):
+                raise ValueError(f'There is no coerce map from the base_ring of the codomain to {ring}.')
+        self._ring = ring
         self._domain=domain
         self._codomain=codomain
+
+    def base_ring(self):
+        return self._ring
+
+    def change_ring(self, ring):
+        r"""
+        Convert this mapping to a mapping whose base_ring is `ring`.
+
+        The ring used must have a coerce map from the base_ring of this
+        SurfaceMapping.
+
+        EXAMPLES::
+
+            sage: from flatsurf import *
+            sage: s = translation_surfaces.square_torus()
+            sage: from flatsurf.geometry.mappings import IdentityMapping
+            sage: id_map = IdentityMapping(s)
+            sage: v0 = s.tangent_bundle(AA)(0, (0,0),(1,1))
+            sage: v1 = id_map(v0)
+            sage: v1.bundle().base_ring()
+            Rational Field
+            sage: id_map2 = id_map.change_ring(ring = AA)
+            sage: v2 = id_map2(v0)
+            sage: v2.bundle().base_ring()
+            Algebraic Real Field
+            sage: v0 == v1
+            True
+            sage: v0 == v2
+            True
+            sage: TestSuite(id_map2).run()
+        """
+        return RingChangedMapping(self, ring)
+
+    def support_contains(self, label):
+        r'''
+        Return if the associated polygon is in the support of the map.
+
+        A polygon is in the support if the triple associated to a tangent
+        vector in the polygon, `(label, pt, vect)`, is changed by the map.
+
+        A return of `False` indicates that applying the map to
+        `(label, pt, vect)` will lead to an equal return (with possibly
+        the ring changing for `pt` and `vect`).
+
+        A return of `True` suggests that a triple like this will be changed by
+        the map, though we do not require this. By default this method returns
+        `True`.
+        '''
+        # Defaults to true since most maps will change vectors.
+        return True
 
     def domain(self):
         r"""
@@ -88,16 +148,20 @@ class SurfaceMapping(SageObject):
         r"""
         Return the inverse mapping.
 
-        Raises a NotImplementedError by default.
+        Raises a NotImplementedError by default. This should occur if the
+        mapping is not invertible.
         """
         raise NotImplementedError('__invert__ has not been implemented.')
 
     def push_vector_forward(self,tangent_vector, ring=None):
         r"""
-        Applies the mapping to the provided vector. If the ring parameter
-        is set, then the output will be a tangent vector in the provided ring.
+        Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
         """
-        raise NotImplementedError
+        raise NotImplementedError('push_vector_forward has not been implemented.')
 
     def __mul__(self,other):
         # Compose SurfaceMappings
@@ -117,6 +181,8 @@ class SurfaceMapping(SageObject):
         if self.domain() != other.domain():
             return False
         if self.codomain() != other.codomain():
+            return False
+        if self.base_ring() != other.base_ring():
             return False
         l = self._domain.base_label()
         p = self._domain.polygon(l)
@@ -138,7 +204,7 @@ class SurfaceMapping(SageObject):
             # independent and have the same image under locally affine
             # maps, then the maps are the same!
             return True
-        raise NotImplemented('Comparison of mappings is not fully implemented unless both maps are locally affine.')
+        raise NotImplementedError('Comparison of mappings is not fully implemented unless both maps are locally affine.')
 
     def __hash__(self):
         if self.is_locally_affine():
@@ -156,41 +222,208 @@ class SurfaceMapping(SageObject):
                 self._domain.tangent_vector(l, pt, v2)
             )
             return 23 * hash(self.domain()) + 47 * hash(self.codomain()) + \
-                173 * hash(iv1) + 59 * hash(iv2)
+                241 * hash(self.base_ring()) + 173 * hash(iv1) + 59 * hash(iv2)
         else:
-            raise NotImplemented('Hash is only implemented for locally affine maps.')
+            raise NotImplementedError('Hash is only implemented for locally affine maps.')
 
+    def _test_ring(self, **options):
+        r"""
+        Check that rings are behaving correctly.
+        """
+        tester = self._tester(**options)
+        tb = self.domain().tangent_bundle()
+        v = tb.edge(self.domain().base_label(), 0)
+        img = self.push_vector_forward(v)
+        tester.assertEqual(img.bundle().base_ring(), self.base_ring())
+
+    def _test_inverse(self, **options):
+        r"""
+        Check that the map sends vertices to the vertices it claims it does.
+        """
+        tester = self._tester(**options)
+        if not self.is_invertible():
+            try:
+                ~self
+                tester.fail('`is_invertible()` returns False but `__invert__` does not raise a NotImplementedError.')
+            except NotImplementedError:
+                # This is what should happen if the map is not invertible.
+                return
+        # Here the map should be invertible
+        try:
+            inv = ~self
+        except NotImplementedError:
+            tester.fail('`is_invertible()` returns True but `__invert__` raises a NotImplementedError.')
+        tester.assertTrue(inv.is_invertible(), 'The inverse is not invertible.')
+        tester.assertEqual(~inv, self, 'The mapping is not equal to its double inverse.')
+        domain = self.domain()
+        if domain.is_finite():
+            limit = Infinity
+        else:
+            limit = 50
+        count = 0
+        for l,e in domain.edge_iterator():
+            p = domain.polygon(l)
+            tv = domain.tangent_vector(l, p.vertex(e), p.edge(e), ring=self.base_ring())
+            image_tv = self.push_vector_forward(tv)
+            tester.assertEqual(tv, inv.push_vector_forward(image_tv),
+                f'Composition of of this mapping with its inverse does not act trivially on {tv}.'
+            )
+            count += 1
+            if count >= limit:
+                break
+
+class RingChangedMapping(SurfaceMapping):
+    r'''
+    This class implements a SurfaceMapping altered by changing the base_ring.
+
+    This class is called from the method :func:`~flatsurf.geometry.mapping.change_ring`.
+    An example is included in the documentation of this method.
+    '''
+    def __init__(self, mapping, ring):
+        if not ring.has_coerce_map_from(mapping.base_ring()):
+            raise ValueError('There should be a coerce map from the base ring of the mapping to the ring parameter.')
+        if isinstance(mapping, RingChangedMapping):
+            self._mapping = mapping._mapping
+        else:
+            self._mapping = mapping
+        SurfaceMapping.__init__(self, self._mapping.domain(), self._mapping.codomain(), ring=ring)
+
+    def is_invertible(self):
+        r"""Return true if this mapping is invertible."""
+        return self._mapping.is_invertible()
+
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is affine in local coordinates.
+
+        Note that this requires that the map is affine at points in the
+        interiors of edges.
+        """
+        return self._mapping.is_locally_affine()
+
+    def is_cellular(self):
+        r"""
+        Return `True` if the map is cellular, i.e., polygons defining the
+        surface in the domain are mapped bijectively to polygons in the
+        codomain.
+        """
+        return self._mapping.is_cellular()
+
+    def is_orientation_preserving(self):
+        r"""
+        Return `True` if the mapping is orientation-preserving and
+        `False` if not.
+
+        By default we return `True`.
+        """
+        return self._mapping.is_orientation_preserving()
+
+    def __invert__(self):
+        r"""
+        Return the inverse mapping.
+
+        Raises a NotImplementedError by default. This should occur if the
+        mapping is not invertible.
+        """
+        return self._mapping.__invert__().change_ring(self.base_ring())
+
+    def push_vector_forward(self,tangent_vector, ring=None):
+        r"""
+        Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
+        """
+        if ring == None:
+            return self._mapping.push_vector_forward(tangent_vector, ring=self.base_ring())
+        else:
+            return self._mapping.push_vector_forward(tangent_vector, ring=ring)
+
+    def support_contains(self, label):
+        r'''
+        Return if the associated polygon is in the support of the map.
+
+        A polygon is in the support if the triple associated to a tangent
+        vector in the polygon, `(label, pt, vect)`, is changed by the map.
+
+        A return of `False` indicates that applying the map to
+        `(label, pt, vect)` will lead to an equal return (with possibly
+        the ring changing for `pt` and `vect`).
+
+        A return of `True` suggests that a triple like this will be changed by
+        the map, though we do not require this. By default this method returns
+        `True`.
+        '''
+        return self._mapping.support_contains(label)
 
 class SurfaceMappingComposition(SurfaceMapping):
     r"""
     Composition of mappings.
     """
 
-    def __init__(self, *mappings):
+    def __init__(self, *mappings, ring = None):
         r"""
         Represent the composition of mappings.
 
-        Mappings must be listed in the order in which they will be applied.
+        Mappings must be listed in the order in which they will be applied
+        (which is opposite composition notation.)
+
+        If a ring is set, each `base_ring`
         """
         if len(mappings) < 2:
             raise ValueError('Need at least two mappings to compose.')
         for i in range(1, len(mappings)):
             if mappings[i-1].codomain() != mappings[i].domain():
                 raise ValueError(f'The codomain of map {i-1} does not match the domain of map {i}.')
+        if ring is None:
+            ring = mappings[0].base_ring()
         self._m = []
         for m in mappings:
             if isinstance(m, SurfaceMappingComposition):
                 self._m += m.factors()
             else:
+                if m.base_ring() != ring:
+                    if not ring.has_coerce_map_from(m.base_ring()):
+                        raise ValueError(f'There is no coerce map from the base_ring of one of the maps to {ring}.')
+                    m = m.change_ring(ring)
                 self._m.append(m)
         self._m = tuple(self._m)
-        SurfaceMapping.__init__(self, self._m[0].domain(), self._m[-1].codomain())
+        SurfaceMapping.__init__(self, self._m[0].domain(), self._m[-1].codomain(), ring=ring)
 
-    def push_vector_forward(self, tangent_vector):
-        r"""Applies the mapping to the provided vector."""
+    def push_vector_forward(self,tangent_vector, ring=None):
+        r"""
+        Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
+        """
+        if ring == None:
+            ring = self.base_ring()
         for mapping in self._m:
-            tangent_vector = mapping.push_vector_forward(tangent_vector)
+            tangent_vector = mapping.push_vector_forward(tangent_vector, ring=ring)
         return tangent_vector
+
+    def support_contains(self, label):
+        r'''
+        Return if the associated polygon is in the support of the map.
+
+        A polygon is in the support if the triple associated to a tangent
+        vector in the polygon, `(label, pt, vect)`, is changed by the map.
+
+        A return of `False` indicates that applying the map to
+        `(label, pt, vect)` will lead to an equal return (with possibly
+        the ring changing for `pt` and `vect`).
+
+        A return of `True` suggests that a triple like this will be changed by
+        the map, though we do not require this. By default this method returns
+        `True`.
+        '''
+        for mapping in self._m:
+            if mapping.support_contains(label):
+                return True
+        return False
 
     def factors(self):
         r"""
@@ -244,15 +477,6 @@ class SurfaceMappingComposition(SurfaceMapping):
         r"""
         Return the inverse mapping.
 
-        Raises a NotImplementedError by default.
-        """
-        raise NotImplementedError('__invert__ has not been implemented.')
-
-
-    def __invert__(self):
-        r"""
-        Return the inverse mapping.
-
         Raises a NotImplementedError if the map is not invertible.
         """
         if self.is_invertible():
@@ -281,22 +505,9 @@ class CellularMapping(SurfaceMapping):
         that all maps between polygons are restrictions of affine maps defined
         over the given `ring`.
         """
-        if ring is None:
-            if domain.base_ring() == codomain.base_ring():
-                self._ring = domain.base_ring()
-            else:
-                from sage.structure.element import get_coercion_model
-                cm = get_coercion_model()
-                self._ring = cm.common_parent(domain.base_ring(), codomain.base_ring())
-        else:
-            if not ring.has_coerce_map_from(domain.base_ring()):
-                raise ValueError(
-                    'The ring used must have a coersion from the base ring of the domain surface.'
-                )
-            self._ring = ring
         self._locally_affine = locally_affine
-        self._codomain_tb = codomain.tangent_bundle(ring)
-        SurfaceMapping.__init__(self, domain, codomain)
+        SurfaceMapping.__init__(self, domain, codomain, ring=ring)
+        self._codomain_tb = codomain.tangent_bundle(self.base_ring())
 
     # Implement the following two methods:
     def image_vertex(self, domain_label, domain_vertex):
@@ -316,6 +527,27 @@ class CellularMapping(SurfaceMapping):
         the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
         """
         raise NotImplementedError
+
+    def support_contains(self, label):
+        r'''
+        Return if the associated polygon is in the support of the map.
+
+        A polygon is in the support if the triple associated to a tangent
+        vector in the polygon, `(label, pt, vect)`, is changed by the map.
+
+        A return of `False` indicates that applying the map to
+        `(label, pt, vect)` will lead to an equal return (with possibly
+        the ring changing for `pt` and `vect`).
+
+        A return of `True` suggests that a triple like this will be changed by
+        the map, though we do not require this. By default this method returns
+        `True`.
+        '''
+        codomain_label,iv = self.image_vertex(label, 0)
+        if codomain_label == label:
+            return self.affine_transformation(label).is_one()
+        else:
+            return True
 
     def ring(self):
         return self._ring
@@ -365,7 +597,10 @@ class CellularMapping(SurfaceMapping):
 
     def image_edge(self, domain_label, domain_edge):
         r"""
-        Return the pair
+        Return the image of the oriented edge in the codomain.
+
+        Returns the pair `(codomain_label, codomain_edge)` representing the
+        image of the edge described by `(codomain_label, codomain_edge)`
         """
         if self.is_orientation_preserving():
             return self.image_vertex(domain_label, domain_edge)
@@ -373,35 +608,24 @@ class CellularMapping(SurfaceMapping):
             ne = self.domain().polygon(domain_label).num_edges()
             return self.image_vertex(domain_label, (domain_edge+1)%ne)
 
-    def affine_transformation(self, domain_label):
-        r"""
-        Return the affine transformation carrying the polygon
-        with label `domain_label` to the image polygon.
-
-        The returned element should be in the AffineGroup over
-        the provided ring. See :meth:`~flatsurf.geometry.mapping.CellularMapping.affine_group`.
-        """
-        raise NotImplementedError
-
     def push_vector_forward(self, tangent_vector, ring=None):
         r"""
         Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
         """
         domain_label = tangent_vector.polygon_label()
         codomain_label = self.image_vertex(domain_label,0)[0]
         at = self.affine_transformation(domain_label)
         if ring is None:
-            return self._codomain_tb(
-                codomain_label,
-                at(tangent_vector.point()),
-                at.matrix()[:2,:2]*tangent_vector.vector()
-            )
-        else:
-            return self.codomain().tangent_bundle(ring)(
-                codomain_label,
-                at(tangent_vector.point()),
-                at.matrix()[:2,:2]*tangent_vector.vector()
-            )
+            ring = self.base_ring()
+        return self.codomain().tangent_bundle(ring)(
+            codomain_label,
+            at(tangent_vector.point()),
+            at.matrix()[:2,:2]*tangent_vector.vector()
+        )
 
     def _test_affine_along_edges(self, **options):
         r"""
@@ -430,7 +654,6 @@ class IdentityMapping(CellularMapping):
 
     Surfaces should have the same labels, the same polygons, and the same
     gluings, but the surfaces may be defined over slightly different rings.
-    The map will be defined over the common parent.
 
     EXAMPLES::
 
@@ -438,7 +661,7 @@ class IdentityMapping(CellularMapping):
         sage: s1 = translation_surfaces.regular_octagon()
         sage: s2 = s1.copy(new_field=AA)
         sage: from flatsurf.geometry.mappings import IdentityMapping
-        sage: m = IdentityMapping(s1, s2)
+        sage: m = IdentityMapping(s1, s2, ring=AA)
         sage: m.ring() == s2.base_ring()
         True
         sage: TestSuite(m).run()
@@ -453,8 +676,7 @@ class IdentityMapping(CellularMapping):
 
     def _test_equality_of_domain_and_codomain(self, **options):
         r"""
-        Check that the map is cellular: i.e., that it sends polygons
-        to polygons.
+        Check equality of the domain and codomain up to a change of base_ring.
         """
         tester = self._tester(**options)
         s1 = self.domain()
@@ -468,9 +690,16 @@ class IdentityMapping(CellularMapping):
         tester.assertEqual(s1, s2,
                 f'The domain and codomain must be equal in the identity map up to a change of base_ring.')
 
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
+    def push_vector_forward(self, tangent_vector, ring=None):
+        r"""
+        Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
+        """
+        if ring == None:
+            ring = self.base_ring()
         return self._codomain.tangent_vector( \
             tangent_vector.polygon_label(), \
             tangent_vector.point(), \
@@ -485,7 +714,7 @@ class IdentityMapping(CellularMapping):
         r"""
         Return the inverse mapping.
         """
-        return self
+        return IdentityMapping(self._codomain, self._domain, ring=self.base_ring())
 
     def image_vertex(self, domain_label, domain_vertex):
         r"""
@@ -641,6 +870,7 @@ class JoinPolygonsMapping(SurfaceMapping):
         (0, 1) is glued to (0, 3).
         (0, 2) is glued to (0, 0).
         (0, 3) is glued to (0, 1).
+
     """
     def __init__(self, s, p1, e1):
         r"""
@@ -713,9 +943,15 @@ class JoinPolygonsMapping(SurfaceMapping):
                 (self._glued_edge+self._domain.polygon(self._removed_label).num_edges()-1) %
                      self._codomain.polygon(self._saved_label).num_edges())
 
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
+    def push_vector_forward(self, tangent_vector):
+        r"""
+        Applies the mapping to the provided vector.
+
+        If the ring parameter is set, then the output will be a tangent vector in the
+        provided ring. Otherwise, the output will be a tangeng vector in the
+        `base_ring` of the mapping.
+        """
+        ring = self.base_ring()
         if tangent_vector.polygon_label() == self._removed_label:
             return self._codomain.tangent_vector( \
                 self._saved_label, \
@@ -728,53 +964,6 @@ class JoinPolygonsMapping(SurfaceMapping):
                 tangent_vector.point(), \
                 tangent_vector.vector(), \
                 ring = ring)
-
-#    def pull_vector_back(self,tangent_vector):
-#        r"""
-#        Applies the inverse of the mapping to the provided vector.
-#        """
-#        ring = tangent_vector.bundle().base_ring()
-#        if tangent_vector.polygon_label() == self._saved_label:
-#            p=tangent_vector.point()
-#            v=self._domain.polygon(self._saved_label).vertex(self._glued_edge)
-#            e=self._domain.polygon(self._saved_label).edge(self._glued_edge)
-#            from flatsurf.geometry.polygon import wedge_product
-#            wp = wedge_product(p-v,e)
-#            if wp > 0:
-#                # in polygon with the removed label
-#                return self.domain().tangent_vector( \
-#                    self._removed_label, \
-#                    (~ self._remove_map)(tangent_vector.point()), \
-#                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
-#                    ring = ring)
-#            if wp < 0:
-#                # in polygon with the removed label
-#                return self.domain().tangent_vector( \
-#                    self._saved_label, \
-#                    tangent_vector.point(), \
-#                    tangent_vector.vector(), \
-#                    ring = ring)
-#            # Otherwise wp==0
-#            w = tangent_vector.vector()
-#            wp = wedge_product(w,e)
-#            if wp > 0:
-#                # in polygon with the removed label
-#                return self.domain().tangent_vector( \
-#                    self._removed_label, \
-#                    (~ self._remove_map)(tangent_vector.point()), \
-#                    (~ self._remove_map_derivative)*tangent_vector.vector(), \
-#                    ring = ring)
-#            return self.domain().tangent_vector( \
-#                self._saved_label, \
-#                tangent_vector.point(), \
-#                tangent_vector.vector(), \
-#                ring = ring)
-#        else:
-#            return self._domain.tangent_vector( \
-#                tangent_vector.polygon_label(), \
-#                tangent_vector.point(), \
-#                tangent_vector.vector(), \
-#                ring = ring)
 
     def is_invertible(self):
         r"""Return true to indicate this mapping is invertible."""
@@ -805,7 +994,7 @@ class JoinPolygonsMapping(SurfaceMapping):
         surface in the domain are mapped bijectively to polygons in the
         codomain.
         """
-        return True
+        return False
 
     def is_orientation_preserving(self):
         r"""
@@ -816,174 +1005,59 @@ class JoinPolygonsMapping(SurfaceMapping):
         """
         return True
 
-class SplitPolygonsMapping(SurfaceMapping):
+class JoinPolygonsMappingInverse(SurfaceMapping):
     r"""
-    Class for cutting a polygon along a diagonal.
-
-    EXAMPLES::
-
-        sage: from flatsurf import *
-        sage: s=translation_surfaces.veech_2n_gon(4)
-        sage: from flatsurf.geometry.mappings import SplitPolygonsMapping
-        sage: m = SplitPolygonsMapping(s,0,0,2)
-        sage: s2=m.codomain()
-        sage: TestSuite(s2).run()
-        sage: for pair in s2.label_iterator(polygons=True):
-        ....:     print(pair)
-        (0, Polygon: (0, 0), (1/2*a + 1, 1/2*a), (1/2*a + 1, 1/2*a + 1), (1, a + 1), (0, a + 1), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a))
-        (ExtraLabel(...), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))
-        sage: for glue in s2.edge_iterator(gluings=True):
-        ....:     print(glue)
-        ((0, 0), (ExtraLabel(...), 0))
-        ((0, 1), (0, 5))
-        ((0, 2), (0, 6))
-        ((0, 3), (ExtraLabel(...), 1))
-        ((0, 4), (ExtraLabel(...), 2))
-        ((0, 5), (0, 1))
-        ((0, 6), (0, 2))
-        ((ExtraLabel(...), 0), (0, 0))
-        ((ExtraLabel(...), 1), (0, 3))
-        ((ExtraLabel(...), 2), (0, 4))
+    Represents the inverse of a JoinPolygonsMapping
     """
-
-    def __init__(self, s, p, v1, v2, new_label = None):
+    def __init__(self, m):
         r"""
-        Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.
-
-        Warning: We do not ensure that new_label is not already in the list of labels unless it is None (as by default).
+        The parameter `m` should be a `JoinPolygonsMapping`.
         """
-        if s.is_mutable():
-            raise ValueError("The surface should be immutable.")
+        self._m = m
+        SurfaceMapping.__init__(self, m.codomain(), m.domain())
 
-        poly=s.polygon(p)
-        ne=poly.num_edges()
-        if v1<0 or v2<0 or v1>=ne or v2>=ne:
-            raise ValueError('Provided vertices out of bounds.')
-        if abs(v1-v2)<=1 or abs(v1-v2)>=ne-1:
-            raise ValueError('Provided diagonal is not a diagonal.')
-        if v2<v1:
-            temp=v1
-            v1=v2
-            v2=temp
-
-        newvertices1=[poly.vertex(v2)-poly.vertex(v1)]
-        for i in range(v2, v1+ne):
-            newvertices1.append(poly.edge(i))
-        newpoly1 = ConvexPolygons(s.base_ring())(newvertices1)
-
-        newvertices2=[poly.vertex(v1)-poly.vertex(v2)]
-        for i in range(v1,v2):
-            newvertices2.append(poly.edge(i))
-        newpoly2 = ConvexPolygons(s.base_ring())(newvertices2)
-
-        ss2 = s.copy(mutable=True,lazy=True)
-        s2 = ss2.underlying_surface()
-        s2.change_polygon(p,newpoly1)
-        new_label = s2.add_polygon(newpoly2, label=new_label)
-
-        old_to_new_labels={}
-        for i in range(ne):
-            if i<v1:
-                old_to_new_labels[i]=(p,i+ne-v2+1)
-            elif i<v2:
-                old_to_new_labels[i]=(new_label,i-v1+1)
-            else: # i>=v2
-                old_to_new_labels[i]=(p,i-v2+1)
-        new_to_old_labels={}
-        for i,pair in iteritems(old_to_new_labels):
-            new_to_old_labels[pair]=i
-
-        # This glues the split polygons together.
-        s2.change_edge_gluing(p,0,new_label,0)
-        for e in range(ne):
-            ll,ee = old_to_new_labels[e]
-            lll,eee = s.opposite_edge(p,e)
-            if lll == p:
-                gl,ge = old_to_new_labels[eee]
-                s2.change_edge_gluing(ll,ee,gl,ge)
-            else:
-                s2.change_edge_gluing(ll,ee,lll,eee)
-
-        s2.set_immutable()
-
-        self._p=p
-        self._v1=v1
-        self._v2=v2
-        self._new_label=new_label
-        from flatsurf.geometry.similarity import SimilarityGroup
-        TG = SimilarityGroup(s.base_ring())
-        self._tp = TG(-s.polygon(p).vertex(v1))
-        self._tnew_label = TG(-s.polygon(p).vertex(v2))
-        SurfaceMapping.__init__(self, s, ss2)
-
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        if tangent_vector.polygon_label() == self._p:
-            point=tangent_vector.point()
-            vertex1=self._domain.polygon(self._p).vertex(self._v1)
-            vertex2=self._domain.polygon(self._p).vertex(self._v2)
-
-            wp = wedge_product(vertex2-vertex1,point-vertex1)
-
+    def push_vector_forward(self, tangent_vector):
+        r"""
+        Applies the inverse of the mapping to the provided vector.
+        """
+        ring = self.base_ring()
+        if tangent_vector.polygon_label() == self._m._saved_label:
+            p=tangent_vector.point()
+            v=self._m._domain.polygon(self._m._saved_label).vertex(self._m._glued_edge)
+            e=self._m._domain.polygon(self._m._saved_label).edge(self._m._glued_edge)
+            from flatsurf.geometry.polygon import wedge_product
+            wp = wedge_product(p-v,e)
             if wp > 0:
-                # in new polygon 1
-                return self.codomain().tangent_vector( \
-                    self._p, \
-                    self._tp(tangent_vector.point()), \
-                    tangent_vector.vector(), \
+                # in polygon with the removed label
+                return self._m.domain().tangent_vector( \
+                    self._m._removed_label, \
+                    (~ self._m._remove_map)(tangent_vector.point()), \
+                    (~ self._m._remove_map_derivative)*tangent_vector.vector(), \
                     ring = ring)
             if wp < 0:
-                # in new polygon 2
-                return self.codomain().tangent_vector( \
-                    self._new_label, \
-                    self._tnew_label(tangent_vector.point()), \
+                # in polygon with the removed label
+                return self._m.domain().tangent_vector( \
+                    self._m._saved_label, \
+                    tangent_vector.point(), \
                     tangent_vector.vector(), \
                     ring = ring)
-
             # Otherwise wp==0
             w = tangent_vector.vector()
-            wp = wedge_product(vertex2-vertex1,w)
+            wp = wedge_product(w,e)
             if wp > 0:
-                # in new polygon 1
-                return self.codomain().tangent_vector( \
-                    self._p, \
-                    self._tp(tangent_vector.point()), \
-                    tangent_vector.vector(), \
+                # in polygon with the removed label
+                return self._m.domain().tangent_vector( \
+                    self._m._removed_label, \
+                    (~ self._m._remove_map)(tangent_vector.point()), \
+                    (~ self._m._remove_map_derivative)*tangent_vector.vector(), \
                     ring = ring)
-            # in new polygon 2
-            return self.codomain().tangent_vector( \
-                self._new_label, \
-                self._tnew_label(tangent_vector.point()), \
-                tangent_vector.vector(), \
-                ring = ring)
-        else:
-            # Not in a polygon that was changed. Just copy the data.
-            return self._codomain.tangent_vector( \
-                tangent_vector.polygon_label(), \
+            return self._m.domain().tangent_vector( \
+                self._m._saved_label, \
                 tangent_vector.point(), \
                 tangent_vector.vector(), \
                 ring = ring)
-
-
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the pullback mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        if tangent_vector.polygon_label() == self._p:
-            return self._domain.tangent_vector( \
-                self._p, \
-                (~ self._tp)(tangent_vector.point()), \
-                tangent_vector.vector(), \
-                ring = ring)
-        elif tangent_vector.polygon_label() == self._new_label:
-            return self._domain.tangent_vector( \
-                self._p, \
-                (~ self._tnew_label)(tangent_vector.point()), \
-                tangent_vector.vector(), \
-                ring = ring)
         else:
-            # Not in a polygon that was changed. Just copy the data.
-            return self._domain.tangent_vector( \
+            return self._m._domain.tangent_vector( \
                 tangent_vector.polygon_label(), \
                 tangent_vector.point(), \
                 tangent_vector.vector(), \
@@ -993,405 +1067,635 @@ class SplitPolygonsMapping(SurfaceMapping):
         r"""Return true to indicate this mapping is invertible."""
         return True
 
-def subdivide_a_polygon(s):
-    r"""
-    Return a SurfaceMapping which cuts one polygon along a diagonal or None if the surface is triangulated.
-    """
-    from flatsurf.geometry.polygon import wedge_product
-    for l,poly in s.label_iterator(polygons=True):
-        n = poly.num_edges()
-        if n>3:
-            for i in range(n):
-                e1=poly.edge(i)
-                e2=poly.edge((i+1)%n)
-                if wedge_product(e1,e2) != 0:
-                    return SplitPolygonsMapping(s,l,i, (i+2)%n)
-            raise ValueError("Unable to triangulate polygon with label "+str(l)+\
-                ": "+str(poly))
-    return None
-
-
-def triangulation_mapping(s):
-    r"""Return a  SurfaceMapping triangulating the provided surface.
-
-    EXAMPLES::
-
-        sage: from flatsurf import *
-        sage: s=translation_surfaces.veech_2n_gon(4)
-        sage: from flatsurf.geometry.mappings import *
-        sage: m=triangulation_mapping(s)
-        sage: s2=m.codomain()
-        sage: TestSuite(s2).run()
-        sage: for label,polygon in s2.label_iterator(polygons=True):
-        ....:     print(str(polygon))
-        Polygon: (0, 0), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a)
-        Polygon: (0, 0), (1/2*a, -1/2*a - 1), (1/2*a, 1/2*a)
-        Polygon: (0, 0), (-1/2*a - 1, -1/2*a - 1), (0, -1)
-        Polygon: (0, 0), (-1, -a - 1), (1/2*a, -1/2*a)
-        Polygon: (0, 0), (0, -a - 1), (1, 0)
-        Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a)
-    """
-    assert(s.is_finite())
-    m=subdivide_a_polygon(s)
-    if m is None:
-        return None
-    s1=m.codomain()
-    while True:
-        m2=subdivide_a_polygon(s1)
-        if m2 is None:
-            return m
-        s1=m2.codomain()
-        m=SurfaceMappingComposition(m,m2)
-    return m
-
-def flip_edge_mapping(s,p1,e1):
-    r"""
-    Return a mapping whose domain is s which flips the provided edge.
-    """
-    m1=JoinPolygonsMapping(s,p1,e1)
-    v1,v2=m1.glued_vertices()
-    removed_label = m1.removed_label()
-    m2=SplitPolygonsMapping(m1.codomain(), p1, (v1+1)%4, (v1+3)%4, new_label = removed_label)
-    return SurfaceMappingComposition(m1,m2)
-
-def one_delaunay_flip_mapping(s):
-    r"""
-    Returns one delaunay flip, or none if no flips are needed.
-    """
-    for p,poly in s.label_iterator(polygons=True):
-        for e in range(poly.num_edges()):
-            if s._edge_needs_flip(p,e):
-                return flip_edge_mapping(s,p,e)
-    return None
-
-def delaunay_triangulation_mapping(s):
-    r"""
-    Returns a mapping to a Delaunay triangulation or None if the surface already is Delaunay triangulated.
-    """
-    assert(s.is_finite())
-    m=triangulation_mapping(s)
-    if m is None:
-        s1=s
-    else:
-        s1=m.codomain()
-    m1=one_delaunay_flip_mapping(s1)
-    if m1 is None:
-        return m
-    if m is None:
-        m=m1
-    else:
-        m=SurfaceMappingComposition(m,m1)
-    s1=m1.codomain()
-    while True:
-        m1=one_delaunay_flip_mapping(s1)
-        if m1 is None:
-            return m
-        s1=m1.codomain()
-        m=SurfaceMappingComposition(m,m1)
-
-def delaunay_decomposition_mapping(s):
-    r"""
-    Returns a mapping to a Delaunay decomposition or possibly None if the surface already is Delaunay.
-    """
-    m=delaunay_triangulation_mapping(s)
-    if m is None:
-        s1=s
-    else:
-        s1=m.codomain()
-    edge_vectors=[]
-    lc = s._label_comparator()
-    for p,poly in s1.label_iterator(polygons=True):
-        for e in range(poly.num_edges()):
-            pp,ee=s1.opposite_edge(p,e)
-            if (lc.lt(p,pp) or (p==pp and e<ee)) and s1._edge_needs_join(p,e):
-                edge_vectors.append( s1.tangent_vector(p,poly.vertex(e),poly.edge(e)) )
-    if len(edge_vectors)>0:
-        ev=edge_vectors.pop()
-        p,e=ev.edge_pointing_along()
-        m1=JoinPolygonsMapping(s1,p,e)
-        s2=m1.codomain()
-        while len(edge_vectors)>0:
-            ev=edge_vectors.pop()
-            ev2=m1.push_vector_forward(ev)
-            p,e=ev2.edge_pointing_along()
-            mtemp=JoinPolygonsMapping(s2,p,e)
-            m1=SurfaceMappingComposition(m1,mtemp)
-            s2=m1.codomain()
-        if m is None:
-            return m1
-        else:
-            return SurfaceMappingComposition(m,m1)
-    return m
-
-def canonical_first_vertex(polygon):
-    r"""
-    Return the index of the vertex with smallest y-coordinate.
-    If two vertices have the same y-coordinate, then the one with least x-coordinate is returned.
-    """
-    best=0
-    best_pt=polygon.vertex(best)
-    for v in range(1,polygon.num_edges()):
-        pt=polygon.vertex(v)
-        if pt[1]<best_pt[1]:
-            best=v
-            best_pt=pt
-    if best==0:
-        if pt[1]==best_pt[1]:
-            return v
-    return best
-
-class CanonicalizePolygonsMapping(SurfaceMapping):
-    r"""
-    This is a mapping to a surface with the polygon vertices canonically determined.
-    A canonical labeling is when the canonocal_first_vertex is the zero vertex.
-    """
-    def __init__(self, s):
+    def __invert__(self):
         r"""
-        Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.
+        Return the inverse mapping.
+
+        Raises a NotImplementedError by default.
         """
-        if not s.is_finite():
-            raise ValueError("Currently only works with finite surfaces.")
-        ring=s.base_ring()
-        from flatsurf.geometry.similarity import SimilarityGroup
-        T = SimilarityGroup(ring)
-        P = ConvexPolygons(ring)
-        cv = {} # dictionary for canonical vertices
-        translations={} # translations bringing the canonical vertex to the origin.
-        s2 = Surface_dict(base_ring=ring)
-        for l,polygon in s.label_iterator(polygons=True):
-            cv[l]=cvcur=canonical_first_vertex(polygon)
-            newedges=[]
-            for i in range(polygon.num_edges()):
-                newedges.append(polygon.edge( (i+cvcur) % polygon.num_edges() ))
-            s2.add_polygon(P(newedges), label=l)
-            translations[l]=T( -polygon.vertex(cvcur) )
-        for l1,polygon in s.label_iterator(polygons=True):
-            for e1 in range(polygon.num_edges()):
-                l2,e2=s.opposite_edge(l1,e1)
-                ee1= (e1-cv[l1]+polygon.num_edges())%polygon.num_edges()
-                polygon2=s.polygon(l2)
-                ee2= (e2-cv[l2]+polygon2.num_edges())%polygon2.num_edges()
-                # newgluing.append( ( (l1,ee1),(l2,ee2) ) )
-                s2.change_edge_gluing(l1,ee1,l2,ee2)
-        s2.change_base_label(s.base_label())
-        s2.set_immutable()
-        ss2=s.__class__(s2)
+        return self._m
 
-        self._cv=cv
-        self._translations=translations
+    def is_locally_affine(self):
+        r"""
+        Return `True` if the map is affine in local coordinates.
 
-        SurfaceMapping.__init__(self, s, ss2)
-
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        l=tangent_vector.polygon_label()
-        return self.codomain().tangent_vector(l, \
-            self._translations[l](tangent_vector.point()), \
-            tangent_vector.vector(), \
-            ring = ring)
-
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the pullback mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        l=tangent_vector.polygon_label()
-        return self.domain().tangent_vector(l, \
-            (~self._translations[l])(tangent_vector.point()), \
-            tangent_vector.vector(), \
-            ring = ring)
-
-    def is_invertible(self):
-        r"""Return true to indicate this mapping is invertible."""
+        Note that this requires that the map is affine at points in the
+        interiors of edges.
+        """
         return True
 
-class ReindexMapping(SurfaceMapping):
-    r"""
-    Apply a dictionary to relabel the polygons.
-    """
-    def __init__(self,s,relabler,new_base_label=None):
+    def is_cellular(self):
         r"""
-        The parameters should be a surface and a dictionary which takes as input a label and produces a new label.
+        Return `True` if the map is cellular, i.e., polygons defining the
+        surface in the domain are mapped bijectively to polygons in the
+        codomain.
         """
-        if not s.is_finite():
-            raise ValueError("Currently only works with finite surfaces.""")
-        f = {} # map for labels going forward.
-        b = {} # map for labels going backward.
-        for l in s.label_iterator():
-            if l in relabler:
-                l2=relabler[l]
-                f[l]=l2
-                if l2 in b:
-                    raise ValueError("Provided dictionary has two keys mapping to the same value. Or you are mapping to a label you didn't change.")
-                b[l2]=l
-            else:
-                # If no key then don't change the label
-                f[l]=l
-                if l in b:
-                    raise ValueError("Provided dictionary has two keys mapping to the same value. Or you are mapping to a label you didn't change.")
-                b[l]=l
+        return False
 
-        self._f=f
-        self._b=b
+    def is_orientation_preserving(self):
+        r"""
+        Return `True` if the mapping is orientation-preserving and
+        `False` if not.
 
-        if new_base_label==None:
-            if s.base_label() in f:
-                new_base_label = f[s.base_label()]
-            else:
-                new_base_label = s.base_label()
-        s2=s.copy(mutable=True,lazy=True)
-        s2.relabel(relabler, in_place=True)
-        s2.underlying_surface().change_base_label(new_base_label)
-
-        SurfaceMapping.__init__(self, s, s2)
-
-    def push_vector_forward(self,tangent_vector):
-        r"""Applies the mapping to the provided vector."""
-        # There is no change- we just move it to the new surface.
-        ring = tangent_vector.bundle().base_ring()
-        return self.codomain().tangent_vector( \
-            self._f[tangent_vector.polygon_label()], \
-            tangent_vector.point(), \
-            tangent_vector.vector(), \
-            ring = ring)
-
-    def pull_vector_back(self,tangent_vector):
-        r"""Applies the pullback mapping to the provided vector."""
-        ring = tangent_vector.bundle().base_ring()
-        return self.domain().tangent_vector( \
-            self._b[tangent_vector.polygon_label()], \
-            tangent_vector.point(), \
-            tangent_vector.vector(), \
-            ring = ring)
-
-    def is_invertible(self):
-        r"""Return true to indicate this mapping is invertible."""
+        By default we return `True`.
+        """
         return True
 
 
-def my_sgn(val):
-    if val>0:
-        return 1
-    elif val<0:
-        return -1
-    else:
-        return 0
+#class SplitPolygonsMapping(SurfaceMapping):
+#    r"""
+#    Class for cutting a polygon along a diagonal.
 
-def polygon_compare(poly1,poly2):
-    r"""
-    Compare two polygons first by area, then by number of sides,
-    then by lexigraphical ording on edge vectors."""
-    # This should not be used is broken!!
-    #from sage.functions.generalized import sgn
-    res = my_sgn(-poly1.area()+poly2.area())
-    if res!=0:
-        return res
-    res = my_sgn(poly1.num_edges()-poly2.num_edges())
-    if res!=0:
-        return res
-    ne=poly1.num_edges()
-    for i in range(0,ne-1):
-        edge_diff = poly1.edge(i) - poly2.edge(i)
-        res = my_sgn(edge_diff[0])
-        if res!=0:
-            return res
-        res = my_sgn(edge_diff[1])
-        if res!=0:
-            return res
-    return 0
+#    EXAMPLES::
 
-def translation_surface_cmp(s1, s2):
-    r"""
-    Compare two finite surfaces.
-    The surfaces will be considered equal if and only if there is a translation automorphism
-    respecting the polygons and the base_labels.
-    """
-    if not s1.is_finite() or not s2.is_finite():
-        raise NotImplementedError
-    lw1=s1.walker()
-    lw2=s2.walker()
-    try:
-        from itertools import zip_longest
-    except ImportError:
-        from itertools import izip_longest as zip_longest
-    for p1,p2 in zip_longest(lw1.polygon_iterator(), lw2.polygon_iterator()):
-        if p1 is None:
-            # s2 has more polygons
-            return -1
-        if p2 is None:
-            # s1 has more polygons
-            return 1
-        ret = polygon_compare(p1,p2)
-        if ret != 0:
-            return ret
-    # Polygons are identical. Compare edge gluings.
-    for pair1,pair2 in zip_longest(lw1.edge_iterator(), lw2.edge_iterator()):
-        l1,e1 = s1.opposite_edge(pair1)
-        l2,e2 = s2.opposite_edge(pair2)
-        num1 = lw1.label_to_number(l1)
-        num2 = lw2.label_to_number(l2)
-        ret = (num1 > num2) - (num1 < num2)
-        if ret!=0:
-            return ret
-        ret = (e1 > e2) - (e1 < e2)
-        if ret!=0:
-            return ret
-    return 0
+#        sage: from flatsurf import *
+#        sage: s=translation_surfaces.veech_2n_gon(4)
+#        sage: from flatsurf.geometry.mappings import SplitPolygonsMapping
+#        sage: m = SplitPolygonsMapping(s,0,0,2)
+#        sage: s2=m.codomain()
+#        sage: TestSuite(s2).run()
+#        sage: for pair in s2.label_iterator(polygons=True):
+#        ....:     print(pair)
+#        (0, Polygon: (0, 0), (1/2*a + 1, 1/2*a), (1/2*a + 1, 1/2*a + 1), (1, a + 1), (0, a + 1), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a))
+#        (ExtraLabel(...), Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a))
+#        sage: for glue in s2.edge_iterator(gluings=True):
+#        ....:     print(glue)
+#        ((0, 0), (ExtraLabel(...), 0))
+#        ((0, 1), (0, 5))
+#        ((0, 2), (0, 6))
+#        ((0, 3), (ExtraLabel(...), 1))
+#        ((0, 4), (ExtraLabel(...), 2))
+#        ((0, 5), (0, 1))
+#        ((0, 6), (0, 2))
+#        ((ExtraLabel(...), 0), (0, 0))
+#        ((ExtraLabel(...), 1), (0, 3))
+#        ((ExtraLabel(...), 2), (0, 4))
+#    """
 
-def canonicalize_translation_surface_mapping(s):
-    r"""
-    Return the translation surface in a canonical form.
+#    def __init__(self, s, p, v1, v2, new_label = None):
+#        r"""
+#        Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.
 
-    EXAMPLES::
+#        Warning: We do not ensure that new_label is not already in the list of labels unless it is None (as by default).
+#        """
+#        if s.is_mutable():
+#            raise ValueError("The surface should be immutable.")
 
-        sage: from flatsurf import *
-        sage: s=translation_surfaces.octagon_and_squares().canonicalize()
-        sage: TestSuite(s).run()
-        sage: a = s.base_ring().gen()  # a is the square root of 2.
+#        poly=s.polygon(p)
+#        ne=poly.num_edges()
+#        if v1<0 or v2<0 or v1>=ne or v2>=ne:
+#            raise ValueError('Provided vertices out of bounds.')
+#        if abs(v1-v2)<=1 or abs(v1-v2)>=ne-1:
+#            raise ValueError('Provided diagonal is not a diagonal.')
+#        if v2<v1:
+#            temp=v1
+#            v1=v2
+#            v2=temp
 
-        sage: from flatsurf.geometry.mappings import *
-        sage: mat=Matrix([[1,2+a],[0,1]])
-        sage: from flatsurf.geometry.half_dilation_surface import GL2RMapping
-        sage: m1=GL2RMapping(s,mat)
-        sage: m2=canonicalize_translation_surface_mapping(m1.codomain())
-        sage: m=m2*m1
-        sage: translation_surface_cmp(m.domain(),m.codomain())==0
-        True
-        sage: TestSuite(m.codomain()).run()
-        sage: s=m.domain()
-        sage: v=s.tangent_vector(0,(0,0),(1,1))
-        sage: w=m.push_vector_forward(v)
-        sage: print(w)
-        SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (a + 3, 1)
-    """
-    from flatsurf.geometry.translation_surface import TranslationSurface
-    if not s.is_finite():
-        raise NotImplementedError
-    if not isinstance(s,TranslationSurface):
-        raise ValueError("Only defined for TranslationSurfaces")
-    m1=delaunay_decomposition_mapping(s)
-    if m1 is None:
-        s2=s
-    else:
-        s2=m1.codomain()
-    m2=CanonicalizePolygonsMapping(s2)
-    if m1 is None:
-        m=m2
-    else:
-        m=SurfaceMappingComposition(m1,m2)
-    s2=m.codomain()
+#        newvertices1=[poly.vertex(v2)-poly.vertex(v1)]
+#        for i in range(v2, v1+ne):
+#            newvertices1.append(poly.edge(i))
+#        newpoly1 = ConvexPolygons(s.base_ring())(newvertices1)
 
-    s2copy=s2.copy(mutable=True)
-    ss=s2.copy(mutable=True)
-    labels={label for label in s2.label_iterator()}
-    labels.remove(s2.base_label())
-    for label in labels:
-        ss.underlying_surface().change_base_label(label)
-        if ss.cmp(s2copy)>0:
-            s2copy.underlying_surface().change_base_label(label)
-    # We now have the base_label correct.
-    # We will use the label walker to generate the canonical labeling of polygons.
-    w=s2copy.walker()
-    w.find_all_labels()
+#        newvertices2=[poly.vertex(v1)-poly.vertex(v2)]
+#        for i in range(v1,v2):
+#            newvertices2.append(poly.edge(i))
+#        newpoly2 = ConvexPolygons(s.base_ring())(newvertices2)
 
-    m3=ReindexMapping(s2,w.label_dictionary(),0)
-    return SurfaceMappingComposition(m,m3)
+#        ss2 = s.copy(mutable=True,lazy=True)
+#        s2 = ss2.underlying_surface()
+#        s2.change_polygon(p,newpoly1)
+#        new_label = s2.add_polygon(newpoly2, label=new_label)
+
+#        old_to_new_labels={}
+#        for i in range(ne):
+#            if i<v1:
+#                old_to_new_labels[i]=(p,i+ne-v2+1)
+#            elif i<v2:
+#                old_to_new_labels[i]=(new_label,i-v1+1)
+#            else: # i>=v2
+#                old_to_new_labels[i]=(p,i-v2+1)
+#        new_to_old_labels={}
+#        for i,pair in iteritems(old_to_new_labels):
+#            new_to_old_labels[pair]=i
+
+#        # This glues the split polygons together.
+#        s2.change_edge_gluing(p,0,new_label,0)
+#        for e in range(ne):
+#            ll,ee = old_to_new_labels[e]
+#            lll,eee = s.opposite_edge(p,e)
+#            if lll == p:
+#                gl,ge = old_to_new_labels[eee]
+#                s2.change_edge_gluing(ll,ee,gl,ge)
+#            else:
+#                s2.change_edge_gluing(ll,ee,lll,eee)
+
+#        s2.set_immutable()
+
+#        self._p=p
+#        self._v1=v1
+#        self._v2=v2
+#        self._new_label=new_label
+#        from flatsurf.geometry.similarity import SimilarityGroup
+#        TG = SimilarityGroup(s.base_ring())
+#        self._tp = TG(-s.polygon(p).vertex(v1))
+#        self._tnew_label = TG(-s.polygon(p).vertex(v2))
+#        SurfaceMapping.__init__(self, s, ss2)
+
+#    def push_vector_forward(self,tangent_vector):
+#        r"""
+#        Applies the mapping to the provided vector.
+
+#        If the ring parameter is set, then the output will be a tangent vector in the
+#        provided ring. Otherwise, the output will be a tangeng vector in the
+#        `base_ring` of the mapping.
+#        """
+#        ring = tangent_vector.bundle().base_ring()
+#        if tangent_vector.polygon_label() == self._p:
+#            point=tangent_vector.point()
+#            vertex1=self._domain.polygon(self._p).vertex(self._v1)
+#            vertex2=self._domain.polygon(self._p).vertex(self._v2)
+
+#            wp = wedge_product(vertex2-vertex1,point-vertex1)
+
+#            if wp > 0:
+#                # in new polygon 1
+#                return self.codomain().tangent_vector( \
+#                    self._p, \
+#                    self._tp(tangent_vector.point()), \
+#                    tangent_vector.vector(), \
+#                    ring = ring)
+#            if wp < 0:
+#                # in new polygon 2
+#                return self.codomain().tangent_vector( \
+#                    self._new_label, \
+#                    self._tnew_label(tangent_vector.point()), \
+#                    tangent_vector.vector(), \
+#                    ring = ring)
+
+#            # Otherwise wp==0
+#            w = tangent_vector.vector()
+#            wp = wedge_product(vertex2-vertex1,w)
+#            if wp > 0:
+#                # in new polygon 1
+#                return self.codomain().tangent_vector( \
+#                    self._p, \
+#                    self._tp(tangent_vector.point()), \
+#                    tangent_vector.vector(), \
+#                    ring = ring)
+#            # in new polygon 2
+#            return self.codomain().tangent_vector( \
+#                self._new_label, \
+#                self._tnew_label(tangent_vector.point()), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+#        else:
+#            # Not in a polygon that was changed. Just copy the data.
+#            return self._codomain.tangent_vector( \
+#                tangent_vector.polygon_label(), \
+#                tangent_vector.point(), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+
+
+#    def pull_vector_back(self,tangent_vector):
+#        r"""Applies the pullback mapping to the provided vector."""
+#        ring = tangent_vector.bundle().base_ring()
+#        if tangent_vector.polygon_label() == self._p:
+#            return self._domain.tangent_vector( \
+#                self._p, \
+#                (~ self._tp)(tangent_vector.point()), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+#        elif tangent_vector.polygon_label() == self._new_label:
+#            return self._domain.tangent_vector( \
+#                self._p, \
+#                (~ self._tnew_label)(tangent_vector.point()), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+#        else:
+#            # Not in a polygon that was changed. Just copy the data.
+#            return self._domain.tangent_vector( \
+#                tangent_vector.polygon_label(), \
+#                tangent_vector.point(), \
+#                tangent_vector.vector(), \
+#                ring = ring)
+
+#    def is_invertible(self):
+#        r"""Return true to indicate this mapping is invertible."""
+#        return True
+
+#def subdivide_a_polygon(s):
+#    r"""
+#    Return a SurfaceMapping which cuts one polygon along a diagonal or None if the surface is triangulated.
+#    """
+#    from flatsurf.geometry.polygon import wedge_product
+#    for l,poly in s.label_iterator(polygons=True):
+#        n = poly.num_edges()
+#        if n>3:
+#            for i in range(n):
+#                e1=poly.edge(i)
+#                e2=poly.edge((i+1)%n)
+#                if wedge_product(e1,e2) != 0:
+#                    return SplitPolygonsMapping(s,l,i, (i+2)%n)
+#            raise ValueError("Unable to triangulate polygon with label "+str(l)+\
+#                ": "+str(poly))
+#    return None
+
+
+#def triangulation_mapping(s):
+#    r"""Return a  SurfaceMapping triangulating the provided surface.
+
+#    EXAMPLES::
+
+#        sage: from flatsurf import *
+#        sage: s=translation_surfaces.veech_2n_gon(4)
+#        sage: from flatsurf.geometry.mappings import *
+#        sage: m=triangulation_mapping(s)
+#        sage: s2=m.codomain()
+#        sage: TestSuite(s2).run()
+#        sage: for label,polygon in s2.label_iterator(polygons=True):
+#        ....:     print(str(polygon))
+#        Polygon: (0, 0), (-1/2*a, 1/2*a + 1), (-1/2*a, 1/2*a)
+#        Polygon: (0, 0), (1/2*a, -1/2*a - 1), (1/2*a, 1/2*a)
+#        Polygon: (0, 0), (-1/2*a - 1, -1/2*a - 1), (0, -1)
+#        Polygon: (0, 0), (-1, -a - 1), (1/2*a, -1/2*a)
+#        Polygon: (0, 0), (0, -a - 1), (1, 0)
+#        Polygon: (0, 0), (-1/2*a - 1, -1/2*a), (-1/2*a, -1/2*a)
+#    """
+#    assert(s.is_finite())
+#    m=subdivide_a_polygon(s)
+#    if m is None:
+#        return None
+#    s1=m.codomain()
+#    while True:
+#        m2=subdivide_a_polygon(s1)
+#        if m2 is None:
+#            return m
+#        s1=m2.codomain()
+#        m=SurfaceMappingComposition(m,m2)
+#    return m
+
+#def flip_edge_mapping(s,p1,e1):
+#    r"""
+#    Return a mapping whose domain is s which flips the provided edge.
+#    """
+#    m1=JoinPolygonsMapping(s,p1,e1)
+#    v1,v2=m1.glued_vertices()
+#    removed_label = m1.removed_label()
+#    m2=SplitPolygonsMapping(m1.codomain(), p1, (v1+1)%4, (v1+3)%4, new_label = removed_label)
+#    return SurfaceMappingComposition(m1,m2)
+
+#def one_delaunay_flip_mapping(s):
+#    r"""
+#    Returns one delaunay flip, or none if no flips are needed.
+#    """
+#    for p,poly in s.label_iterator(polygons=True):
+#        for e in range(poly.num_edges()):
+#            if s._edge_needs_flip(p,e):
+#                return flip_edge_mapping(s,p,e)
+#    return None
+
+#def delaunay_triangulation_mapping(s):
+#    r"""
+#    Returns a mapping to a Delaunay triangulation or None if the surface already is Delaunay triangulated.
+#    """
+#    assert(s.is_finite())
+#    m=triangulation_mapping(s)
+#    if m is None:
+#        s1=s
+#    else:
+#        s1=m.codomain()
+#    m1=one_delaunay_flip_mapping(s1)
+#    if m1 is None:
+#        return m
+#    if m is None:
+#        m=m1
+#    else:
+#        m=SurfaceMappingComposition(m,m1)
+#    s1=m1.codomain()
+#    while True:
+#        m1=one_delaunay_flip_mapping(s1)
+#        if m1 is None:
+#            return m
+#        s1=m1.codomain()
+#        m=SurfaceMappingComposition(m,m1)
+
+#def delaunay_decomposition_mapping(s):
+#    r"""
+#    Returns a mapping to a Delaunay decomposition or possibly None if the surface already is Delaunay.
+#    """
+#    m=delaunay_triangulation_mapping(s)
+#    if m is None:
+#        s1=s
+#    else:
+#        s1=m.codomain()
+#    edge_vectors=[]
+#    lc = s._label_comparator()
+#    for p,poly in s1.label_iterator(polygons=True):
+#        for e in range(poly.num_edges()):
+#            pp,ee=s1.opposite_edge(p,e)
+#            if (lc.lt(p,pp) or (p==pp and e<ee)) and s1._edge_needs_join(p,e):
+#                edge_vectors.append( s1.tangent_vector(p,poly.vertex(e),poly.edge(e)) )
+#    if len(edge_vectors)>0:
+#        ev=edge_vectors.pop()
+#        p,e=ev.edge_pointing_along()
+#        m1=JoinPolygonsMapping(s1,p,e)
+#        s2=m1.codomain()
+#        while len(edge_vectors)>0:
+#            ev=edge_vectors.pop()
+#            ev2=m1.push_vector_forward(ev)
+#            p,e=ev2.edge_pointing_along()
+#            mtemp=JoinPolygonsMapping(s2,p,e)
+#            m1=SurfaceMappingComposition(m1,mtemp)
+#            s2=m1.codomain()
+#        if m is None:
+#            return m1
+#        else:
+#            return SurfaceMappingComposition(m,m1)
+#    return m
+
+#def canonical_first_vertex(polygon):
+#    r"""
+#    Return the index of the vertex with smallest y-coordinate.
+#    If two vertices have the same y-coordinate, then the one with least x-coordinate is returned.
+#    """
+#    best=0
+#    best_pt=polygon.vertex(best)
+#    for v in range(1,polygon.num_edges()):
+#        pt=polygon.vertex(v)
+#        if pt[1]<best_pt[1]:
+#            best=v
+#            best_pt=pt
+#    if best==0:
+#        if pt[1]==best_pt[1]:
+#            return v
+#    return best
+
+#class CanonicalizePolygonsMapping(SurfaceMapping):
+#    r"""
+#    This is a mapping to a surface with the polygon vertices canonically determined.
+#    A canonical labeling is when the canonocal_first_vertex is the zero vertex.
+#    """
+#    def __init__(self, s):
+#        r"""
+#        Split the polygon with label p of surface s along the diagonal joining vertex v1 to vertex v2.
+#        """
+#        if not s.is_finite():
+#            raise ValueError("Currently only works with finite surfaces.")
+#        ring=s.base_ring()
+#        from flatsurf.geometry.similarity import SimilarityGroup
+#        T = SimilarityGroup(ring)
+#        P = ConvexPolygons(ring)
+#        cv = {} # dictionary for canonical vertices
+#        translations={} # translations bringing the canonical vertex to the origin.
+#        s2 = Surface_dict(base_ring=ring)
+#        for l,polygon in s.label_iterator(polygons=True):
+#            cv[l]=cvcur=canonical_first_vertex(polygon)
+#            newedges=[]
+#            for i in range(polygon.num_edges()):
+#                newedges.append(polygon.edge( (i+cvcur) % polygon.num_edges() ))
+#            s2.add_polygon(P(newedges), label=l)
+#            translations[l]=T( -polygon.vertex(cvcur) )
+#        for l1,polygon in s.label_iterator(polygons=True):
+#            for e1 in range(polygon.num_edges()):
+#                l2,e2=s.opposite_edge(l1,e1)
+#                ee1= (e1-cv[l1]+polygon.num_edges())%polygon.num_edges()
+#                polygon2=s.polygon(l2)
+#                ee2= (e2-cv[l2]+polygon2.num_edges())%polygon2.num_edges()
+#                # newgluing.append( ( (l1,ee1),(l2,ee2) ) )
+#                s2.change_edge_gluing(l1,ee1,l2,ee2)
+#        s2.change_base_label(s.base_label())
+#        s2.set_immutable()
+#        ss2=s.__class__(s2)
+
+#        self._cv=cv
+#        self._translations=translations
+
+#        SurfaceMapping.__init__(self, s, ss2)
+
+#    def push_vector_forward(self,tangent_vector):
+#        r"""
+#        Applies the mapping to the provided vector.
+
+#        If the ring parameter is set, then the output will be a tangent vector in the
+#        provided ring. Otherwise, the output will be a tangeng vector in the
+#        `base_ring` of the mapping.
+#        """
+#        ring = tangent_vector.bundle().base_ring()
+#        l=tangent_vector.polygon_label()
+#        return self.codomain().tangent_vector(l, \
+#            self._translations[l](tangent_vector.point()), \
+#            tangent_vector.vector(), \
+#            ring = ring)
+
+#    def pull_vector_back(self,tangent_vector):
+#        r"""Applies the pullback mapping to the provided vector."""
+#        ring = tangent_vector.bundle().base_ring()
+#        l=tangent_vector.polygon_label()
+#        return self.domain().tangent_vector(l, \
+#            (~self._translations[l])(tangent_vector.point()), \
+#            tangent_vector.vector(), \
+#            ring = ring)
+
+#    def is_invertible(self):
+#        r"""Return true to indicate this mapping is invertible."""
+#        return True
+
+#class ReindexMapping(SurfaceMapping):
+#    r"""
+#    Apply a dictionary to relabel the polygons.
+#    """
+#    def __init__(self,s,relabler,new_base_label=None):
+#        r"""
+#        The parameters should be a surface and a dictionary which takes as input a label and produces a new label.
+#        """
+#        if not s.is_finite():
+#            raise ValueError("Currently only works with finite surfaces.""")
+#        f = {} # map for labels going forward.
+#        b = {} # map for labels going backward.
+#        for l in s.label_iterator():
+#            if l in relabler:
+#                l2=relabler[l]
+#                f[l]=l2
+#                if l2 in b:
+#                    raise ValueError("Provided dictionary has two keys mapping to the same value. Or you are mapping to a label you didn't change.")
+#                b[l2]=l
+#            else:
+#                # If no key then don't change the label
+#                f[l]=l
+#                if l in b:
+#                    raise ValueError("Provided dictionary has two keys mapping to the same value. Or you are mapping to a label you didn't change.")
+#                b[l]=l
+
+#        self._f=f
+#        self._b=b
+
+#        if new_base_label==None:
+#            if s.base_label() in f:
+#                new_base_label = f[s.base_label()]
+#            else:
+#                new_base_label = s.base_label()
+#        s2=s.copy(mutable=True,lazy=True)
+#        s2.relabel(relabler, in_place=True)
+#        s2.underlying_surface().change_base_label(new_base_label)
+
+#        SurfaceMapping.__init__(self, s, s2)
+
+#    def push_vector_forward(self,tangent_vector):
+#        r"""
+#        Applies the mapping to the provided vector.
+
+#        If the ring parameter is set, then the output will be a tangent vector in the
+#        provided ring. Otherwise, the output will be a tangeng vector in the
+#        `base_ring` of the mapping.
+#        """
+#        # There is no change- we just move it to the new surface.
+#        ring = tangent_vector.bundle().base_ring()
+#        return self.codomain().tangent_vector( \
+#            self._f[tangent_vector.polygon_label()], \
+#            tangent_vector.point(), \
+#            tangent_vector.vector(), \
+#            ring = ring)
+
+#    def pull_vector_back(self,tangent_vector):
+#        r"""Applies the pullback mapping to the provided vector."""
+#        ring = tangent_vector.bundle().base_ring()
+#        return self.domain().tangent_vector( \
+#            self._b[tangent_vector.polygon_label()], \
+#            tangent_vector.point(), \
+#            tangent_vector.vector(), \
+#            ring = ring)
+
+#    def is_invertible(self):
+#        r"""Return true to indicate this mapping is invertible."""
+#        return True
+
+
+#def my_sgn(val):
+#    if val>0:
+#        return 1
+#    elif val<0:
+#        return -1
+#    else:
+#        return 0
+
+#def polygon_compare(poly1,poly2):
+#    r"""
+#    Compare two polygons first by area, then by number of sides,
+#    then by lexigraphical ording on edge vectors."""
+#    # This should not be used is broken!!
+#    #from sage.functions.generalized import sgn
+#    res = my_sgn(-poly1.area()+poly2.area())
+#    if res!=0:
+#        return res
+#    res = my_sgn(poly1.num_edges()-poly2.num_edges())
+#    if res!=0:
+#        return res
+#    ne=poly1.num_edges()
+#    for i in range(0,ne-1):
+#        edge_diff = poly1.edge(i) - poly2.edge(i)
+#        res = my_sgn(edge_diff[0])
+#        if res!=0:
+#            return res
+#        res = my_sgn(edge_diff[1])
+#        if res!=0:
+#            return res
+#    return 0
+
+#def translation_surface_cmp(s1, s2):
+#    r"""
+#    Compare two finite surfaces.
+#    The surfaces will be considered equal if and only if there is a translation automorphism
+#    respecting the polygons and the base_labels.
+#    """
+#    if not s1.is_finite() or not s2.is_finite():
+#        raise NotImplementedError
+#    lw1=s1.walker()
+#    lw2=s2.walker()
+#    try:
+#        from itertools import zip_longest
+#    except ImportError:
+#        from itertools import izip_longest as zip_longest
+#    for p1,p2 in zip_longest(lw1.polygon_iterator(), lw2.polygon_iterator()):
+#        if p1 is None:
+#            # s2 has more polygons
+#            return -1
+#        if p2 is None:
+#            # s1 has more polygons
+#            return 1
+#        ret = polygon_compare(p1,p2)
+#        if ret != 0:
+#            return ret
+#    # Polygons are identical. Compare edge gluings.
+#    for pair1,pair2 in zip_longest(lw1.edge_iterator(), lw2.edge_iterator()):
+#        l1,e1 = s1.opposite_edge(pair1)
+#        l2,e2 = s2.opposite_edge(pair2)
+#        num1 = lw1.label_to_number(l1)
+#        num2 = lw2.label_to_number(l2)
+#        ret = (num1 > num2) - (num1 < num2)
+#        if ret!=0:
+#            return ret
+#        ret = (e1 > e2) - (e1 < e2)
+#        if ret!=0:
+#            return ret
+#    return 0
+
+#def canonicalize_translation_surface_mapping(s):
+#    r"""
+#    Return the translation surface in a canonical form.
+
+#    EXAMPLES::
+
+#        sage: from flatsurf import *
+#        sage: s=translation_surfaces.octagon_and_squares().canonicalize()
+#        sage: TestSuite(s).run()
+#        sage: a = s.base_ring().gen()  # a is the square root of 2.
+
+#        sage: from flatsurf.geometry.mappings import *
+#        sage: mat=Matrix([[1,2+a],[0,1]])
+#        sage: from flatsurf.geometry.half_dilation_surface import GL2RMapping
+#        sage: m1=GL2RMapping(s,mat)
+#        sage: m2=canonicalize_translation_surface_mapping(m1.codomain())
+#        sage: m=m2*m1
+#        sage: translation_surface_cmp(m.domain(),m.codomain())==0
+#        True
+#        sage: TestSuite(m.codomain()).run()
+#        sage: s=m.domain()
+#        sage: v=s.tangent_vector(0,(0,0),(1,1))
+#        sage: w=m.push_vector_forward(v)
+#        sage: print(w)
+#        SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (a + 3, 1)
+#    """
+#    from flatsurf.geometry.translation_surface import TranslationSurface
+#    if not s.is_finite():
+#        raise NotImplementedError
+#    if not isinstance(s,TranslationSurface):
+#        raise ValueError("Only defined for TranslationSurfaces")
+#    m1=delaunay_decomposition_mapping(s)
+#    if m1 is None:
+#        s2=s
+#    else:
+#        s2=m1.codomain()
+#    m2=CanonicalizePolygonsMapping(s2)
+#    if m1 is None:
+#        m=m2
+#    else:
+#        m=SurfaceMappingComposition(m1,m2)
+#    s2=m.codomain()
+
+#    s2copy=s2.copy(mutable=True)
+#    ss=s2.copy(mutable=True)
+#    labels={label for label in s2.label_iterator()}
+#    labels.remove(s2.base_label())
+#    for label in labels:
+#        ss.underlying_surface().change_base_label(label)
+#        if ss.cmp(s2copy)>0:
+#            s2copy.underlying_surface().change_base_label(label)
+#    # We now have the base_label correct.
+#    # We will use the label walker to generate the canonical labeling of polygons.
+#    w=s2copy.walker()
+#    w.find_all_labels()
+
+#    m3=ReindexMapping(s2,w.label_dictionary(),0)
+#    return SurfaceMappingComposition(m,m3)

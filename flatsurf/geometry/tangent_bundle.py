@@ -530,6 +530,56 @@ class SimilaritySurfaceTangentVector:
                 "Rotating tangent vectors is only implemnted when at a singularity"
             )
 
+    def straight_line_flip(self):
+        r"""
+        Develop the tangent vector onto the surface, and return
+        the tangent vector obtained that starts at the endpoint and
+        points backward along the developed image.
+
+        A `ValueError` will be raised if this path has a singularity in its interior.
+
+        As a map, `straight_line_flip` is an involution.
+
+        EXAMPLES::
+
+            sage: from flatsurf import translation_surfaces
+            sage: s = translation_surfaces.square_torus()
+            sage: v1 = s.tangent_vector(0, (1/7, 2/7), (3,5))
+            sage: v2 = v1.straight_line_flip()
+            sage: v2.point() == v1.point()
+            True
+            sage: v2.vector() == -v1.vector()
+            True
+            sage: v3 = s.tangent_vector(0, (1/7, 2/7), (13,12))
+            sage: v3.straight_line_flip()
+            Traceback (most recent call last):
+            ...
+            ValueError: path goes through a singularity
+
+            sage: from flatsurf import similarity_surfaces
+            sage: s = similarity_surfaces.right_angle_triangle(3,4)
+            sage: v1 = s.tangent_vector(0, (0, 0), (10,10))
+            sage: v2 = v1.straight_line_flip()
+            sage: v2
+            SimilaritySurfaceTangentVector in polygon 0 based at (22/25, 46/25) with vector (-62/5, 34/5)
+            sage: v1 == v2.straight_line_flip()
+            True
+        """
+        covered = 0 # Keep track of what portion of the path has been transversed.
+        v0 = self
+        while covered < 1:
+            v_end = v0.forward_to_polygon_boundary()
+            if v0.vector()[0] != 0:
+                covered += (v_end.point()[0] - v0.point()[0])/v0.vector()[0]
+            else:
+                covered += (v_end.point()[1] - v0.point()[1])/v0.vector()[1]
+            if covered < 1:
+                try:
+                    v0 = v_end.invert()
+                except ValueError:
+                    raise ValueError("path goes through a singularity")
+        return self.surface().tangent_vector(v_end.polygon_label(), v_end.point() + (covered-1) * v_end.vector(), v_end.vector())
+
     def plot(self, **kwargs):
         r"""
         Return a plot of this tangent vector.

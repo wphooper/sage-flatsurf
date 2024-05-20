@@ -1,5 +1,13 @@
 r"""
-EXAMPLES::
+.. jupyter-execute::
+    :hide-code:
+
+    # Allow jupyter-execute blocks in this module to contain doctests
+    import jupyter_doctest_tweaks
+
+EXAMPLES:
+
+.. jupyter-execute::
 
     sage: import flatsurf
     sage: flatsurf.translation_surfaces.veech_2n_gon(4).plot()
@@ -135,7 +143,9 @@ class GraphicalSurface:
     If adjacencies is not defined and the surface is finite, make_all_visible()
     is called to make all polygons visible.
 
-    EXAMPLES::
+    EXAMPLES:
+
+    .. jupyter-execute::
 
         sage: from flatsurf import similarity_surfaces
         sage: from flatsurf.graphical.surface import GraphicalSurface
@@ -145,6 +155,24 @@ class GraphicalSurface:
         sage: gs.polygon_options["color"]="red"
         sage: gs.plot()
         ...Graphics object consisting of 13 graphics primitives
+
+    TESTS:
+
+    Verify that surfaces with boundary can be plotted::
+
+        sage: from flatsurf import Polygon, MutableOrientedSimilaritySurface
+        sage: S = MutableOrientedSimilaritySurface(QQ)
+        sage: S.add_polygon(Polygon(vertices=[(0,0), (-1, -1), (1,0)]))
+        0
+        sage: S.add_polygon(Polygon(vertices=[(0,0), (0, 1), (-1,-1)]))
+        1
+        sage: S.glue((0, 0), (1, 2))
+        sage: S.set_immutable()
+        sage: S
+        Translation Surface with boundary built from 2 triangles
+
+        sage: S.plot()
+        Graphics object consisting of 9 graphics primitives
 
     """
 
@@ -401,7 +429,9 @@ class GraphicalSurface:
 
         - ``limit`` -- (default ``None``) maximal number of additional polygons to make visible
 
-        EXAMPLES::
+        EXAMPLES:
+
+        .. jupyter-execute::
 
             sage: from flatsurf import similarity_surfaces
 
@@ -411,11 +441,14 @@ class GraphicalSurface:
             sage: g.plot()
             ...Graphics object consisting of 13 graphics primitives
 
+        .. jupyter-execute::
+
             sage: s = similarity_surfaces.example()
             sage: g = s.graphical_surface(adjacencies=[])
             sage: g.make_all_visible(adjacent=False)
             sage: g.plot()
             ...Graphics object consisting of 16 graphics primitives
+
         """
         if adjacent is None:
             adjacent = self._default_position_function is None
@@ -425,7 +458,10 @@ class GraphicalSurface:
             if adjacent:
                 for label, poly in zip(self._ss.labels(), self._ss.polygons()):
                     for e in range(len(poly.vertices())):
-                        l2, e2 = self._ss.opposite_edge(label, e)
+                        opposite_edge = self._ss.opposite_edge(label, e)
+                        if opposite_edge is None:
+                            continue
+                        l2, _ = opposite_edge
                         if not self.is_visible(l2):
                             self.make_adjacent(label, e)
             else:
@@ -621,8 +657,24 @@ class GraphicalSurface:
             True
             sage: g.is_adjacent(0,1)
             False
+
+        TESTS:
+
+        Verify that this works correctly for boundary edges::
+
+            sage: from flatsurf import Polygon, MutableOrientedSimilaritySurface
+            sage: S = MutableOrientedSimilaritySurface(QQ)
+            sage: S.add_polygon(Polygon(vertices=[(0,0), (-1, -1), (1,0)]))
+            0
+            sage: G = S.graphical_surface()
+            sage: G.is_adjacent(0, 0)
+            False
+
         """
-        pp, ee = self.opposite_edge(p, e)
+        opposite_edge = self.opposite_edge(p, e)
+        if opposite_edge is None:
+            return False
+        pp, ee = opposite_edge
         if not self.is_visible(pp):
             return False
         g = self.graphical_polygon(p)
@@ -878,8 +930,10 @@ class GraphicalSurface:
             for e in range(len(p.vertices())):
                 if self.is_adjacent(lab, e):
                     labels.append(None)
+                elif s.opposite_edge(lab, e) is None:
+                    labels.append(None)
                 else:
-                    llab, ee = s.opposite_edge(lab, e)
+                    llab, _ = s.opposite_edge(lab, e)
                     labels.append(str(llab))
         elif self._edge_labels == "number":
             labels = list(map(str, range(len(p.vertices()))))
@@ -1026,7 +1080,9 @@ class GraphicalSurface:
           ``_options`` is merged with the existing options of this surface. See
           examples below for details.
 
-        EXAMPLES::
+        EXAMPLES:
+
+        .. jupyter-execute::
 
             sage: from flatsurf import similarity_surfaces
             sage: s = similarity_surfaces.example()
@@ -1037,7 +1093,9 @@ class GraphicalSurface:
 
         Keyword arguments that end in ``_options`` are merged into the
         corresponding attribute before plotting; see :class:`GraphicalSurface`
-        for a list of all supported ``_options``::
+        for a list of all supported ``_options``:
+
+        .. jupyter-execute::
 
             sage: gs.plot(polygon_label_options={"color": "red"})
             ...Graphics object consisting of 13 graphics primitives
@@ -1045,12 +1103,16 @@ class GraphicalSurface:
         Keyword arguments that are prefixed with such an aspect of plotting,
         are also merged into the corresponding attribute before plotting; see
         :class:`GraphicalSurface` for a list of all supported prefixes, i.e.,
-        ``_options``::
+        ``_options``:
+
+        .. jupyter-execute::
 
             sage: gs.plot(polygon_label_color="red")
             ...Graphics object consisting of 13 graphics primitives
 
-        All other arguments are passed to the polygon plotting itself::
+        All other arguments are passed to the polygon plotting itself:
+
+        .. jupyter-execute::
 
             sage: gs.plot(fill=None)
             ...Graphics object consisting of 13 graphics primitives

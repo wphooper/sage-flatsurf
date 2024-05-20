@@ -1,109 +1,368 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-<!DOCTYPE html>
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>flatsurf.geometry.tangent_bundle &#8212; sage-flatsurf 0.4.1 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.05.20 -->
+        <title>flatsurf.geometry.tangent_bundle - sage-flatsurf 0.5.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-furo.css" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-codemirror-monokai.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter_execute.css" />
     
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/togglebutton.js"></script>
-    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.tangent_bundle</a></li> 
-      </ul>
-    </div>  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <h1>Source code for flatsurf.geometry.tangent_bundle</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="nb">zip</span>
 
-<span class="kn">from</span> <span class="nn">.polygon</span> <span class="kn">import</span> <span class="n">wedge_product</span><span class="p">,</span> <span class="n">is_same_direction</span><span class="p">,</span> <span class="n">is_opposite_direction</span>
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  --color-brand-primary: #0f0fff;
+  --color-brand-content: #0f0fff;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
 
-<span class="n">rotate_limit</span><span class="o">=</span><span class="mi">100</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Limit for clockwise_to and counter_clockwise_to in SimilaritySurfaceTangentVector.</span>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">sage-flatsurf 0.5.2 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../../_static/logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../../_static/logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">sage-flatsurf 0.5.2 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing sage-flatsurf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer.html">The Developer’s Guide for sage-flatsurf</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/tour.html">A Tour of the flatsurf Suite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/defining_surfaces.html">Defining Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/graphics_configuration.html">Graphics Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/linear_action_and_delaunay.html">The GL(2,R) Action, the Veech Group, Delaunay Decomposition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/rel_deformations.html">Relative Period Deformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/saddle_connections.html">Working with Saddle Connections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/apisa_wright.html">Exploring Orbit Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/siegel_veech.html">Siegel-Veech Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/straight_line_flow.html">Straight-Line Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/warwick-2017.html">Notes from the Warwick EPSRC Symposium on “Computation in geometric topology”</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/boshernitzan_conjecture.html">Boshernitzan’s Conjectures</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../geometry.html">The flatsurf.geometry Package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of The flatsurf.geometry Package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/categories.html"><code class="docutils literal notranslate"><span class="pre">categories</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/chamanara.html"><code class="docutils literal notranslate"><span class="pre">chamanara</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/circle.html"><code class="docutils literal notranslate"><span class="pre">circle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/cone_surfaces.html"><code class="docutils literal notranslate"><span class="pre">cone_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/delaunay.html"><code class="docutils literal notranslate"><span class="pre">delaunay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/dilation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">dilation_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/euclidean.html"><code class="docutils literal notranslate"><span class="pre">euclidean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/finitely_generated_matrix_group.html"><code class="docutils literal notranslate"><span class="pre">finitely_generated_matrix_group</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/fundamental_group.html"><code class="docutils literal notranslate"><span class="pre">fundamental_group</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/gl2r_orbit_closure.html"><code class="docutils literal notranslate"><span class="pre">gl2r_orbit_closure</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/half_dilation_surface.html"><code class="docutils literal notranslate"><span class="pre">half_dilation_surface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/half_translation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">half_translation_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/hyperbolic.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/hyperbolic_polygons.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic_polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/interval_exchange_transformation.html"><code class="docutils literal notranslate"><span class="pre">interval_exchange_transformation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/l_infinity_delaunay_cells.html"><code class="docutils literal notranslate"><span class="pre">l_infinity_delaunay_cells</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/mappings.html"><code class="docutils literal notranslate"><span class="pre">mappings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/mega_wollmilchsau.html"><code class="docutils literal notranslate"><span class="pre">mega_wollmilchsau</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/minimal_cover.html"><code class="docutils literal notranslate"><span class="pre">minimal_cover</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/origami.html"><code class="docutils literal notranslate"><span class="pre">origami</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/polygon.html"><code class="docutils literal notranslate"><span class="pre">polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/polygonal_surfaces.html"><code class="docutils literal notranslate"><span class="pre">polygonal_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/polygons.html"><code class="docutils literal notranslate"><span class="pre">polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/polyhedra.html"><code class="docutils literal notranslate"><span class="pre">polyhedra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/pyflatsurf_conversion.html"><code class="docutils literal notranslate"><span class="pre">pyflatsurf_conversion</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/euclidean_polygonal_surfaces.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygonal_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/euclidean_polygons.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/euclidean_polygons_with_angles.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygons_with_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/relative_homology.html"><code class="docutils literal notranslate"><span class="pre">relative_homology</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/similarity.html"><code class="docutils literal notranslate"><span class="pre">similarity</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/similarity_surfaces.html"><code class="docutils literal notranslate"><span class="pre">similarity_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/similarity_surface_generators.html"><code class="docutils literal notranslate"><span class="pre">similarity_surface_generators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/straight_line_trajectory.html"><code class="docutils literal notranslate"><span class="pre">straight_line_trajectory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/subfield.html"><code class="docutils literal notranslate"><span class="pre">subfield</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/surface_category.html"><code class="docutils literal notranslate"><span class="pre">surface_category</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/surface_legacy.html"><code class="docutils literal notranslate"><span class="pre">surface_legacy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/surface_objects.html"><code class="docutils literal notranslate"><span class="pre">surface_objects</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/surface.html"><code class="docutils literal notranslate"><span class="pre">surface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/tangent_bundle.html"><code class="docutils literal notranslate"><span class="pre">tangent_bundle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/thurston_veech.html"><code class="docutils literal notranslate"><span class="pre">thurston_veech</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/topological_surfaces.html"><code class="docutils literal notranslate"><span class="pre">topological_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../geometry/translation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">translation_surfaces</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../graphical.html">The flatsurf.graphical Package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of The flatsurf.graphical Package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../graphical/hyperbolic.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../graphical/polygon.html"><code class="docutils literal notranslate"><span class="pre">polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../graphical/straight_line_trajectory.html"><code class="docutils literal notranslate"><span class="pre">straight_line_trajectory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../graphical/surface_point.html"><code class="docutils literal notranslate"><span class="pre">surface_point</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../graphical/surface.html"><code class="docutils literal notranslate"><span class="pre">surface</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for flatsurf.geometry.tangent_bundle</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. jupyter-execute::</span>
+<span class="sd">    :hide-code:</span>
+
+<span class="sd">    # Allow jupyter-execute blocks in this module to contain doctests</span>
+<span class="sd">    import jupyter_doctest_tweaks</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#  This file is part of sage-flatsurf.</span>
+<span class="c1">#</span>
+<span class="c1">#        Copyright (C) 2016-2022 W. Patrick Hooper</span>
+<span class="c1">#                      2016-2022 Vincent Delecroix</span>
+<span class="c1">#                      2022-2023 Julian Rüth</span>
+<span class="c1">#</span>
+<span class="c1">#  sage-flatsurf is free software: you can redistribute it and/or modify</span>
+<span class="c1">#  it under the terms of the GNU General Public License as published by</span>
+<span class="c1">#  the Free Software Foundation, either version 2 of the License, or</span>
+<span class="c1">#  (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#  sage-flatsurf is distributed in the hope that it will be useful,</span>
+<span class="c1">#  but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">#  GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#  You should have received a copy of the GNU General Public License</span>
+<span class="c1">#  along with sage-flatsurf. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1"># ********************************************************************</span>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector">[docs]</a><span class="k">class</span> <span class="nc">SimilaritySurfaceTangentVector</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Limit for clockwise_to and counter_clockwise_to in SimilaritySurfaceTangentVector.</span>
+<span class="n">rotate_limit</span> <span class="o">=</span> <span class="mi">100</span>
+
+
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector">[docs]</a><span class="k">class</span> <span class="nc">SimilaritySurfaceTangentVector</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tangent vector to a similarity surface.</span>
 
 <span class="sd">    EXAMPLES::</span>
 
-<span class="sd">        sage: from flatsurf import *</span>
+<span class="sd">        sage: from flatsurf import translation_surfaces</span>
 
 <span class="sd">    Examples on edges in direction of edges::</span>
 
 <span class="sd">        sage: s = translation_surfaces.square_torus()</span>
-<span class="sd">        sage: for y in [0,1]:</span>
-<span class="sd">        ....:     for d in [1,-1]:</span>
-<span class="sd">        ....:         print(s.tangent_vector(0, (1/2, y), (d, 0)))</span>
+<span class="sd">        sage: s.tangent_vector(0, (1/2, 0), (1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1/2, 0) with vector (1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1/2, 0), (-1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1/2, 1) with vector (-1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1/2, 1), (1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1/2, 0) with vector (1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1/2, 1), (-1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1/2, 1) with vector (-1, 0)</span>
 
-<span class="sd">        sage: for x in [0,1]:</span>
-<span class="sd">        ....:     for d in [1,-1]:</span>
-<span class="sd">        ....:         print(s.tangent_vector(0, (x, 1/2), (0, d)))</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 1/2), (0, 1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 1/2) with vector (0, 1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 1/2), (0, -1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 1/2) with vector (0, -1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 1/2), (0, 1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 1/2) with vector (0, 1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 1/2), (0, -1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 1/2) with vector (0, -1)</span>
 
 <span class="sd">    Examples on vertices in direction of edges::</span>
 
 <span class="sd">        sage: s = translation_surfaces.square_torus()</span>
-<span class="sd">        sage: for y in [0,1]:</span>
-<span class="sd">        ....:     print(s.tangent_vector(0, (0, y), (1, 0)))</span>
-<span class="sd">        ....:     print(s.tangent_vector(0, (1, y), (-1, 0)))</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 0), (1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 0), (-1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 1) with vector (-1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 1), (1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (1, 0)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 1), (-1, 0))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 1) with vector (-1, 0)</span>
 
-<span class="sd">        sage: for x in [0,1]:</span>
-<span class="sd">        ....:     print(s.tangent_vector(0, (x, 0), (0, 1)))</span>
-<span class="sd">        ....:     print(s.tangent_vector(0, (x, 1), (0, -1)))</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 0), (0, 1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 0) with vector (0, 1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (0, 1), (0, -1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 1) with vector (0, -1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 0), (0, 1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (1, 0) with vector (0, 1)</span>
+<span class="sd">        sage: s.tangent_vector(0, (1, 1), (0, -1))</span>
 <span class="sd">        SimilaritySurfaceTangentVector in polygon 0 based at (0, 1) with vector (0, -1)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tangent_bundle</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">flatsurf.geometry.euclidean</span> <span class="kn">import</span> <span class="n">ccw</span><span class="p">,</span> <span class="n">is_anti_parallel</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span> <span class="o">=</span> <span class="n">tangent_bundle</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">get_point_position</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">vector</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">vector_space</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided vector is zero. (Temporarily not supported.)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vector</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;vector must be non-zero&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">is_in_interior</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span> <span class="o">=</span> <span class="n">polygon_label</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point</span>
@@ -112,117 +371,141 @@
         <span class="k">elif</span> <span class="n">pos</span><span class="o">.</span><span class="n">is_in_edge_interior</span><span class="p">():</span>
             <span class="n">e</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">get_edge</span><span class="p">()</span>
             <span class="n">edge_v</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">edge_v</span><span class="p">,</span><span class="n">vector</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">is_opposite_direction</span><span class="p">(</span><span class="n">edge_v</span><span class="p">,</span><span class="n">vector</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">ccw</span><span class="p">(</span><span class="n">edge_v</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">is_anti_parallel</span><span class="p">(</span><span class="n">edge_v</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
                 <span class="c1"># Need to move point and vector to opposite edge.</span>
-                <span class="n">label2</span><span class="p">,</span><span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
-                <span class="n">similarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">edge_transformation</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
-                <span class="n">point2</span><span class="o">=</span><span class="n">similarity</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-                <span class="n">vector2</span><span class="o">=</span><span class="n">similarity</span><span class="o">.</span><span class="n">derivative</span><span class="p">()</span><span class="o">*</span><span class="n">vector</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="o">=</span><span class="n">label2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="o">=</span><span class="n">point2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="o">=</span><span class="n">vector2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">get_point_position</span><span class="p">(</span><span class="n">point2</span><span class="p">)</span>
+                <span class="n">label2</span><span class="p">,</span> <span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">similarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">edge_transformation</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">point2</span> <span class="o">=</span> <span class="n">similarity</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+                <span class="n">vector2</span> <span class="o">=</span> <span class="n">similarity</span><span class="o">.</span><span class="n">derivative</span><span class="p">()</span> <span class="o">*</span> <span class="n">vector</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span> <span class="o">=</span> <span class="n">label2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span> <span class="o">=</span> <span class="n">vector2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">get_point_position</span><span class="p">(</span><span class="n">point2</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="o">=</span><span class="n">polygon_label</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="o">=</span><span class="n">point</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="o">=</span><span class="n">vector</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">=</span><span class="n">pos</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span> <span class="o">=</span> <span class="n">polygon_label</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span> <span class="o">=</span> <span class="n">vector</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="k">elif</span> <span class="n">pos</span><span class="o">.</span><span class="n">is_vertex</span><span class="p">():</span>
-            <span class="n">v</span><span class="o">=</span><span class="n">pos</span><span class="o">.</span><span class="n">get_vertex</span><span class="p">()</span>
-            <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">get_vertex</span><span class="p">()</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
             <span class="c1"># subsequent edge:</span>
             <span class="n">edge1</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
             <span class="c1"># prior edge:</span>
-            <span class="n">edge0</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span> <span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span> <span class="p">)</span>
-            <span class="n">wp1</span> <span class="o">=</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">edge1</span><span class="p">,</span><span class="n">vector</span><span class="p">)</span>
-            <span class="n">wp0</span> <span class="o">=</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">edge0</span><span class="p">,</span><span class="n">vector</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">wp1</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">wp0</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Singular point with vector pointing away from polygon&quot;</span><span class="p">)</span>
+            <span class="n">edge0</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">edge</span><span class="p">((</span><span class="n">v</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">vertices</span><span class="p">()))</span>
+            <span class="n">wp1</span> <span class="o">=</span> <span class="n">ccw</span><span class="p">(</span><span class="n">edge1</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span>
+            <span class="n">wp0</span> <span class="o">=</span> <span class="n">ccw</span><span class="p">(</span><span class="n">edge0</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">wp1</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">wp0</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Singular point with vector pointing away from polygon&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">wp0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># vector points backward along edge 0</span>
-                <span class="n">label2</span><span class="p">,</span><span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="o">.</span><span class="n">num_edges</span><span class="p">())</span>
-                <span class="n">similarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">edge_transformation</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="o">.</span><span class="n">num_edges</span><span class="p">())</span>
-                <span class="n">point2</span><span class="o">=</span><span class="n">similarity</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-                <span class="n">vector2</span><span class="o">=</span><span class="n">similarity</span><span class="o">.</span><span class="n">derivative</span><span class="p">()</span><span class="o">*</span><span class="n">vector</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="o">=</span><span class="n">label2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="o">=</span><span class="n">point2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="o">=</span><span class="n">vector2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">get_point_position</span><span class="p">(</span><span class="n">point2</span><span class="p">)</span>
+                <span class="n">label2</span><span class="p">,</span> <span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span>
+                    <span class="n">polygon_label</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">similarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">edge_transformation</span><span class="p">(</span>
+                    <span class="n">polygon_label</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">point2</span> <span class="o">=</span> <span class="n">similarity</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+                <span class="n">vector2</span> <span class="o">=</span> <span class="n">similarity</span><span class="o">.</span><span class="n">derivative</span><span class="p">()</span> <span class="o">*</span> <span class="n">vector</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span> <span class="o">=</span> <span class="n">label2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span> <span class="o">=</span> <span class="n">vector2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">get_point_position</span><span class="p">(</span><span class="n">point2</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># vector points along edge1 in that directior or points into polygons interior</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="o">=</span><span class="n">polygon_label</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="o">=</span><span class="n">point</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="o">=</span><span class="n">vector</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">=</span><span class="n">pos</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span> <span class="o">=</span> <span class="n">polygon_label</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">point</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span> <span class="o">=</span> <span class="n">vector</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided point lies outside the indexed polygon&quot;</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="o">.</span><span class="n">set_immutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="o">.</span><span class="n">set_immutable</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;SimilaritySurfaceTangentVector in polygon &quot;</span><span class="o">+</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="p">)</span><span class="o">+</span>\
-            <span class="s2">&quot; based at &quot;</span><span class="o">+</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; with vector &quot;</span><span class="o">+</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s2">&quot;SimilaritySurfaceTangentVector in polygon &quot;</span>
+            <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; based at &quot;</span>
+            <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; with vector &quot;</span>
+            <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">==</span><span class="n">other</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="bp">NotImplemented</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">point</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TESTS::</span>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.surface"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.surface">[docs]</a>    <span class="k">def</span> <span class="nf">surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the underlying surface.&quot;&quot;&quot;</span>
+<span class="sd">            sage: from flatsurf import translation_surfaces</span>
+<span class="sd">            sage: s = translation_surfaces.square_torus()</span>
+<span class="sd">            sage: for y in [0,1]:</span>
+<span class="sd">            ....:     for d in [1,-1]:</span>
+<span class="sd">            ....:         h = hash(s.tangent_vector(0, (1/2, y), (d, 0)))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span><span class="p">))</span>
+
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.surface"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.surface">[docs]</a>    <span class="k">def</span> <span class="nf">surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the underlying surface.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.is_based_at_singularity"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.is_based_at_singularity">[docs]</a>    <span class="k">def</span> <span class="nf">is_based_at_singularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.is_based_at_singularity"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.is_based_at_singularity">[docs]</a>    <span class="k">def</span> <span class="nf">is_based_at_singularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the truth value of the statement &#39;the base point for this vector is a singularity.&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">.</span><span class="n">is_vertex</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.vertex"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.vertex">[docs]</a>    <span class="k">def</span> <span class="nf">vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the index of the vertex.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.vertex"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.vertex">[docs]</a>    <span class="k">def</span> <span class="nf">vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the index of the vertex.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">.</span><span class="n">get_vertex</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.singularity"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.singularity">[docs]</a>    <span class="k">def</span> <span class="nf">singularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the index of the vertex.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">sage.misc.superseded</span> <span class="kn">import</span> <span class="n">deprecation</span>
-        <span class="n">deprecation</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s2">&quot;Do not use .singularity(). Use .vertex() instead.&quot;</span><span class="p">)</span>
-        <span class="c1"># Note: I want to change this to returning the singularity of the surface instead.</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">.</span><span class="n">get_vertex</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.is_in_boundary_of_polygon"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.is_in_boundary_of_polygon">[docs]</a>    <span class="k">def</span> <span class="nf">is_in_boundary_of_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.is_in_boundary_of_polygon"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.is_in_boundary_of_polygon">[docs]</a>    <span class="k">def</span> <span class="nf">is_in_boundary_of_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the truth value of the statement</span>
 <span class="sd">        &#39;the base point for this vector lies on the boundary of</span>
 <span class="sd">        one of the polygons making up the surface.&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span><span class="o">.</span><span class="n">is_in_boundary</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.position"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.position"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the PolygonPosition representing the location of</span>
 <span class="sd">        the basepoint of the vector in the polygon that contains it.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.bundle"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.bundle">[docs]</a>    <span class="k">def</span> <span class="nf">bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return the tangent bundle containing this vector. &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.bundle"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.bundle">[docs]</a>    <span class="k">def</span> <span class="nf">bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the tangent bundle containing this vector.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bundle</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.polygon_label"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.polygon_label">[docs]</a>    <span class="k">def</span> <span class="nf">polygon_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.polygon_label"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.polygon_label">[docs]</a>    <span class="k">def</span> <span class="nf">polygon_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygon_label</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.polygon"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.polygon">[docs]</a>    <span class="k">def</span> <span class="nf">polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.polygon"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.polygon">[docs]</a>    <span class="k">def</span> <span class="nf">polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.point"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.point">[docs]</a>    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.point"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.point">[docs]</a>    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the base point of this tangent vector as a vector.</span>
 
 <span class="sd">        The coordinates of output are given with respect to the polygon it</span>
@@ -241,8 +524,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.vector"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.vector">[docs]</a>    <span class="k">def</span> <span class="nf">vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.vector"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.vector">[docs]</a>    <span class="k">def</span> <span class="nf">vector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the coordinates of this vector within the assigned polygon.</span>
 
 <span class="sd">        EXAMPLES::</span>
@@ -258,42 +541,44 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.edge_pointing_along"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.edge_pointing_along">[docs]</a>    <span class="k">def</span> <span class="nf">edge_pointing_along</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.edge_pointing_along"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.edge_pointing_along">[docs]</a>    <span class="k">def</span> <span class="nf">edge_pointing_along</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the pair of (p,e) where p is the polygon label at the base point,</span>
 <span class="sd">        and e is the edge this vector points along or none if it does not point</span>
 <span class="sd">        along an edge. Here pointing along means that the vector is based at</span>
 <span class="sd">        a vertex and represents the vector joining this edge to the next vertex.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_based_at_singularity</span><span class="p">():</span>
-            <span class="n">e</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon</span><span class="p">()</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon</span><span class="p">()</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> <span class="n">e</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.differs_by_scaling"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.differs_by_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">differs_by_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_tangent_vector</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.differs_by_scaling"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.differs_by_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">differs_by_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">another_tangent_vector</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns true if the other vector just differs by scaling. This means they should lie</span>
 <span class="sd">        in the same polygon, be based at the same point, and point in the same direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span><span class="o">==</span><span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span> <span class="ow">and</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">()</span><span class="o">==</span><span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="ow">and</span> \
-            <span class="n">is_same_direction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span><span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+        <span class="kn">from</span> <span class="nn">flatsurf.geometry.euclidean</span> <span class="kn">import</span> <span class="n">is_parallel</span>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.invert"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.invert">[docs]</a>    <span class="k">def</span> <span class="nf">invert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span> <span class="o">==</span> <span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="o">==</span> <span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">point</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="n">is_parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> <span class="n">another_tangent_vector</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.invert"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.invert">[docs]</a>    <span class="k">def</span> <span class="nf">invert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the negation of this tangent vector.</span>
 <span class="sd">        Raises a ValueError if the vector is based at a singularity.&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_based_at_singularity</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t invert tangent vector based at a singularity.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bundle</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span>
-            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bundle</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.forward_to_polygon_boundary"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.forward_to_polygon_boundary">[docs]</a>    <span class="k">def</span> <span class="nf">forward_to_polygon_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.forward_to_polygon_boundary"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.forward_to_polygon_boundary">[docs]</a>    <span class="k">def</span> <span class="nf">forward_to_polygon_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Flows forward (in the direction of the tangent vector) until the end</span>
 <span class="sd">        of the polygon is reached.</span>
 <span class="sd">        Returns the tangent vector based at the endpoint which point backward along the trajectory.</span>
@@ -309,38 +594,36 @@
 <span class="sd">            sage: s = SimilaritySurfaceGenerators.example()</span>
 <span class="sd">            sage: from flatsurf.geometry.tangent_bundle import SimilaritySurfaceTangentBundle</span>
 <span class="sd">            sage: tb = SimilaritySurfaceTangentBundle(s)</span>
-<span class="sd">            sage: print(&quot;Polygon 0 is &quot;+str(s.polygon(0)))</span>
-<span class="sd">            Polygon 0 is Polygon: (0, 0), (2, -2), (2, 0)</span>
-<span class="sd">            sage: print(&quot;Polygon 1 is &quot;+str(s.polygon(1)))</span>
-<span class="sd">            Polygon 1 is Polygon: (0, 0), (2, 0), (1, 3)</span>
+<span class="sd">            sage: s.polygon(0)</span>
+<span class="sd">            Polygon(vertices=[(0, 0), (2, -2), (2, 0)])</span>
+<span class="sd">            sage: s.polygon(1)</span>
+<span class="sd">            Polygon(vertices=[(0, 0), (2, 0), (1, 3)])</span>
 <span class="sd">            sage: from flatsurf.geometry.tangent_bundle import SimilaritySurfaceTangentVector</span>
-<span class="sd">            sage: V = tb.surface().vector_space()</span>
+<span class="sd">            sage: V = tb.surface().base_ring()**2</span>
 <span class="sd">            sage: v = SimilaritySurfaceTangentVector(tb, 0, V((0,0)), V((3,-1)))</span>
-<span class="sd">            sage: print(v)</span>
+<span class="sd">            sage: v</span>
 <span class="sd">            SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (3, -1)</span>
 <span class="sd">            sage: v2 = v.forward_to_polygon_boundary()</span>
-<span class="sd">            sage: print(v2)</span>
+<span class="sd">            sage: v2</span>
 <span class="sd">            SimilaritySurfaceTangentVector in polygon 0 based at (2, -2/3) with vector (-3, 1)</span>
-<span class="sd">            sage: print(v2.invert())</span>
+<span class="sd">            sage: v2.invert()</span>
 <span class="sd">            SimilaritySurfaceTangentVector in polygon 1 based at (2/3, 2) with vector (4, -3)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon</span><span class="p">()</span>
-        <span class="n">point2</span><span class="p">,</span><span class="n">pos2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">flow_to_exit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
-        <span class="c1">#diff=point2-point</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon</span><span class="p">()</span>
+        <span class="n">point2</span><span class="p">,</span> <span class="n">pos2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">flow_to_exit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+        <span class="c1"># diff=point2-point</span>
         <span class="n">new_vector</span> <span class="o">=</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bundle</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span>
-            <span class="n">point2</span><span class="p">,</span>
-            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bundle</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> <span class="n">point2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">new_vector</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.straight_line_trajectory"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.straight_line_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">straight_line_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.straight_line_trajectory"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.straight_line_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">straight_line_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the straight line trajectory associated to this vector.</span>
 
 <span class="sd">        EXAMPLES::</span>
 
-<span class="sd">            sage: from flatsurf import *</span>
+<span class="sd">            sage: from flatsurf import translation_surfaces</span>
 
 <span class="sd">            sage: s = translation_surfaces.square_torus()</span>
 <span class="sd">            sage: v = s.tangent_vector(0, (0,0), (1,1))</span>
@@ -359,19 +642,20 @@
 <span class="sd">            Segment in polygon 0 starting at (0.9442719099991588?, 0) and ending at (1, 0.1803398874989485?)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">flatsurf.geometry.straight_line_trajectory</span> <span class="kn">import</span> <span class="n">StraightLineTrajectory</span>
+
         <span class="k">return</span> <span class="n">StraightLineTrajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.clockwise_to"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.clockwise_to">[docs]</a>    <span class="k">def</span> <span class="nf">clockwise_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">code</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.clockwise_to"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.clockwise_to">[docs]</a>    <span class="k">def</span> <span class="nf">clockwise_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new tangent vector obtained by rotating this one in the clockwise</span>
 <span class="sd">        direction until the vector is parallel to w, and scaling so that the length matches</span>
-<span class="sd">        that of w. </span>
-<span class="sd">        </span>
-<span class="sd">        Note that we always do some rotation so that if w is parallel to this vector, then a </span>
+<span class="sd">        that of w.</span>
+
+<span class="sd">        Note that we always do some rotation so that if w is parallel to this vector, then a</span>
 <span class="sd">        -360 degree rotation is performed.</span>
-<span class="sd">        </span>
+
 <span class="sd">        The vector w must be nonzero.</span>
-<span class="sd">        </span>
+
 <span class="sd">        On an infinite surface, this is potentially an infinite calculation</span>
 <span class="sd">        so we impose a limit (representing the maximal number of polygons</span>
 <span class="sd">        that must be rotated through.) This is the variable rotate_limit</span>
@@ -384,7 +668,7 @@
 
 <span class="sd">        EXAMPLES::</span>
 
-<span class="sd">            sage: from flatsurf import *</span>
+<span class="sd">            sage: from flatsurf import translation_surfaces</span>
 <span class="sd">            sage: s=translation_surfaces.regular_octagon()</span>
 <span class="sd">            sage: v=s.tangent_vector(0,(0,0),(1,1))</span>
 <span class="sd">            sage: v.clockwise_to((-1,-1))</span>
@@ -394,53 +678,63 @@
 <span class="sd">            sage: v.clockwise_to((1,1), code=True)</span>
 <span class="sd">            (SimilaritySurfaceTangentVector in polygon 0 based at (-1/2*a, 1/2*a) with vector (1, 1), [0, 5, 2])</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">w</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">vector_space</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">(),</span> <span class="s2">&quot;Vector w must be non-zero.&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;w must be non-zero&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_based_at_singularity</span><span class="p">():</span>
-            <span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span>
-            <span class="n">v1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
-            <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
-            <span class="n">vertex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
-            <span class="n">v2</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
+            <span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">sage.matrix.constructor</span> <span class="kn">import</span> <span class="n">Matrix</span>
-            <span class="n">der</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="n">der</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
             <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                 <span class="n">codes</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="kn">from</span> <span class="nn">flatsurf.geometry.euclidean</span> <span class="kn">import</span> <span class="n">ccw</span>
+
             <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rotate_limit</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="n">w</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">v1</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ccw</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ccw</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># We&#39;ve found it!</span>
                     <span class="k">break</span>
                 <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                     <span class="n">codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
-                <span class="n">label2</span><span class="p">,</span><span class="n">edge2</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">vertex</span><span class="p">)</span>
-                <span class="n">der</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">edge_matrix</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span><span class="n">edge2</span><span class="p">)</span>
-                <span class="n">v1</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge2</span><span class="p">))</span>
-                <span class="n">label</span><span class="o">=</span><span class="n">label2</span>
-                <span class="n">vertex</span><span class="o">=</span><span class="p">(</span><span class="n">edge2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span>
-                <span class="n">v2</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">))</span>
-            <span class="k">assert</span> <span class="n">count</span><span class="o">&lt;</span><span class="n">rotate_limit</span><span class="p">,</span> <span class="s2">&quot;Reached limit!&quot;</span>
+                <span class="n">label2</span><span class="p">,</span> <span class="n">edge2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)</span>
+                <span class="n">der</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">edge_matrix</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span> <span class="n">edge2</span><span class="p">)</span>
+                <span class="n">v1</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge2</span><span class="p">))</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">label2</span>
+                <span class="n">vertex</span> <span class="o">=</span> <span class="p">(</span><span class="n">edge2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+                <span class="n">v2</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">rotate_limit</span><span class="p">,</span> <span class="s2">&quot;Reached limit!&quot;</span>
             <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span><span class="n">w</span><span class="p">),</span>
-                    <span class="n">codes</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span>
+                        <span class="n">label</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span> <span class="n">w</span>
+                    <span class="p">),</span>
+                    <span class="n">codes</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span><span class="n">w</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span>
+                    <span class="n">label</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span> <span class="n">w</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;codes are only implemented when based at a singularity&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span><span class="n">v</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span><span class="n">w</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Rotating tangent vectors is only implemnted when at a singularity&quot;</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentVector.counterclockwise_to"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.counterclockwise_to">[docs]</a>    <span class="k">def</span> <span class="nf">counterclockwise_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.counterclockwise_to"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.counterclockwise_to">[docs]</a>    <span class="k">def</span> <span class="nf">counterclockwise_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new tangent vector obtained by rotating this one in the counterclockwise</span>
 <span class="sd">        direction until the vector is parallel to w, and scaling so that the length matches</span>
-<span class="sd">        that of w. </span>
-<span class="sd">        </span>
-<span class="sd">        Note that we always do some rotation so that if w is parallel to this vector, then a </span>
+<span class="sd">        that of w.</span>
+
+<span class="sd">        Note that we always do some rotation so that if w is parallel to this vector, then a</span>
 <span class="sd">        360 degree rotation is performed.</span>
-<span class="sd">        </span>
+
 <span class="sd">        The vector w must be nonzero.</span>
-<span class="sd">        </span>
+
 <span class="sd">        On an infinite surface, this is potentially an infinite calculation</span>
 <span class="sd">        so we impose a limit (representing the maximal number of polygons</span>
 <span class="sd">        that must be rotated through.) This is the variable rotate_limit</span>
@@ -453,7 +747,7 @@
 
 <span class="sd">        EXAMPLES::</span>
 
-<span class="sd">            sage: from flatsurf import *</span>
+<span class="sd">            sage: from flatsurf import translation_surfaces</span>
 <span class="sd">            sage: s=translation_surfaces.regular_octagon()</span>
 <span class="sd">            sage: v=s.tangent_vector(0,(0,0),(1,1))</span>
 <span class="sd">            sage: v.counterclockwise_to((-1,-1))</span>
@@ -463,90 +757,183 @@
 <span class="sd">            sage: v.counterclockwise_to((1,1), code=True)</span>
 <span class="sd">            (SimilaritySurfaceTangentVector in polygon 0 based at (1, 0) with vector (1, 1), [7, 2, 5])</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">w</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">vector_space</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">(),</span> <span class="s2">&quot;Vector w must be non-zero.&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;w must be non-zero&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_based_at_singularity</span><span class="p">():</span>
-            <span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span>
-            <span class="n">v1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
-            <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
-            <span class="n">vertex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
-            <span class="n">previous_vertex</span> <span class="o">=</span> <span class="p">(</span><span class="n">vertex</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">num_edges</span><span class="p">())</span> <span class="o">%</span> \
-                <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span>
-            <span class="n">v2</span><span class="o">=-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">previous_vertex</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">()</span>
+            <span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+            <span class="n">previous_vertex</span> <span class="o">=</span> <span class="p">(</span><span class="n">vertex</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertices</span><span class="p">()))</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">previous_vertex</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">sage.matrix.constructor</span> <span class="kn">import</span> <span class="n">Matrix</span>
-            <span class="n">der</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="n">der</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
             <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                 <span class="n">codes</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">wedge_product</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">w</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">v2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+
+            <span class="kn">from</span> <span class="nn">flatsurf.geometry.euclidean</span> <span class="kn">import</span> <span class="n">ccw</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ccw</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ccw</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rotate_limit</span><span class="p">):</span>
-                    <span class="n">label2</span><span class="p">,</span><span class="n">edge2</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">previous_vertex</span><span class="p">)</span>
+                    <span class="n">label2</span><span class="p">,</span> <span class="n">edge2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">opposite_edge</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">previous_vertex</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                         <span class="n">codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previous_vertex</span><span class="p">)</span>
-                    <span class="n">der</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">edge_matrix</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span><span class="n">edge2</span><span class="p">)</span>
-                    <span class="n">label</span><span class="o">=</span><span class="n">label2</span>
-                    <span class="n">vertex</span><span class="o">=</span><span class="n">edge2</span>
-                    <span class="n">previous_vertex</span> <span class="o">=</span> <span class="p">(</span><span class="n">vertex</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">num_edges</span><span class="p">())</span> <span class="o">%</span> \
-                        <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">num_edges</span><span class="p">()</span>
-                    <span class="n">v1</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">))</span>
-                    <span class="n">v2</span><span class="o">=</span><span class="n">der</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">previous_vertex</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">w</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">wedge_product</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">v2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">der</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">edge_matrix</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span> <span class="n">edge2</span><span class="p">)</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">label2</span>
+                    <span class="n">vertex</span> <span class="o">=</span> <span class="n">edge2</span>
+                    <span class="n">previous_vertex</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">vertex</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+                    <span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+                    <span class="n">v1</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">vertex</span><span class="p">))</span>
+                    <span class="n">v2</span> <span class="o">=</span> <span class="n">der</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">previous_vertex</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">ccw</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ccw</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="c1"># We&#39;ve found it!</span>
                         <span class="k">break</span>
-                <span class="k">assert</span> <span class="n">count</span><span class="o">&lt;</span><span class="n">rotate_limit</span><span class="p">,</span> <span class="s2">&quot;Reached limit!&quot;</span>
+                <span class="k">assert</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">rotate_limit</span><span class="p">,</span> <span class="s2">&quot;Reached limit!&quot;</span>
             <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span><span class="n">w</span><span class="p">),</span>
-                    <span class="n">codes</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span>
+                        <span class="n">label</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span> <span class="n">w</span>
+                    <span class="p">),</span>
+                    <span class="n">codes</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span><span class="n">w</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span>
+                    <span class="n">label</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">vertex</span><span class="p">),</span> <span class="n">w</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;codes are only implemented when based at a singularity&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span><span class="n">v</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span><span class="n">w</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Rotating tangent vectors is only implemnted when at a singularity&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.straight_line_flip"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.straight_line_flip">[docs]</a>    <span class="k">def</span> <span class="nf">straight_line_flip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Develop the tangent vector onto the surface, and return</span>
+<span class="sd">        the tangent vector obtained that starts at the endpoint and</span>
+<span class="sd">        points backward along the developed image.</span>
+
+<span class="sd">        A `ValueError` will be raised if this path has a singularity in its interior.</span>
+
+<span class="sd">        As a map, `straight_line_flip` is an involution.</span>
+
+<span class="sd">        EXAMPLES::</span>
+
+<span class="sd">            sage: from flatsurf import translation_surfaces</span>
+<span class="sd">            sage: s = translation_surfaces.square_torus()</span>
+<span class="sd">            sage: v1 = s.tangent_vector(0, (1/7, 2/7), (3,5))</span>
+<span class="sd">            sage: v2 = v1.straight_line_flip()</span>
+<span class="sd">            sage: v2.point() == v1.point()</span>
+<span class="sd">            True</span>
+<span class="sd">            sage: v2.vector() == -v1.vector()</span>
+<span class="sd">            True</span>
+<span class="sd">            sage: v3 = s.tangent_vector(0, (1/7, 2/7), (13,12))</span>
+<span class="sd">            sage: v3.straight_line_flip()</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            ValueError: path goes through a singularity</span>
+
+<span class="sd">            sage: from flatsurf import similarity_surfaces</span>
+<span class="sd">            sage: s = similarity_surfaces.right_angle_triangle(3,4)</span>
+<span class="sd">            sage: v1 = s.tangent_vector(0, (0, 0), (10,10))</span>
+<span class="sd">            sage: v2 = v1.straight_line_flip()</span>
+<span class="sd">            sage: v2</span>
+<span class="sd">            SimilaritySurfaceTangentVector in polygon 0 based at (22/25, 46/25) with vector (-62/5, 34/5)</span>
+<span class="sd">            sage: v1 == v2.straight_line_flip()</span>
+<span class="sd">            True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">covered</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Keep track of what portion of the path has been transversed.</span>
+        <span class="n">v0</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">covered</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">v_end</span> <span class="o">=</span> <span class="n">v0</span><span class="o">.</span><span class="n">forward_to_polygon_boundary</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v0</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">covered</span> <span class="o">+=</span> <span class="p">(</span><span class="n">v_end</span><span class="o">.</span><span class="n">point</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">v0</span><span class="o">.</span><span class="n">point</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">covered</span> <span class="o">+=</span> <span class="p">(</span><span class="n">v_end</span><span class="o">.</span><span class="n">point</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v0</span><span class="o">.</span><span class="n">point</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="n">vector</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">covered</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">v0</span> <span class="o">=</span> <span class="n">v_end</span><span class="o">.</span><span class="n">invert</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;path goes through a singularity&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">tangent_vector</span><span class="p">(</span><span class="n">v_end</span><span class="o">.</span><span class="n">polygon_label</span><span class="p">(),</span> <span class="n">v_end</span><span class="o">.</span><span class="n">point</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">covered</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">v_end</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span> <span class="n">v_end</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="SimilaritySurfaceTangentVector.plot"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentVector.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a plot of this tangent vector.</span>
+
+<span class="sd">        EXAMPLES:</span>
+
+<span class="sd">        .. jupyter-execute::</span>
+
+<span class="sd">            sage: import flatsurf</span>
+<span class="sd">            sage: S = flatsurf.translation_surfaces.veech_double_n_gon(5)</span>
+<span class="sd">            sage: v = S.tangent_vector(0, (1/8, 1/4), (1/2, 1/4))</span>
+<span class="sd">            sage: S.plot() + v.plot()</span>
+<span class="sd">            Graphics object consisting of 22 graphics primitives</span>
+
+<span class="sd">        Any keyword arguments are passed on to the underlying plot method from SageMath:</span>
+
+<span class="sd">        .. jupyter-execute::</span>
+
+<span class="sd">            sage: S.plot() + v.plot(color=&quot;red&quot;)</span>
+<span class="sd">            Graphics object consisting of 22 graphics primitives</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="o">**</span><span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">(),</span> <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;arrowsize&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle">[docs]</a><span class="k">class</span> <span class="nc">SimilaritySurfaceTangentBundle</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle">[docs]</a><span class="k">class</span> <span class="nc">SimilaritySurfaceTangentBundle</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct the tangent bundle of a given similarity surface.</span>
 
-<span class="sd">    Needs work: We should check for coersion from the base_ring of the surface</span>
+<span class="sd">    Needs work: We should check for coercion from the base_ring of the surface</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">similarity_surface</span><span class="p">,</span> <span class="n">ring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">=</span><span class="n">similarity_surface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">similarity_surface</span>
         <span class="k">if</span> <span class="n">ring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">base_ring</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span><span class="o">=</span><span class="n">ring</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span> <span class="o">=</span> <span class="n">ring</span>
         <span class="kn">from</span> <span class="nn">sage.modules.free_module</span> <span class="kn">import</span> <span class="n">VectorSpace</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_V</span> <span class="o">=</span> <span class="n">VectorSpace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct a tangent vector from a polygon label, a point in the polygon and a vector. The point and the vector should have coordinates</span>
 <span class="sd">        in the base field.&quot;&quot;&quot;</span>
-        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_space</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V</span><span class="p">(</span><span class="n">point</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V</span><span class="p">(</span><span class="n">vector</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V</span><span class="p">(</span><span class="n">point</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Tangent bundle of </span><span class="si">{!r}</span><span class="s2"> defined over </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Tangent bundle of </span><span class="si">{!r}</span><span class="s2"> defined over </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span>
+        <span class="p">)</span>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.base_ring"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.base_ring">[docs]</a>    <span class="k">def</span> <span class="nf">base_ring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.base_ring"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.base_ring">[docs]</a>    <span class="k">def</span> <span class="nf">base_ring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_ring</span></div>
 
-    <span class="n">field</span><span class="o">=</span><span class="n">base_ring</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">base_ring</span>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.vector_space"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.vector_space">[docs]</a>    <span class="k">def</span> <span class="nf">vector_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.vector_space"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.vector_space">[docs]</a>    <span class="k">def</span> <span class="nf">vector_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the vector space over the field of the bundle.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.surface"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.surface">[docs]</a>    <span class="k">def</span> <span class="nf">surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the surface this bundle is over.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.surface"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.surface">[docs]</a>    <span class="k">def</span> <span class="nf">surface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the surface this bundle is over.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.edge"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.edge">[docs]</a>    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the vector leaving a vertex of the polygon which under straight-line flow travels</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.edge"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.edge">[docs]</a>    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the vector leaving a vertex of the polygon which under straight-line flow travels</span>
 <span class="sd">        counterclockwise around the boundary of the polygon along the edge with the provided index.</span>
 <span class="sd">        The length of the vector matches the length of the indexed edge.</span>
 
@@ -556,21 +943,21 @@
 <span class="sd">            sage: s = SimilaritySurfaceGenerators.example()</span>
 <span class="sd">            sage: from flatsurf.geometry.tangent_bundle import SimilaritySurfaceTangentBundle</span>
 <span class="sd">            sage: tb = SimilaritySurfaceTangentBundle(s)</span>
-<span class="sd">            sage: print(s.polygon(0))</span>
-<span class="sd">            Polygon: (0, 0), (2, -2), (2, 0)</span>
-<span class="sd">            sage: print(tb.edge(0,0))</span>
+<span class="sd">            sage: s.polygon(0)</span>
+<span class="sd">            Polygon(vertices=[(0, 0), (2, -2), (2, 0)])</span>
+<span class="sd">            sage: tb.edge(0,0)</span>
 <span class="sd">            SimilaritySurfaceTangentVector in polygon 0 based at (0, 0) with vector (2, -2)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">polygon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
-        <span class="n">point</span><span class="o">=</span><span class="n">polygon</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
-        <span class="n">vector</span><span class="o">=</span><span class="n">polygon</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.clockwise_edge"><a class="viewcode-back" href="../../../geometry.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.clockwise_edge">[docs]</a>    <span class="k">def</span> <span class="nf">clockwise_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the vector leaving a vertex of the polygon which under straight-line flow travels</span>
+<div class="viewcode-block" id="SimilaritySurfaceTangentBundle.clockwise_edge"><a class="viewcode-back" href="../../../geometry/tangent_bundle.html#flatsurf.geometry.tangent_bundle.SimilaritySurfaceTangentBundle.clockwise_edge">[docs]</a>    <span class="k">def</span> <span class="nf">clockwise_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the vector leaving a vertex of the polygon which under straight-line flow travels</span>
 <span class="sd">        *clockwise* around the boundary of the polygon along the edge with the provided index.</span>
 <span class="sd">        The length of the vector matches the length of the indexed edge.</span>
-<span class="sd">        Note that the point will be based in the polgon opposite the provided edge.</span>
+<span class="sd">        Note that the point will be based in the polygon opposite the provided edge.</span>
 
 <span class="sd">        EXAMPLES::</span>
 
@@ -578,59 +965,60 @@
 <span class="sd">            sage: s = SimilaritySurfaceGenerators.example()</span>
 <span class="sd">            sage: from flatsurf.geometry.tangent_bundle import SimilaritySurfaceTangentBundle</span>
 <span class="sd">            sage: tb = SimilaritySurfaceTangentBundle(s)</span>
-<span class="sd">            sage: print(&quot;Polygon 0 is &quot;+str(s.polygon(0)))</span>
-<span class="sd">            Polygon 0 is Polygon: (0, 0), (2, -2), (2, 0)</span>
-<span class="sd">            sage: print(&quot;Polygon 1 is &quot;+str(s.polygon(1)))</span>
-<span class="sd">            Polygon 1 is Polygon: (0, 0), (2, 0), (1, 3)</span>
-<span class="sd">            sage: print(&quot;Opposite edge to (0,0) is &quot;+repr(s.opposite_edge(0,0)))</span>
-<span class="sd">            Opposite edge to (0,0) is (1, 1)</span>
-<span class="sd">            sage: print(tb.clockwise_edge(0,0))</span>
+<span class="sd">            sage: s.polygon(0)</span>
+<span class="sd">            Polygon(vertices=[(0, 0), (2, -2), (2, 0)])</span>
+<span class="sd">            sage: s.polygon(1)</span>
+<span class="sd">            Polygon(vertices=[(0, 0), (2, 0), (1, 3)])</span>
+<span class="sd">            sage: s.opposite_edge(0, 0)</span>
+<span class="sd">            (1, 1)</span>
+<span class="sd">            sage: tb.clockwise_edge(0,0)</span>
 <span class="sd">            SimilaritySurfaceTangentVector in polygon 1 based at (2, 0) with vector (-1, 3)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">polygon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
-        <span class="n">point</span><span class="o">=</span><span class="n">polygon</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">edge_index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">vector</span><span class="o">=-</span><span class="n">polygon</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">polygon_label</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">edge_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="o">-</span><span class="n">polygon</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">edge_index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SimilaritySurfaceTangentVector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_label</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">vector</span><span class="p">)</span></div></div>
-
 </pre></div>
-
-            <div class="clearer"></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2016-2024, the sage-flatsurf authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
           </div>
         </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
+        
+      </footer>
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">sage-flatsurf 0.4.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">flatsurf.geometry.tangent_bundle</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016-2021, Vincent Delecroix and Pat Hooper.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.4.
-    </div>
-  </body>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    </body>
 </html>

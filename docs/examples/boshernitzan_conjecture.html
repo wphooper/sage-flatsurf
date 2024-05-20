@@ -1,0 +1,869 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="The flatsurf.geometry Package" href="../geometry.html" /><link rel="prev" title="Notes from the Warwick EPSRC Symposium on “Computation in geometric topology”" href="warwick-2017.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.05.20 -->
+        <title>Boshernitzan’s Conjectures - sage-flatsurf 0.5.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-furo.css" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="https://doc.sagemath.org/html/en/reference/_static/custom-codemirror-monokai.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter_execute.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  --color-brand-primary: #0f0fff;
+  --color-brand-content: #0f0fff;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">sage-flatsurf 0.5.2 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">sage-flatsurf 0.5.2 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing sage-flatsurf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">The Developer’s Guide for sage-flatsurf</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tour.html">A Tour of the flatsurf Suite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="defining_surfaces.html">Defining Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphics_configuration.html">Graphics Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear_action_and_delaunay.html">The GL(2,R) Action, the Veech Group, Delaunay Decomposition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rel_deformations.html">Relative Period Deformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="saddle_connections.html">Working with Saddle Connections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apisa_wright.html">Exploring Orbit Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="siegel_veech.html">Siegel-Veech Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="straight_line_flow.html">Straight-Line Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warwick-2017.html">Notes from the Warwick EPSRC Symposium on “Computation in geometric topology”</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Boshernitzan’s Conjectures</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../geometry.html">The flatsurf.geometry Package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of The flatsurf.geometry Package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/categories.html"><code class="docutils literal notranslate"><span class="pre">categories</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/chamanara.html"><code class="docutils literal notranslate"><span class="pre">chamanara</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/circle.html"><code class="docutils literal notranslate"><span class="pre">circle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/cone_surfaces.html"><code class="docutils literal notranslate"><span class="pre">cone_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/delaunay.html"><code class="docutils literal notranslate"><span class="pre">delaunay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/dilation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">dilation_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/euclidean.html"><code class="docutils literal notranslate"><span class="pre">euclidean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/finitely_generated_matrix_group.html"><code class="docutils literal notranslate"><span class="pre">finitely_generated_matrix_group</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/fundamental_group.html"><code class="docutils literal notranslate"><span class="pre">fundamental_group</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/gl2r_orbit_closure.html"><code class="docutils literal notranslate"><span class="pre">gl2r_orbit_closure</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/half_dilation_surface.html"><code class="docutils literal notranslate"><span class="pre">half_dilation_surface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/half_translation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">half_translation_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/hyperbolic.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/hyperbolic_polygons.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic_polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/interval_exchange_transformation.html"><code class="docutils literal notranslate"><span class="pre">interval_exchange_transformation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/l_infinity_delaunay_cells.html"><code class="docutils literal notranslate"><span class="pre">l_infinity_delaunay_cells</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/mappings.html"><code class="docutils literal notranslate"><span class="pre">mappings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/mega_wollmilchsau.html"><code class="docutils literal notranslate"><span class="pre">mega_wollmilchsau</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/minimal_cover.html"><code class="docutils literal notranslate"><span class="pre">minimal_cover</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/origami.html"><code class="docutils literal notranslate"><span class="pre">origami</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/polygon.html"><code class="docutils literal notranslate"><span class="pre">polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/polygonal_surfaces.html"><code class="docutils literal notranslate"><span class="pre">polygonal_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/polygons.html"><code class="docutils literal notranslate"><span class="pre">polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/polyhedra.html"><code class="docutils literal notranslate"><span class="pre">polyhedra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/pyflatsurf_conversion.html"><code class="docutils literal notranslate"><span class="pre">pyflatsurf_conversion</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/euclidean_polygonal_surfaces.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygonal_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/euclidean_polygons.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygons</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/euclidean_polygons_with_angles.html"><code class="docutils literal notranslate"><span class="pre">euclidean_polygons_with_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/relative_homology.html"><code class="docutils literal notranslate"><span class="pre">relative_homology</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/similarity.html"><code class="docutils literal notranslate"><span class="pre">similarity</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/similarity_surfaces.html"><code class="docutils literal notranslate"><span class="pre">similarity_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/similarity_surface_generators.html"><code class="docutils literal notranslate"><span class="pre">similarity_surface_generators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/straight_line_trajectory.html"><code class="docutils literal notranslate"><span class="pre">straight_line_trajectory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/subfield.html"><code class="docutils literal notranslate"><span class="pre">subfield</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/surface_category.html"><code class="docutils literal notranslate"><span class="pre">surface_category</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/surface_legacy.html"><code class="docutils literal notranslate"><span class="pre">surface_legacy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/surface_objects.html"><code class="docutils literal notranslate"><span class="pre">surface_objects</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/surface.html"><code class="docutils literal notranslate"><span class="pre">surface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/tangent_bundle.html"><code class="docutils literal notranslate"><span class="pre">tangent_bundle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/thurston_veech.html"><code class="docutils literal notranslate"><span class="pre">thurston_veech</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/topological_surfaces.html"><code class="docutils literal notranslate"><span class="pre">topological_surfaces</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geometry/translation_surfaces.html"><code class="docutils literal notranslate"><span class="pre">translation_surfaces</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../graphical.html">The flatsurf.graphical Package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of The flatsurf.graphical Package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../graphical/hyperbolic.html"><code class="docutils literal notranslate"><span class="pre">hyperbolic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../graphical/polygon.html"><code class="docutils literal notranslate"><span class="pre">polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../graphical/straight_line_trajectory.html"><code class="docutils literal notranslate"><span class="pre">straight_line_trajectory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../graphical/surface_point.html"><code class="docutils literal notranslate"><span class="pre">surface_point</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../graphical/surface.html"><code class="docutils literal notranslate"><span class="pre">surface</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section class="tex2jax_ignore mathjax_ignore" id="boshernitzan-s-conjectures">
+<h1>Boshernitzan’s Conjectures<a class="headerlink" href="#boshernitzan-s-conjectures" title="Permalink to this heading">#</a></h1>
+<p>Let <span class="math notranslate nohighlight">\(\Delta\)</span> be a rational triangle and let <span class="math notranslate nohighlight">\(P_0:=P_0(\Delta)\)</span> be the directions for which the flow on the unfolding of <span class="math notranslate nohighlight">\(\Delta\)</span> completely decomposes into cylinders. Let <span class="math notranslate nohighlight">\(E:=E(\Delta)\)</span> be the exceptional directions of <span class="math notranslate nohighlight">\(\Delta\)</span>, i.e., the directions for which there exists a generalized diagonal, i.e., a billiard trajectory connecting two vertices.</p>
+<p>In <em>Billiards and Rational Periodic Directions in Polygons</em>, Boshernitzan states the following conjecture:</p>
+<blockquote>
+<div><p><strong>Conjecture 2.2</strong>
+Assume that a rational triangle <span class="math notranslate nohighlight">\(\Delta=(\alpha, \beta, \chi)\)</span> [is embedded into <span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span> such that one of its sides is horizontal or vertical]. Then:<br />
+(a) If <span class="math notranslate nohighlight">\(d\)</span> [with <span class="math notranslate nohighlight">\(d:=\alpha+\beta+\chi\)</span>] is even, we have <span class="math notranslate nohighlight">\(S^1(2d')\subset P_0\)</span> [where <span class="math notranslate nohighlight">\(d':=\mathrm{lcm}(2, d)\)</span> and <span class="math notranslate nohighlight">\(S^1(n):=\{z\in S^1\mid|z^n=1\}\)</span>].<br />
+(b) If <span class="math notranslate nohighlight">\(d\)</span> is odd, we have <span class="math notranslate nohighlight">\(S^1(2d')\setminus S^1(d')\subset P_0\)</span>.<br />
+(c) If <span class="math notranslate nohighlight">\(d\le 12\)</span>, and if <span class="math notranslate nohighlight">\(\Delta\ne(2/11,3/11,6/11)\)</span>, we have <span class="math notranslate nohighlight">\(S^1(2d')\subset P_0\)</span>.<br />
+(d) If <span class="math notranslate nohighlight">\(d\le 12\)</span>, and if <span class="math notranslate nohighlight">\(\Delta\ne(2/11,3/11,6/11)\)</span> or <span class="math notranslate nohighlight">\((4/11,4/11,3/11)\)</span>, we have <span class="math notranslate nohighlight">\(P_0=E\)</span>.<br />
+(e) If <span class="math notranslate nohighlight">\(\Delta\)</span> is either isosceles, or right triangle, we have <span class="math notranslate nohighlight">\(S^1(2d')\subset P_0\)</span>.</p>
+</div></blockquote>
+<p>In the following, we are trying to verify the statements using sage-flatsurf.</p>
+<p>We will find that
+❌ (a) does not hold,
+❔ (b) might hold,
+✔ (c) holds,
+❌ (d) does not hold,
+❌ (e) does not hold.</p>
+<section id="a-cylinder-periodic-directions-of-even-triangles">
+<h2>(a) Cylinder Periodic Directions of Even Triangles<a class="headerlink" href="#a-cylinder-periodic-directions-of-even-triangles" title="Permalink to this heading">#</a></h2>
+<p>Let us first state assertion (a) again:</p>
+<blockquote>
+<div><p>Let <span class="math notranslate nohighlight">\(d\)</span> be even and let <span class="math notranslate nohighlight">\(d=α+β+γ\)</span> be a partition into coprime positive integers. Consider the triangle <span class="math notranslate nohighlight">\(\Delta = (α, β, γ)\)</span>, i.e., the triangle with angles <span class="math notranslate nohighlight">\((απ/d, βπ/d, γπ/d)\)</span>, embedded into the complex plane such that one of its sides is horizontal. Let <span class="math notranslate nohighlight">\(z\in S^1\)</span> be such that <span class="math notranslate nohighlight">\(z^{2d}=1\)</span>. Then the flow in direction <span class="math notranslate nohighlight">\(z\)</span> on the unfolding of <span class="math notranslate nohighlight">\(\Delta\)</span> completely decomposes into cylinders.</p>
+</div></blockquote>
+<p>To verify this conjecture for a given triangle, we do not need to compute the flow decomposition for each such <span class="math notranslate nohighlight">\(z\)</span> due to symmetries in the unfolding. Indeed, identifying the set <span class="math notranslate nohighlight">\(S^1(2d):=\{z^{2d}=1\}\)</span> with <span class="math notranslate nohighlight">\(\mathbb{Z}/2d\mathbb{Z}\)</span> we see that the assertion holds for a direction <span class="math notranslate nohighlight">\(v\)</span> iff it holds for the subset <span class="math notranslate nohighlight">\(v + \langle 2α, 2β, 2γ\rangle\)</span>. Since the angles <span class="math notranslate nohighlight">\(α,β,γ\)</span> are coprime, it suffices to check two directions; for example two directions orthogonal (or equally parallel) to edges of <span class="math notranslate nohighlight">\(\Delta\)</span> that do not meet at the one “even” angle from <span class="math notranslate nohighlight">\(α,β,γ\)</span>.</p>
+<p>We performed such a search systematically with <a class="reference external" href="https://github.com/flatsurf/flatsurvey">flatsurvey</a> which is built upon sage-flatsurf. An exhaustive search up to d=153 found 9 counterexamples to the conjecture, namely (7, 7, 16), (7, 8, 15), (13, 20, 23), (15, 30, 47), (11, 45, 50), (23, 29, 58), (19, 38, 55), (11, 22, 103), (30, 41, 67).</p>
+<p>Let us verify that the (7, 7, 16) triangle indeed fails the assertion of the conjecture.</p>
+<p>First, we construct a triangle with angles (7, 7, 16).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">EuclideanPolygonsWithAngles</span>
+
+<span class="n">Δ</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">an_element</span><span class="p">()</span>
+<span class="n">Δ</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Polygon(vertices=[(0, 0), (1, 0), (1/2, c^7 - 13/2*c^5 + 21/2*c^3 - 3/2*c)])
+</pre></div>
+</div>
+</div>
+</div>
+<p>We unfold this triangle and obtain a translation surface.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">similarity_surfaces</span>
+
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">Δ</span><span class="p">)</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">edge_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">polygon_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/90f0ab60b2d1a2a254cdd89a8953b692edc1be52a6880b090c26ebfeb7464b5a.png" src="../_images/90f0ab60b2d1a2a254cdd89a8953b692edc1be52a6880b090c26ebfeb7464b5a.png" />
+</div>
+</div>
+<p>We construct the flow decomposition in direction (0, 1), orthogonal to one of the sides of the triangle.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">vector</span><span class="p">(</span><span class="n">Δ</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="n">D</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/usr/share/miniconda3/envs/test/lib/python3.10/site-packages/cppyy/__init__.py:319: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources as pr
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlowDecomposition with 6 cylinders, 4 minimal components and 0 undetermined components
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can visualize the complement of the minimal components if ipvue-flatsurf is available. (Note that visualizing the minimal components themselves might not work correctly until <a class="reference external" href="https://github.com/flatsurf/ipyvue-flatsurf/issues/62">#62</a> has ben resolved.)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">cylinders</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="n">components</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">cylinder</span><span class="p">()]</span>
+<span class="n">Widget</span><span class="p">(</span><span class="n">cylinders</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="b-cylinder-periodic-directions-of-odd-triangles">
+<h2>(b) Cylinder Periodic Directions of Odd Triangles<a class="headerlink" href="#b-cylinder-periodic-directions-of-odd-triangles" title="Permalink to this heading">#</a></h2>
+<p>Assertion (b) can be phrased as follows:</p>
+<blockquote>
+<div><p>Let <span class="math notranslate nohighlight">\(d\)</span> be odd and let <span class="math notranslate nohighlight">\(d=α+β+γ\)</span> be a partition into coprime positive integers. Consider the triangle <span class="math notranslate nohighlight">\(\Delta=(α,β,γ)\)</span>, i.e., the triangle with angles <span class="math notranslate nohighlight">\((α\pi/d, β\pi/d, γ\pi/d)\)</span>, embedded into the complex plane such that one of its sides is horizontal. Let <span class="math notranslate nohighlight">\(z\in S^1\)</span> be such that <span class="math notranslate nohighlight">\(z^{2d}=-1\)</span>. Then the flow in direction <span class="math notranslate nohighlight">\(z\)</span> on the unfolding of <span class="math notranslate nohighlight">\(\Delta\)</span> completely decomposes into cylinders.</p>
+</div></blockquote>
+<p>Again, we do not need to compute the flow decomposition for each such <span class="math notranslate nohighlight">\(z\)</span> since there are a lot of symmetries. Let us identify the <span class="math notranslate nohighlight">\(z\in S^1\)</span> with <span class="math notranslate nohighlight">\(z^{4d}=1\)</span> with <span class="math notranslate nohighlight">\(\mathbb{Z}/4d\mathbb{Z}\)</span>. The assertion then holds for a direction <span class="math notranslate nohighlight">\(v\)</span> iff it holds for the subset <span class="math notranslate nohighlight">\(v + \langle 4α, 4β, 4γ\rangle\)</span>. Since the <span class="math notranslate nohighlight">\(α,β,γ\)</span> are coprime and the assertion excludes directions with <span class="math notranslate nohighlight">\(z^{2d}=1\)</span>, it suffices to check two directions; for example directions orthogonal to two edges of <span class="math notranslate nohighlight">\(\Delta\)</span> that do not meet at an “even” angle.</p>
+<p>We performed such a search systematically with <a class="reference external" href="https://github.com/flatsurf/flatsurvey">flatsurvey</a> which is built upon sage-flatsurf. An exhaustive search up to d=189 found no counterexamples to the conjecture.</p>
+</section>
+<section id="c-cylinder-periodic-directions-of-most-small-triangles">
+<h2>(c) Cylinder Periodic Directions of Most Small Triangles<a class="headerlink" href="#c-cylinder-periodic-directions-of-most-small-triangles" title="Permalink to this heading">#</a></h2>
+<p>Assertion (c) is a finite variant of (a) and (b), namely it asserts that:</p>
+<ul class="simple">
+<li><p>(a) holds for all <span class="math notranslate nohighlight">\(d\le 12\)</span> and</p></li>
+<li><p>(b) holds for all <span class="math notranslate nohighlight">\(d\le 12\)</span> even if we replace <span class="math notranslate nohighlight">\(z^{2d}=-1\)</span> with <span class="math notranslate nohighlight">\(z^{4d}=1\)</span> as long as we exclude the triangle <span class="math notranslate nohighlight">\((2, 3, 6)\)</span>.</p></li>
+</ul>
+<p>We can use sage-flatsurf to verify that this assertion does indeed hold. Let us for example verify here that the assertion holds for the (1, 1, 10) triangle.</p>
+<p>We start by constructing the unfolding of that triangle:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">,</span> <span class="n">similarity_surfaces</span>
+
+<span class="n">Δ</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">an_element</span><span class="p">()</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">Δ</span><span class="p">)</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We find that this completely decomposes into cylinders in horizontal direction:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">vector</span><span class="p">(</span><span class="n">Δ</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="n">D</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlowDecomposition with 6 cylinders, 0 minimal components and 0 undetermined components
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can visualize these cylinders if ipyvue-flatsurf is available:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">Widget</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="the-2-3-6-triangle">
+<h3>The (2, 3, 6) Triangle<a class="headerlink" href="#the-2-3-6-triangle" title="Permalink to this heading">#</a></h3>
+<p>As indicated in the conjecture, (2, 3, 6) is exceptional, i.e., there is such a direction for which the flow decomposition does not fully decompose into cylinders.</p>
+<section id="computing-a-flow-decomposition-for-the-2-3-6-triangle">
+<h4>Computing a Flow Decomposition for the (2, 3, 6) Triangle<a class="headerlink" href="#computing-a-flow-decomposition-for-the-2-3-6-triangle" title="Permalink to this heading">#</a></h4>
+<p>Again, we can ask sage-flatsurf to compute the flow decomposition of the unfolding of the (2, 3, 6) triangle. It turns out that in vertical direction (1, 0), it does not fully decompose into cylinders:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">,</span> <span class="n">similarity_surfaces</span><span class="p">,</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">Δ</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">an_element</span><span class="p">()</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">Δ</span><span class="p">)</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">vector</span><span class="p">(</span><span class="n">Δ</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="n">D</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlowDecomposition with 3 cylinders, 2 minimal components and 0 undetermined components
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">polygons</span><span class="p">,</span> <span class="n">similarity_surfaces</span><span class="p">,</span> <span class="n">EuclideanPolygonsWithAngles</span>
+<span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">E</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">random_element</span><span class="p">()</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+<span class="n">O</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">O</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">vector</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="n">D</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlowDecomposition with 3 cylinders, 2 minimal components and 0 undetermined components
+</pre></div>
+</div>
+</div>
+</div>
+<p>Using ipyvue-flatsurf, we can visualize the minimal components:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">Widget</span><span class="p">([</span><span class="n">component</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="n">components</span><span class="p">()</span> <span class="k">if</span> <span class="n">component</span><span class="o">.</span><span class="n">withoutPeriodicTrajectory</span><span class="p">()])</span>
+</pre></div>
+</div>
+</section>
+<section id="asserting-minimality-on-the-level-of-the-interval-exchange-transformation">
+<h4>Asserting Minimality on the Level of the Interval Exchange Transformation<a class="headerlink" href="#asserting-minimality-on-the-level-of-the-interval-exchange-transformation" title="Permalink to this heading">#</a></h4>
+<p>Internally, the preceding computation is performed on Interval Exchange Transformations describing this translation surface. We are now getting that same result by going through (some of) these underlying steps explicitly with more low-level interfaces.</p>
+<p>Currently, the only way to work with such low-level objects is by invoking functions in the C++ libraries <a class="reference external" href="https://github.com/flatsurf/flatsurf">libflatsurf</a> and <a class="reference external" href="https://github.com/flatsurf/intervalxt">libintervalxt</a> directly. We start by passing from our translation surface to the corresponding surface in libflatsurf. (Note that these operations are not considered part of the stable interface of sage-flatsurf and subject to change.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf.geometry.pyflatsurf_conversion</span> <span class="kn">import</span> <span class="n">to_pyflatsurf</span>
+
+<span class="n">F</span> <span class="o">=</span> <span class="n">to_pyflatsurf</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="a-unique-large-edge">
+<h5>A Unique Large Edge<a class="headerlink" href="#a-unique-large-edge" title="Permalink to this heading">#</a></h5>
+<p>We start by retriangulating our surface. Namely, we want to obtain a single <em>large edge</em> for the flow direction, i.e., a unique edge that is wider (perpendicular to the flow direction) than all the other edges.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyflatsurf</span>
+
+<span class="n">V</span> <span class="o">=</span> <span class="n">pyflatsurf</span><span class="o">.</span><span class="n">flatsurf</span><span class="o">.</span><span class="n">Vector</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">.</span><span class="n">Coordinate</span><span class="p">]</span>
+<span class="n">horizontal</span> <span class="o">=</span> <span class="n">V</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="n">F</span> <span class="o">=</span> <span class="n">pyflatsurf</span><span class="o">.</span><span class="n">flatsurf</span><span class="o">.</span><span class="n">FlatTriangulationCollapsed</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">.</span><span class="n">Coordinate</span><span class="p">](</span><span class="n">F</span><span class="p">,</span> <span class="n">horizontal</span><span class="p">)</span>
+<span class="n">pyflatsurf</span><span class="o">.</span><span class="n">flatsurf</span><span class="o">.</span><span class="n">IntervalExchangeTransformation</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span><span class="o">.</span><span class="n">makeUniqueLargeEdges</span><span class="p">(</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">horizontal</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Unfortunately, we cannot display a plot of such a surface since it is not a real translation surface anymore. Some of the edges (the ones is direction of the flow) have been collapsed, see <a class="reference external" href="https://github.com/flatsurf/vue-flatsurf/issues/62">#62</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">large</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">F</span><span class="o">.</span><span class="n">edges</span><span class="p">()</span> <span class="k">if</span> <span class="n">F</span><span class="o">.</span><span class="n">vertical</span><span class="p">()</span><span class="o">.</span><span class="n">large</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">positive</span><span class="p">())][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">negative</span><span class="p">()</span>
+<span class="n">large</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-12
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="flowing-from-the-large-edge-to-construct-an-interval-exchange-transformation">
+<h5>Flowing from the Large Edge to Construct an Interval Exchange Transformation<a class="headerlink" href="#flowing-from-the-large-edge-to-construct-an-interval-exchange-transformation" title="Permalink to this heading">#</a></h5>
+<p>We (unfortunately do not) see in the above plot how the half edges on the left get shuffled to be become the half edges on the right if we follow the flow across the <code class="docutils literal notranslate"><span class="pre">large</span></code> edge.</p>
+<p>This defines an Interval Exchange Transformation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyintervalxt</span><span class="o">,</span> <span class="nn">pyeantic</span>
+
+<span class="n">iet</span> <span class="o">=</span> <span class="n">pyflatsurf</span><span class="o">.</span><span class="n">flatsurf</span><span class="o">.</span><span class="n">IntervalExchangeTransformation</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">F</span><span class="p">)](</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">vertical</span><span class="p">()</span><span class="o">.</span><span class="n">vertical</span><span class="p">(),</span> <span class="n">large</span>
+<span class="p">)</span><span class="o">.</span><span class="n">forget</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [b: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [d: (-c^9 + 10*c^7 - 71/2*c^5 + 105/2*c^3 - 53/2*c ~ 0.069831789)] [e: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [f: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [g: (-1/2*c^7 + 4*c^5 - 19/2*c^3 + 6*c ~ 0.21510876)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [i: (-1/2*c^3 + 2*c ~ 0.080189447)] / [g] [b] [d] [i] [e] [a] [c] [h] [f]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="zorich-induction-on-the-interval-exchange-transformation">
+<h5>Zorich Induction on the Interval Exchange Transformation<a class="headerlink" href="#zorich-induction-on-the-interval-exchange-transformation" title="Permalink to this heading">#</a></h5>
+<p>We now attempt to decompose the Interval Exchange Transformation by performing some Zorich induction steps.</p>
+<p>Namely, we begin by subtracting <code class="docutils literal notranslate"><span class="pre">a</span></code> at the top from <code class="docutils literal notranslate"><span class="pre">g</span></code> at the bottom.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[b: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [d: (-c^9 + 10*c^7 - 71/2*c^5 + 105/2*c^3 - 53/2*c ~ 0.069831789)] [e: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [f: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [g: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [i: (-1/2*c^3 + 2*c ~ 0.080189447)] / [g] [b] [d] [i] [e] [a] [c] [h] [f]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Next, we subtract <code class="docutils literal notranslate"><span class="pre">g</span></code> at the bottom from <code class="docutils literal notranslate"><span class="pre">b</span></code> at the top.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[b: (-1/2*c^9 + 11/2*c^7 - 21*c^5 + 63/2*c^3 - 14*c ~ 0.043799504)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [d: (-c^9 + 10*c^7 - 71/2*c^5 + 105/2*c^3 - 53/2*c ~ 0.069831789)] [e: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [f: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [g: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [i: (-1/2*c^3 + 2*c ~ 0.080189447)] / [g] [b] [d] [i] [e] [a] [c] [h] [f]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, we subtract <code class="docutils literal notranslate"><span class="pre">b</span></code> at the top from <code class="docutils literal notranslate"><span class="pre">g</span></code> at the bottom.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[d: (-c^9 + 10*c^7 - 71/2*c^5 + 105/2*c^3 - 53/2*c ~ 0.069831789)] [e: (c^9 - 10*c^7 + 35*c^5 - 99/2*c^3 + 45/2*c ~ 0.084050632)] [f: (1/2*c^9 - 9/2*c^7 + 14*c^5 - 18*c^3 + 17/2*c ~ 0.12785014)] [a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [b: (-1/2*c^9 + 11/2*c^7 - 21*c^5 + 63/2*c^3 - 14*c ~ 0.043799504)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [g: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [i: (-1/2*c^3 + 2*c ~ 0.080189447)] / [g] [b] [d] [i] [e] [a] [c] [h] [f]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We keep going like this for a few more iterations and end up with the starting labels <code class="docutils literal notranslate"><span class="pre">f</span></code> and <code class="docutils literal notranslate"><span class="pre">e</span></code> of the same length.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">swap</span><span class="p">()</span>
+<span class="n">iet</span><span class="o">.</span><span class="n">zorichInduction</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[f: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [d: (-5/2*c^9 + 49/2*c^7 - 169/2*c^5 + 119*c^3 - 107/2*c ~ 0.018309914)] [b: (2*c^9 - 19*c^7 + 127/2*c^5 - 175/2*c^3 + 79/2*c ~ 0.025489590)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [g: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [e: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [i: (-1/2*c^9 + 11/2*c^7 - 21*c^5 + 63/2*c^3 - 14*c ~ 0.043799504)] / [e] [a] [c] [h] [i] [b] [g] [d] [f]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Therefore, we can simplify the interval exchange transformation by dropping the label <code class="docutils literal notranslate"><span class="pre">f</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">induce</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[a: (-c^9 + 19/2*c^7 - 31*c^5 + 40*c^3 - 33/2*c ~ 0.13105812)] [d: (-5/2*c^9 + 49/2*c^7 - 169/2*c^5 + 119*c^3 - 107/2*c ~ 0.018309914)] [b: (2*c^9 - 19*c^7 + 127/2*c^5 - 175/2*c^3 + 79/2*c ~ 0.025489590)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [g: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [e: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [i: (-1/2*c^9 + 11/2*c^7 - 21*c^5 + 63/2*c^3 - 14*c ~ 0.043799504)] / [a] [c] [h] [i] [b] [g] [d] [e]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, top and bottom start with the same label <code class="docutils literal notranslate"><span class="pre">a</span></code>. We found a cylinder.</p>
+<p>We continue with the remaining interval exchange transformation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span> <span class="o">=</span> <span class="n">iet</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[d: (-5/2*c^9 + 49/2*c^7 - 169/2*c^5 + 119*c^3 - 107/2*c ~ 0.018309914)] [b: (2*c^9 - 19*c^7 + 127/2*c^5 - 175/2*c^3 + 79/2*c ~ 0.025489590)] [c: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [g: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [h: (-1/2*c^9 + 11/2*c^7 - 43/2*c^5 + 35*c^3 - 20*c ~ 0.11749248)] [e: (1/2*c^9 - 11/2*c^7 + 21*c^5 - 32*c^3 + 16*c ~ 0.036389943)] [i: (-1/2*c^9 + 11/2*c^7 - 21*c^5 + 63/2*c^3 - 14*c ~ 0.043799504)] / [c] [h] [i] [b] [g] [d] [e]
+</pre></div>
+</div>
+</div>
+</div>
+<p>A few more induction steps, let us drop the <code class="docutils literal notranslate"><span class="pre">e</span></code> label as we did before.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">induce</span><span class="p">(</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[d: (-2*c^9 + 21*c^7 - 77*c^5 + 225/2*c^3 - 101/2*c ~ 0.0035483753)] [h: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [c: (2*c^9 - 20*c^7 + 141/2*c^5 - 102*c^3 + 49*c ~ 0.014218843)] [g: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] [b: (-c^9 + 11*c^7 - 42*c^5 + 127/2*c^3 - 30*c ~ 0.0074095609)] [i: (-3/2*c^9 + 27/2*c^7 - 85/2*c^5 + 111/2*c^3 - 47/2*c ~ 0.010900353)] / [h] [d] [c] [b] [g] [i]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, top and bottom start with the same labels <code class="docutils literal notranslate"><span class="pre">d</span></code> and <code class="docutils literal notranslate"><span class="pre">h</span></code>. The interval exchange transformation splits.</p>
+<p>Let us consider the first part on the labels <code class="docutils literal notranslate"><span class="pre">d</span></code> and <code class="docutils literal notranslate"><span class="pre">h</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span>
+<span class="n">iet</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[d: (-2*c^9 + 21*c^7 - 77*c^5 + 225/2*c^3 - 101/2*c ~ 0.0035483753)] [h: (c^9 - 10*c^7 + 35*c^5 - 49*c^3 + 41/2*c ~ 0.0038611856)] / [h] [d]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We see that this must be a minimal component. Indeed, consider a point somewhere on the bottom interval, i.e., on either <code class="docutils literal notranslate"><span class="pre">h</span></code> or <code class="docutils literal notranslate"><span class="pre">d</span></code>. As this point flows to the top, it either hits <code class="docutils literal notranslate"><span class="pre">d</span></code> or <code class="docutils literal notranslate"><span class="pre">h</span></code> there. If it hits <code class="docutils literal notranslate"><span class="pre">d</span></code> it gets translated by the length of <code class="docutils literal notranslate"><span class="pre">h</span></code>. If it hits <code class="docutils literal notranslate"><span class="pre">h</span></code> it gets translated by the length of <code class="docutils literal notranslate"><span class="pre">-d</span></code>. If there were a cylinder hidden in this somewhere, we would be able to chain such translations together to get a total translation of zero. However, there is no combination of positive integer multiples of <code class="docutils literal notranslate"><span class="pre">h</span></code> and <code class="docutils literal notranslate"><span class="pre">-d</span></code> that sums to zero. There cannot be a cylinder.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iet</span><span class="o">.</span><span class="n">boshernitzanNoPeriodicTrajectory</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<p>We have found a cylinder and a minimal component. Performing the same steps on the other part formed by the labels <code class="docutils literal notranslate"><span class="pre">c</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">g</span></code>, <code class="docutils literal notranslate"><span class="pre">i</span></code> yields two more cylinders and another minimal component.</p>
+</section>
+</section>
+</section>
+</section>
+<section id="d-most-small-triangles-are-completely-cylinder-periodic">
+<h2>(d) Most Small Triangles are Completely Cylinder Periodic<a class="headerlink" href="#d-most-small-triangles-are-completely-cylinder-periodic" title="Permalink to this heading">#</a></h2>
+<p>Assertion (d) can be phrased as</p>
+<blockquote>
+<div><p>Let <span class="math notranslate nohighlight">\(d\le 12\)</span> with a partition <span class="math notranslate nohighlight">\(d=α+β+γ\)</span> into positive coprime integers with <span class="math notranslate nohighlight">\((α,β,γ)\ne(2,3,6)\)</span> and <span class="math notranslate nohighlight">\((α,β,γ)\ne(3,4,4)\)</span>. Consider a triangle <span class="math notranslate nohighlight">\(\Delta=(α,β,γ)\)</span>, i.e., the triangle with angles <span class="math notranslate nohighlight">\((α\pi/d, β\pi/d, γ\pi/d)\)</span>. Then <span class="math notranslate nohighlight">\(\Delta\)</span> is completely cylinder periodic, i.e., the flow in direction <span class="math notranslate nohighlight">\(v\)</span> on the unfolding of <span class="math notranslate nohighlight">\(\Delta\)</span> decomposes into cylinders for any direction <span class="math notranslate nohighlight">\(v\)</span> given by a saddle connection.</p>
+</div></blockquote>
+<p>We can use sage-flatsurf to check this assertion for some small triangles. Let us consider the (2, 2, 3) triangle.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">,</span> <span class="n">similarity_surfaces</span><span class="p">,</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">Δ</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">an_element</span><span class="p">()</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">Δ</span><span class="p">)</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">Widget</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can compute flow decompositions for some short saddle connections in this surface and look for minimal components.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">saddle_connections</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">decomposition</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">direction</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="n">component</span><span class="o">.</span><span class="n">withoutPeriodicTrajectory</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">components</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Found minimal component in&quot;</span><span class="p">,</span>
+            <span class="n">decomposition</span><span class="p">,</span>
+            <span class="s2">&quot;for direction&quot;</span><span class="p">,</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">direction</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Found minimal component in FlowDecomposition with 0 cylinders, 2 minimal components and 0 undetermined components for direction (1, -9/29*c^5 + 50/29*c^3 - 57/29*c)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can try to visualize the minimal components. There might be some rendering errors due to <a class="reference external" href="https://github.com/flatsurf/ipyvue-flatsurf/issues/62">#62</a> however:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">Widget</span><span class="p">(</span><span class="n">decomposition</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="e-cylinder-periodic-directions-of-isosceles-and-right-triangles">
+<h2>(e) Cylinder Periodic Directions of Isosceles and Right Triangles<a class="headerlink" href="#e-cylinder-periodic-directions-of-isosceles-and-right-triangles" title="Permalink to this heading">#</a></h2>
+<p>Assertion (e) can be phrased as</p>
+<blockquote>
+<div><p>Let <span class="math notranslate nohighlight">\(d=α+β+γ\)</span> be a sum of positive coprime integers with <span class="math notranslate nohighlight">\(γ=α+β\)</span> or <span class="math notranslate nohighlight">\(α=β\)</span>. Consider the (right) triangle <span class="math notranslate nohighlight">\(\Delta=(α,β,γ)\)</span> embedded into the complex plane such that one of its sides is horizontal. Let <span class="math notranslate nohighlight">\(z\in S^1\)</span> be such that <span class="math notranslate nohighlight">\(z^{2\mathrm{lcm}(2,d)}=1\)</span>. Then the flow in direction <span class="math notranslate nohighlight">\(z\)</span> on the unfolding of <span class="math notranslate nohighlight">\(\Delta\)</span> completely decomposes into cylinders.</p>
+</div></blockquote>
+<p>The (7,8,15) triangle which is also a counterexample to (a) works here as well.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">,</span> <span class="n">similarity_surfaces</span><span class="p">,</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">Δ</span> <span class="o">=</span> <span class="n">EuclideanPolygonsWithAngles</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">an_element</span><span class="p">()</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">similarity_surfaces</span><span class="o">.</span><span class="n">billiard</span><span class="p">(</span><span class="n">Δ</span><span class="p">)</span><span class="o">.</span><span class="n">minimal_cover</span><span class="p">(</span><span class="n">cover_type</span><span class="o">=</span><span class="s2">&quot;translation&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ipyvue_flatsurf</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="n">Widget</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flatsurf</span> <span class="kn">import</span> <span class="n">GL2ROrbitClosure</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">GL2ROrbitClosure</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">decomposition</span><span class="p">(</span><span class="n">vector</span><span class="p">(</span><span class="n">Δ</span><span class="o">.</span><span class="n">base_ring</span><span class="p">(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="n">D</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlowDecomposition with 6 cylinders, 2 minimal components and 0 undetermined components
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../geometry.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">The flatsurf.geometry Package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="warwick-2017.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Notes from the Warwick EPSRC Symposium on “Computation in geometric topology”</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2016-2024, the sage-flatsurf authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Boshernitzan’s Conjectures</a><ul>
+<li><a class="reference internal" href="#a-cylinder-periodic-directions-of-even-triangles">(a) Cylinder Periodic Directions of Even Triangles</a></li>
+<li><a class="reference internal" href="#b-cylinder-periodic-directions-of-odd-triangles">(b) Cylinder Periodic Directions of Odd Triangles</a></li>
+<li><a class="reference internal" href="#c-cylinder-periodic-directions-of-most-small-triangles">(c) Cylinder Periodic Directions of Most Small Triangles</a><ul>
+<li><a class="reference internal" href="#the-2-3-6-triangle">The (2, 3, 6) Triangle</a><ul>
+<li><a class="reference internal" href="#computing-a-flow-decomposition-for-the-2-3-6-triangle">Computing a Flow Decomposition for the (2, 3, 6) Triangle</a></li>
+<li><a class="reference internal" href="#asserting-minimality-on-the-level-of-the-interval-exchange-transformation">Asserting Minimality on the Level of the Interval Exchange Transformation</a><ul>
+<li><a class="reference internal" href="#a-unique-large-edge">A Unique Large Edge</a></li>
+<li><a class="reference internal" href="#flowing-from-the-large-edge-to-construct-an-interval-exchange-transformation">Flowing from the Large Edge to Construct an Interval Exchange Transformation</a></li>
+<li><a class="reference internal" href="#zorich-induction-on-the-interval-exchange-transformation">Zorich Induction on the Interval Exchange Transformation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#d-most-small-triangles-are-completely-cylinder-periodic">(d) Most Small Triangles are Completely Cylinder Periodic</a></li>
+<li><a class="reference internal" href="#e-cylinder-periodic-directions-of-isosceles-and-right-triangles">(e) Cylinder Periodic Directions of Isosceles and Right Triangles</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
